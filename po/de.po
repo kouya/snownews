@@ -1,0 +1,816 @@
+# German translation for Snownews.
+# Copyright (C) 2003 Oliver Feiler.
+# Oliver Feiler <kiza@kcore.de>, 2003
+#
+#: about.c:275 about.c:276 main.c:114 net-support.c:100 netio.c:351
+#: netio.c:352 netio.c:359 netio.c:360 netio.c:373 netio.c:374 netio.c:382
+#: netio.c:383
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Snownews 1.4.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-09-22 11:30+0200\n"
+"PO-Revision-Date: 2003-11-28 14:29+0100\n"
+"Last-Translator: Oliver Feiler <kiza@kcore.de>\n"
+"Language-Team: German <kiza@kcore.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: about.c:254
+msgid "Need at least 80 COLS terminal, sorry!"
+msgstr "Ihr Terminalfenster muss hierfür mindesten 80 Spalten groß sein!"
+
+#: about.c:306 about.c:328
+#, c-format
+msgid "Version %s"
+msgstr ""
+
+#: about.c:307
+msgid "Merry Christmas from the Snownews developers."
+msgstr "Frohe Weihnachten vom Entwicklerteam."
+
+#: about.c:308 about.c:331
+msgid "Main code"
+msgstr "Hauptcode"
+
+#: about.c:310 about.c:333
+msgid "Additional code"
+msgstr "Weiterer code"
+
+#: about.c:312 about.c:335
+msgid "Translation team"
+msgstr "Übersetzerteam"
+
+#: about.c:328
+msgid "Version"
+msgstr ""
+
+#: about.c:330
+msgid "Brought to you by:"
+msgstr "Programmiert von"
+
+#: conversions.c:129 interface.c:164 interface.c:167
+msgid "No description available."
+msgstr "Keine Beschreibung vorhanden."
+
+#: conversions.c:443
+#, c-format
+msgid "ERROR: zlib_uncompress: %d %s\n"
+msgstr ""
+
+#: conversions.c:459
+msgid "ERROR: No output during decompression"
+msgstr "FEHLER: Dekompression fehlgeschlagen"
+
+#: conversions.c:492
+msgid "ERROR: Invalid magic bytes for GZIP data"
+msgstr "FEHLER: Ungültige magic bytes für GZIP Daten"
+
+#: conversions.c:497
+msgid "ERROR: Compression method is not deflate"
+msgstr "FEHLER: Kompressionsmethode ist nicht deflate"
+
+#: conversions.c:502
+#, c-format
+msgid "ERROR: Unsupported flags %d"
+msgstr "FEHLER: Nicht unterstützte Optionen in gzip"
+
+#: cookies.c:184
+#, c-format
+msgid "Cookie for %s has expired!"
+msgstr "Cookie für %s ist abgelaufen!"
+
+#: dialog.c:99 dialog.c:653 interface.c:1213 interface.c:1342
+msgid "Aborted."
+msgstr "Abgebrochen."
+
+#: dialog.c:106
+#, c-format
+msgid "Only %s format strings allowed for default browser!"
+msgstr "Es sind nur %s Formatzeichen erlaubt für den Standardbrowser"
+
+#: dialog.c:111 ui-support.c:242
+msgid ""
+"Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"
+msgstr "Unsicherer Standardbrowser! Siehe snownews.kcore.de/faq#toc2.4"
+
+#: dialog.c:131
+msgid "Enter new name. Blank line to abort. '-' to reset."
+msgstr ""
+"Neuer Name? Leere Zeile zum Abbrechen, '-' um auf Originalnamen "
+"zurückzusetzen."
+
+#: dialog.c:144
+msgid "The new title must not contain a \"|\" character!"
+msgstr "Der neue Titel darf kein \"|\" Zeichen enthalten!"
+
+#: dialog.c:192
+msgid "Enter URL of the feed you want to add. Blank line to abort."
+msgstr ""
+"Geben Sie die URL ein, die Sie hinzufügen möchten. Leere Zeile zum Abbrechen."
+
+#: dialog.c:272
+msgid ""
+"The feed could not be parsed. Do you need a filter script for this feed? (y/"
+"n)"
+msgstr "Feed konnte nicht gelesen werden. Wollen Sie einen Filter benutzen? (y/n)"
+
+#: dialog.c:324
+#, c-format
+msgid "Last updated: %s"
+msgstr "Zuletzt aktualisiert: %s"
+
+#: dialog.c:326
+msgid "No modification date."
+msgstr "Kein Aktualisierungsdatum."
+
+#: dialog.c:329
+#, c-format
+msgid "In disk cache: %lld bytes"
+msgstr "Im Zwischenspeicher: %lld bytes"
+
+#: dialog.c:331
+msgid "Not in disk cache."
+msgstr "Nicht im Zwischenspeicher."
+
+#: dialog.c:334 dialog.c:336 dialog.c:339
+msgid "Categories:"
+msgstr "Kategorien:"
+
+#: dialog.c:336
+msgid "none"
+msgstr "keine"
+
+#: dialog.c:345
+msgid "Feed uses authentication."
+msgstr "Feed benutzt Authentifizierung."
+
+#: dialog.c:347
+msgid "Feed does not use authentication."
+msgstr "Feed benutzt keine Authentifizierung."
+
+#: dialog.c:353 dialog.c:354
+#, c-format
+msgid "Last webserver status: %d"
+msgstr "Letzter Webserver Status: %d"
+
+#: dialog.c:358 dialog.c:359
+#, c-format
+msgid "Last webserver status: (%s) %d"
+msgstr "Letzter Webserver Status: (%s) %d"
+
+#: dialog.c:381 dialog.c:382
+msgid "Filtered through:"
+msgstr "Filterskript:"
+
+#: dialog.c:385
+msgid "Displaying feed information."
+msgstr "Zeige Feedinformation an."
+
+#: dialog.c:400
+msgid "Are you sure you want to delete this feed?"
+msgstr "Wollen Sie diesen Feed wirklich löschen?"
+
+#: dialog.c:403
+msgid "Type 'y' to delete, any other key to abort."
+msgstr ""
+"Drücken Sie die Taste 'y' zum Löschen, eine beliebige andere zum Abbrechen."
+
+#: dialog.c:440 dialog.c:496
+msgid "tab:"
+msgstr "Tab:"
+
+#: dialog.c:444
+msgid "Add RSS feed..."
+msgstr "RSS Feed hinzufügen..."
+
+#: dialog.c:445
+msgid "Delete highlighted RSS feed..."
+msgstr "RSS Feed löschen..."
+
+#: dialog.c:446
+msgid "Rename feed..."
+msgstr "Feed umbenennen..."
+
+#: dialog.c:447
+msgid "Reload all feeds"
+msgstr "Alles aktualisieren"
+
+#: dialog.c:448 dialog.c:502
+msgid "Reload this feed"
+msgstr "Diesen Feed aktualisieren"
+
+#: dialog.c:449 dialog.c:505
+msgid "Mark all read"
+msgstr "Alles gelesen setzen"
+
+#: dialog.c:450
+msgid "Change default browser..."
+msgstr "Standardbrowser ändern..."
+
+#: dialog.c:451
+msgid "Move item up, down"
+msgstr "Feed nach oben, unten schieben"
+
+#: dialog.c:452
+msgid "Sort feed list alphabetically"
+msgstr "Feedliste alphabetisch sortieren"
+
+#: dialog.c:453
+msgid "Categorize feed..."
+msgstr "Feed Kategorisieren..."
+
+#: dialog.c:454
+msgid "Apply filter..."
+msgstr "Filter aktivieren..."
+
+#: dialog.c:455
+msgid "Only current category"
+msgstr "Nur aktuelle Kategorie anzeigen"
+
+#: dialog.c:456
+msgid "Remove filter"
+msgstr "Filter entfernen"
+
+#: dialog.c:457
+msgid "Toggle AND/OR filtering"
+msgstr "UND/ODER Kategoriefilter"
+
+#: dialog.c:458
+msgid "Show new headlines"
+msgstr "Neue Nachrichten anzeigen"
+
+#: dialog.c:459
+msgid "Add conversion filter..."
+msgstr "Konvertierungsfilter hinzufügen..."
+
+#: dialog.c:460 dialog.c:508
+msgid "Type Ahead Find"
+msgstr ""
+
+#: dialog.c:461
+msgid "About"
+msgstr "Über Snownews"
+
+#: dialog.c:462
+msgid "Quit program"
+msgstr "Programm beenden"
+
+#: dialog.c:465 dialog.c:512 dialog.c:544
+msgid "Press the any(tm) key to exit help screen."
+msgstr "Drücken Sie die beliebige Taste(tm), um die Hilfe zu verlassen."
+
+#: dialog.c:487
+#, c-format
+msgid "%c, up:"
+msgstr "%c, oben:"
+
+#: dialog.c:488
+#, c-format
+msgid "%c, down:"
+msgstr "%c, unten:"
+
+#: dialog.c:489
+msgid "enter:"
+msgstr "Enter:"
+
+#: dialog.c:499 dialog.c:538
+msgid "Previous item"
+msgstr "Vorheriger Eintrag"
+
+#: dialog.c:500 dialog.c:539
+msgid "Next item"
+msgstr "Nächster Eintrag"
+
+#: dialog.c:501
+msgid "View item"
+msgstr "Eintrag lesen"
+
+#: dialog.c:503
+msgid "Open homepage"
+msgstr "Homepage öffnen"
+
+#: dialog.c:504 dialog.c:540
+msgid "Open link"
+msgstr "Link öffnen"
+
+#: dialog.c:506
+msgid "Mark item unread"
+msgstr "Artikel ungelesen markieren"
+
+#: dialog.c:507
+msgid "Show feed info..."
+msgstr "Feedinfo anzeigen..."
+
+#: dialog.c:509
+msgid "Return to main menu"
+msgstr "Hauptmenü"
+
+#: dialog.c:531
+msgid "cursor:"
+msgstr "Cursor:"
+
+#: dialog.c:535
+#, c-format
+msgid "%c, enter:"
+msgstr "%c, unten:"
+
+#: dialog.c:537
+msgid "Scroll text"
+msgstr "Text scrollen"
+
+#: dialog.c:541
+msgid "Return to overview"
+msgstr "Übersicht"
+
+#: dialog.c:581 dialog.c:582
+#, c-format
+msgid "Category configuration for %s"
+msgstr "Kategoriekonfiguration für %s"
+
+#: dialog.c:589
+msgid "No category defined. Select one or add a new category:"
+msgstr "Keine Kategorie definiert. Wählen Sie eine, oder fügen Sie eine hinzu:"
+
+#: dialog.c:598 dialog.c:638
+#, c-format
+msgid ""
+"Select category number to add, press 'A' to add a new category or '%c' to "
+"quit."
+msgstr "Nummer: Kategorie hinzufügen. 'A': neue Kategorie. '%c': beenden."
+
+#: dialog.c:603
+msgid "Categories defined for this feed:"
+msgstr "Kategorien für diesen Feed:"
+
+#: dialog.c:612
+#, c-format
+msgid ""
+"Select a category number to delete, press 'A' to add a new one or '%c' to "
+"quit."
+msgstr "Nummer: Kategorie löschen. 'A': neue Kategorie. '%c': beenden."
+
+#: dialog.c:629
+msgid "Select a new category or add a new one:"
+msgstr "Wählen Sie eine Kategorie oder fügen Sie eine neue hinzu:"
+
+#: dialog.c:650
+msgid "Enter new category name."
+msgstr "Geben Sie den neuen Kategorienamen ein."
+
+#: dialog.c:658
+msgid "Category already defined for this feed!"
+msgstr "Dieser Feed befindet sich bereits in dieser Kategorie!"
+
+#: dialog.c:723
+msgid "Select filter to apply"
+msgstr "Wählen Sie einen Filter"
+
+#: dialog.c:736
+msgid "Select a category number or any other key to reset filters."
+msgstr ""
+"Wählen Sie eine Kategorie oder eine beliebige andere Taste für keinen Filter."
+
+#: dialog.c:774
+msgid "Enter script to pipe feed through."
+msgstr "Bitte geben Sie den Skriptnamen für den Filter ein."
+
+#: filters.c:52
+#, c-format
+msgid "Loading \"%s\""
+msgstr "Lade \"%s\""
+
+#: filters.c:109
+#, c-format
+msgid "Could not write temp file for filter: %s"
+msgstr "Konnte temporäre Datei %s nicht anlegen!"
+
+#: interface.c:161 interface.c:577 interface.c:580
+msgid "No title"
+msgstr "Kein Titel"
+
+#: interface.c:241 interface.c:611
+msgid "-> No link"
+msgstr "-> Kein Link"
+
+#: interface.c:256
+#, c-format
+msgid ""
+"Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."
+msgstr ""
+"Drücken Sie '%c' oder Enter, um zum vorigen Bildschirm zu kommen, '%c' für "
+"Hilfe."
+
+#: interface.c:627
+#, c-format
+msgid "Press '%c' to return to main menu, '%c' to show help."
+msgstr "Drücken Sie '%c', um zum Hauptmenü zu gelangen, '%c' für Hilfe."
+
+#: interface.c:734 interface.c:1184 interface.c:1194 interface.c:1204
+#: interface.c:1243 interface.c:1468 interface.c:1476 interface.c:1484
+#: interface.c:1493
+msgid "Please deactivate the category filter before using this function."
+msgstr "Bitte deaktivieren Sie den Filter, bevor Sie diese Funktion benutzen."
+
+#: interface.c:1115 interface.c:1117 interface.c:1134
+msgid "new"
+msgstr "neu"
+
+#: interface.c:1128
+#, c-format
+msgid "%3d new"
+msgstr "%3d neu"
+
+#: interface.c:1150
+#, c-format
+msgid "Press '%c' for help window."
+msgstr "Drücken Sie '%c', um die Hilfe anzuzeigen."
+
+#: interface.c:1210
+msgid "Successfully added new item..."
+msgstr "Neuer Eintrag erfolgreicht hinzugefügt..."
+
+#: interface.c:1217
+msgid "Invalid URL! Please add http:// if you forgot this."
+msgstr ""
+"Ungültige URL! Bitten vergessen Sie nicht http:// an den Anfang zu setzen."
+
+#: interface.c:1221
+msgid "There was a problem adding the feed!"
+msgstr "Es gab ein Problem beim Hinzufügen des Feeds!"
+
+#: interface.c:1420 interface.c:1437
+msgid "You cannot move items while a category filter is defined!"
+msgstr "Sie können Feeds nicht verschieben während ein Filter aktiv ist!"
+
+#: io-internal.c:53
+#, c-format
+msgid "Bad request"
+msgstr "Ungültige Serveranfrage"
+
+#: io-internal.c:56
+#, c-format
+msgid "Payment required"
+msgstr "Bezahlung benötigt"
+
+#: io-internal.c:59
+#, c-format
+msgid "Access denied"
+msgstr "Zugriff verweigert"
+
+#: io-internal.c:62
+#, c-format
+msgid "Internal server error"
+msgstr "Interner Serverfehler"
+
+#: io-internal.c:65
+#, c-format
+msgid "Not implemented"
+msgstr "Funktion nicht implementiert"
+
+#: io-internal.c:69
+#, c-format
+msgid "Service unavailable"
+msgstr "Dienst nicht verfügbar"
+
+#: io-internal.c:88
+#, c-format
+msgid "%s: Invalid URL!"
+msgstr "%s: Ungültige URL!"
+
+#: io-internal.c:91
+#, c-format
+msgid "%s: Couldn't create network socket!"
+msgstr "%s: Konnte Netzwerksocket nicht erstellen!"
+
+#: io-internal.c:94
+#, c-format
+msgid "%s: Can't resolve host!"
+msgstr "%s: Kann Hostnamen %s nicht auflösen!"
+
+#: io-internal.c:97
+#, c-format
+msgid "%s: Connection refused!"
+msgstr "%s: Verbindung verweigert!"
+
+#: io-internal.c:100
+#, c-format
+msgid "%s: Couldn't connect to server: %s"
+msgstr "%s: Konnte nicht mit Server verbinden: %s"
+
+#: io-internal.c:105
+#, c-format
+msgid "%s: Connection timed out."
+msgstr "%s: Zeitüberschreitung der Anforderung."
+
+#: io-internal.c:110
+#, c-format
+msgid "%s: Too many HTTP redirects encountered! Giving up."
+msgstr "%s: Zu viele HTTP redirects! Breche ab."
+
+#: io-internal.c:113
+#, c-format
+msgid "%s: Server sent an invalid redirect!"
+msgstr "%s: Ungültiger Verweis vom Server!"
+
+#: io-internal.c:117
+#, c-format
+msgid "%s: This feed no longer exists. Please unsubscribe!"
+msgstr "%s: Diesen Feed gibt es nicht mehr. Bitte entfernen Sie ihn!"
+
+#: io-internal.c:121
+#, c-format
+msgid "%s: Could not download feed: %s"
+msgstr "%s: Konnte Feed nicht herunterladen: %s"
+
+#: io-internal.c:124
+#, c-format
+msgid "%s: Error in server reply."
+msgstr "%s: Fehler on der Serverantwort!"
+
+#: io-internal.c:127
+#, c-format
+msgid "%s: Authentication failed!"
+msgstr "%s: Authentifizierung fehlgeschlagen!"
+
+#: io-internal.c:130
+#, c-format
+msgid "%s: URL does not contain authentication information!"
+msgstr "%s: Die URL enthält kein Benutzername/Passwort!"
+
+#: io-internal.c:133
+#, c-format
+msgid "%s: Could not generate authentication information!"
+msgstr "%s: Authentifizierung konnte nicht generiert werden!"
+
+#: io-internal.c:136
+#, c-format
+msgid "%s: Unsupported authentication method requested by server!"
+msgstr ""
+"%s: Eine nicht unterstützte Authentifizierungsmethode wurde vom Server "
+"angefordert!"
+
+#: io-internal.c:139
+#, c-format
+msgid "%s: Error decompressing server reply!"
+msgstr "%s: Fehler beim Dekomprimieren der Serverantwort!"
+
+#: io-internal.c:207
+msgid "Invalid XML! Cannot parse this feed!"
+msgstr "Ungültiges XML! Konnte Feed nicht verarbeiten!"
+
+#: io-internal.c:251
+#, c-format
+msgid "Cache for %s is toast. Reloading from server..."
+msgstr "Zwischenspeicher für %s ist unbrauchbar. Wird neu geladen..."
+
+#: io-internal.c:286
+#, c-format
+msgid "Could not load %s!"
+msgstr "Konnte Feed %s nicht aktualisieren!"
+
+#: io-internal.c:305 io-internal.c:306
+msgid "Loading cache ["
+msgstr "Lade Zwischenspeicher ["
+
+#: io-internal.c:351 io-internal.c:352
+msgid "Saving settings ["
+msgstr "Speichere Einstellungen ["
+
+#: io-internal.c:357
+msgid "Save settings (browser)"
+msgstr "Speichern der Einstellungen (browser)"
+
+#: io-internal.c:374
+msgid "Save settings (urls)"
+msgstr "Speichern der Einstellungen (urls)"
+
+#: io-internal.c:430
+msgid "Writing cache file"
+msgstr "Lade Zwischenspeicher"
+
+#: main.c:59
+#, c-format
+msgid ""
+"Bye.\n"
+"\n"
+msgstr ""
+
+#: main.c:68
+#, c-format
+msgid ""
+"Aborting program execution!\n"
+"An internal error occured. Snownews has quit, no changes has been saved!\n"
+msgstr "Die Programmausführung wurde unterbrochen!\n"
+"Ein interner Fehler ist aufgetreten und Snownews wurde beendet. Einstellungen wurden nicht gespeichert!\n"
+
+#: main.c:69
+#, c-format
+msgid ""
+"This shouldn't happen, please submit a bugreport to kiza@kcore.de, tell me "
+"what you where doing and include the output below in your mail.\n"
+msgstr "Dies sollte natürlich nicht passieren, bitte senden Sie einen Fehlerbericht"
+"an kiza@kcore.de und fügen Sie die Ausgabe unten zu der Mail hinzu.\n"
+
+#: main.c:72
+#, c-format
+msgid "While executing: %s\n"
+msgstr "Führe aus: %s\n"
+
+#: main.c:73
+#, c-format
+msgid ""
+"Error as reported by the system: %s\n"
+"\n"
+msgstr "Fehler gemeldet vom Betriebssystem: %s\n"
+"\n"
+
+#: main.c:124 main.c:135
+#, c-format
+msgid ""
+"Snownews version %s\n"
+"\n"
+msgstr "Snownews Version %s\n"
+"\n"
+
+#: main.c:130
+#, c-format
+msgid "The option \"--disable-versioncheck\" has been obsoleted.\n"
+msgstr "Die Option \"--disable-versioncheck\" wurde entfernt.\n"
+
+#: main.c:131
+#, c-format
+msgid "Please see the manpage for details.\n"
+msgstr "Bitte schauen Sie in die manpage für weitere Details.\n"
+
+#: main.c:132
+#, c-format
+msgid "(To deactivate check, put -1 into ~/.snownews/updatecheck)\n"
+msgstr "(Um den Check zu deaktivieren, schreiben Sie -1 in ~/.snownews/updatecheck)\n"
+
+msgid "Option %s requires an argument.\n"
+msgstr "Option %s benötigt einen parameter.\n"
+
+#: main.c:136
+#, c-format
+msgid ""
+"usage: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+msgstr ""
+"Verwendung: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+
+#: main.c:137
+#, c-format
+msgid "\t--update|-u\tAutomatically update every feed.\n"
+msgstr "\t--update|-u\tAlle Feeds automatisch aktualisieren.\n"
+
+#: main.c:138
+#, c-format
+msgid "\t--help|-h\tPrint this help message.\n"
+msgstr "\t--help|-h\tGibt diesen Hilfetext aus.\n"
+
+#: main.c:139
+#, c-format
+msgid "\t--version|-V\tPrint version number and exit.\n"
+msgstr "\t--version|-V\tGibt Versionsnummer aus.\n"
+
+#: main.c:140
+#, c-format
+msgid "\t--disable-versioncheck (obsoleted)\n"
+msgstr "\t--disable-versioncheck (entfernt)\n"
+
+msgid "\t--charset|-l\tForce using this charset.\n"
+msgstr "\t--charset|-l\tDiesen Zeichensatz erzwingen.\n"
+
+msgid "\t--cursor-on|-c\tForce cursor always visible.\n"
+msgstr "\t--cursor-on|-c\tCursor immer anzeigen.\n"
+
+#: netio.c:149 netio.c:151 netio.c:311
+#, c-format
+msgid "Downloading \"%s\""
+msgstr "Lade \"%s\""
+
+#: netio.c:309
+#, c-format
+msgid "Downloading \"http://%s%s\""
+msgstr "Lade \"http://%s%s\""
+
+#: netio.c:503 netio.c:504
+msgid "URL points to permanent redirect, updating with new location..."
+msgstr ""
+"URL zeigt auf einen redirect, aktualisiere Einstellungen mit neuer Adresse..."
+
+#: os-support.c:90
+msgid "Allocating memory"
+msgstr ""
+
+#: setup.c:64
+msgid "Creating new config \"browser\"..."
+msgstr "Lege neue Konfigurationsdatei \"browser\" an..."
+
+#: setup.c:67
+msgid "Create initial configfile \"config\""
+msgstr "Erstellen der Konfigurationsdatei \"config\""
+
+#: setup.c:557 setup.c:561
+msgid "Creating config directory ~/.snownews/"
+msgstr "Lege Verzeichnis ~/.snownews/ an"
+
+#: setup.c:562
+msgid "A file with the name \"~/.snownews/\" exists!"
+msgstr "Eine Datei mit dem Namen \"~/.snownews/\" existiert bereits!"
+
+#: setup.c:570
+msgid "Creating config directory ~/.snownews/cache/"
+msgstr "Lege Verzeichnis ~/.snownews/cache/ an"
+
+#: setup.c:574
+msgid "A file with the name \"~/.snownews/cache/\" exists!"
+msgstr "Eine Datei mit dem Namen \"~/.snownews/cache/\" existiert bereits!"
+
+#: setup.c:584
+msgid "Reading configuration settings..."
+msgstr "Lesen der Konfiguration..."
+
+#: setup.c:596
+msgid "Creating new configfile."
+msgstr "Lege neue Konfiguration an"
+
+#: setup.c:599
+msgid "Create initial configfile \"urls\""
+msgstr "Erstellen der Konfigurationsdatei \"urls\""
+
+#: ui-support.c:254
+msgid "Invalid URL passed. Possible shell exploit attempted!"
+msgstr "Ungültige URL. Möglicher shell exploit wurde versucht!"
+
+#: ui-support.c:259 ui-support.c:261
+#, c-format
+msgid "Executing %s"
+msgstr "Führe aus: %s"
+
+#: ui-support.c:339
+msgid "(New headlines)"
+msgstr "(Neue Nachrichten)"
+
+#: updatecheck.c:96
+#, c-format
+msgid "A new version %s of Snownews is available.\n"
+msgstr "Eine neue Version %s von Snownews ist erhältich.\n"
+
+#: updatecheck.c:97
+#, c-format
+msgid ""
+"If you want to download it, go to http://snownews.kcore.de/downloading/\n"
+"\n"
+msgstr ""
+"Sie können sie auf http://snownews.kcore.de/downloading/ herunterladen.\n"
+"\n"
+
+#: updatecheck.c:98
+#, c-format
+msgid ""
+"To disable the auto version check see the manpage.\n"
+"\n"
+msgstr ""
+"Um den Updatecheck zu deaktivieren, lesen Sie bitte die manpage.\n"
+"\n"
+
+#: ui-support.c:179
+msgid "Sorting, please wait..."
+msgstr "Sortiere Liste, einen Augenblick Geduld bitte..."
+
+#: conversions.c:635
+msgid ", %H:%M"
+msgstr ", %H:%M Uhr"
+
+#: conversions.c:636
+msgid "Posted "
+msgstr "Erschienen: "
+
+#: conversions.c:643
+msgid "today"
+msgstr "heute"
+
+#: conversions.c:651
+msgid "yesterday"
+msgstr "gestern"
+
+#: conversions.c:663
+msgid "%d days ago"
+msgstr "vor %d Tagen"
+
+#: conversions.c:672
+msgid "a week ago"
+msgstr "vor einer Woche"
+
+#: conversions.c:683
+msgid "%x"
+msgstr "am %x"
+
+#: conversions.c:683
+msgid "%x, %H:%M"
+msgstr "am %x, %H:%M Uhr"

@@ -1,0 +1,816 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Snownews 1.5.7\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-09-22 12:10+0200\n"
+"PO-Revision-Date: 2008-01-22 01:42+0300\n"
+"Last-Translator: Anton Lytvynenko <tenebrosus.scriptor@gmail.com>\n"
+"Language-Team: UK <tenebrosus.scriptor@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Ukrainian\n"
+"X-Poedit-Country: Ukraine\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: about.c:254
+msgid "Need at least 80 COLS terminal, sorry!"
+msgstr "Вибачте, потрібен термінал шириною мінімум 80 стовпчиків!"
+
+#: about.c:306
+#: about.c:328
+#, c-format
+msgid "Version %s"
+msgstr "Версія %s"
+
+#: about.c:307
+msgid "Merry Christmas from the Snownews developers."
+msgstr "Щасливого Різдва від розробників Snownews."
+
+#: about.c:308
+#: about.c:331
+msgid "Main code"
+msgstr "Головний код"
+
+#: about.c:310
+#: about.c:333
+msgid "Additional code"
+msgstr "Додатковий код"
+
+#: about.c:312
+#: about.c:335
+msgid "Translation team"
+msgstr "Команда перекладачів"
+
+#: about.c:328
+msgid "Version"
+msgstr "Версія"
+
+#: about.c:330
+msgid "Brought to you by:"
+msgstr "Виконали для Вас:"
+
+#: conversions.c:129
+#: interface.c:164
+#: interface.c:167
+msgid "No description available."
+msgstr "Опис недоступний"
+
+#: conversions.c:443
+#, c-format
+msgid "ERROR: zlib_uncompress: %d %s\n"
+msgstr "ПОМИЛКА: zlib_uncompress: %d %s\n"
+
+#: conversions.c:459
+msgid "ERROR: No output during decompression"
+msgstr "ПОМИЛКА: Відсутній вивід при декомпресії"
+
+#: conversions.c:492
+msgid "ERROR: Invalid magic bytes for GZIP data"
+msgstr "ПОМИЛКА: неправильні магічні байти для даних GZIP"
+
+#: conversions.c:497
+msgid "ERROR: Compression method is not deflate"
+msgstr "ПОМИЛКА: метод стиснення - не deflate"
+
+#: conversions.c:502
+#, c-format
+msgid "ERROR: Unsupported flags %d\n"
+msgstr "Помилка: Непідтримувані флаги %d\n"
+
+#: cookies.c:184
+#, c-format
+msgid "Cookie for %s has expired!"
+msgstr "\"Коржик\" для %s застарів!"
+
+#: dialog.c:84
+#: dialog.c:86
+#, c-format
+msgid "Current setting: %s"
+msgstr "Чинне налаштування: %s"
+
+#: dialog.c:99
+#: dialog.c:653
+#: interface.c:1213
+#: interface.c:1342
+msgid "Aborted."
+msgstr "Перервано."
+
+#: dialog.c:106
+#, c-format
+msgid "Only %s format strings allowed for default browser!"
+msgstr "Лише %s рядки формату дозволені для оглядача за замовчанням"
+
+#: dialog.c:111
+#: ui-support.c:244
+msgid "Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"
+msgstr "Небезпечний рядок оглядача (містить лапки!) Дивіться snownews.kcore.de/faq#toc2.4"
+
+#: dialog.c:131
+msgid "Enter new name. Blank line to abort. '-' to reset."
+msgstr "Введіть нове ім'я. Залиште рядок пустим, щоб перервати. '-', щоб скинути."
+
+#: dialog.c:144
+msgid "The new title must not contain a \"|\" character!"
+msgstr "Новий заголовок не повинен містити символ \"|\"!"
+
+#: dialog.c:192
+msgid "Enter URL of the feed you want to add. Blank line to abort."
+msgstr "Введіть адресу потоку, який Ви хочете додати. Залиште рядок пустим, щоб перервати."
+
+#: dialog.c:272
+msgid "The feed could not be parsed. Do you need a filter script for this feed? (y/n)"
+msgstr "Потік не може бути розібраний. Вам потрібен скрипт-фільтр для цього потоку? (y/n)"
+
+#: dialog.c:324
+#, c-format
+msgid "Last updated: %s"
+msgstr "Востаннє поновлено: %s"
+
+#: dialog.c:326
+msgid "No modification date."
+msgstr "Немає дати модифікації."
+
+#: dialog.c:329
+#, c-format
+msgid "In disk cache: %lld bytes"
+msgstr "Збережено у кеші на диску: %lld байт"
+
+#: dialog.c:331
+msgid "Not in disk cache."
+msgstr "Нема у кеші на диску."
+
+#: dialog.c:334
+#: dialog.c:336
+#: dialog.c:339
+msgid "Categories:"
+msgstr "Категорії"
+
+#: dialog.c:336
+msgid "none"
+msgstr "none"
+
+#: dialog.c:345
+msgid "Feed uses authentication."
+msgstr "Потік використовує аутентифікацію"
+
+#: dialog.c:347
+msgid "Feed does not use authentication."
+msgstr "Потік не використовує аутентифікацію"
+
+#: dialog.c:353
+#: dialog.c:354
+#, c-format
+msgid "Last webserver status: %d"
+msgstr "Останній статус веб-сервера: %d"
+
+#: dialog.c:381
+#: dialog.c:382
+msgid "Filtered through:"
+msgstr "Фільтровано через:"
+
+#: dialog.c:385
+msgid "Displaying feed information."
+msgstr "Відображення інформації потоку."
+
+#: dialog.c:400
+msgid "Are you sure you want to delete this feed?"
+msgstr "Ви певні, що хочете видалити цей потік?"
+
+#: dialog.c:403
+msgid "Type 'y' to delete, any other key to abort."
+msgstr "Натисніть 'y', щоб видалити, чи іншу клавішу, щоб перервати."
+
+#: dialog.c:440
+#: dialog.c:496
+msgid "tab:"
+msgstr "tab:"
+
+#: dialog.c:444
+msgid "Add RSS feed..."
+msgstr "Додати RSS потік..."
+
+#: dialog.c:445
+msgid "Delete highlighted RSS feed..."
+msgstr "Видалити підсвічений RSS потік..."
+
+#: dialog.c:446
+msgid "Rename feed..."
+msgstr "Перейменувати потік..."
+
+#: dialog.c:447
+msgid "Reload all feeds"
+msgstr "Перезавантажити всі потоки"
+
+#: dialog.c:448
+#: dialog.c:502
+msgid "Reload this feed"
+msgstr "Перезавантажити цей потік"
+
+#: dialog.c:449
+#: dialog.c:505
+msgid "Mark all read"
+msgstr "Позначити все прочитаним"
+
+#: dialog.c:450
+msgid "Change default browser..."
+msgstr "Змінити оглядач за замовчанням..."
+
+#: dialog.c:451
+msgid "Move item up, down"
+msgstr "Перемістити елемент вгору, вниз"
+
+#: dialog.c:452
+msgid "Sort feed list alphabetically"
+msgstr "Сортувати список за алфавітом"
+
+#: dialog.c:453
+msgid "Categorize feed..."
+msgstr "Віднести потік до категорії..."
+
+#: dialog.c:454
+msgid "Apply filter..."
+msgstr "Застосувати фільтр..."
+
+#: dialog.c:455
+msgid "Only current category"
+msgstr "Лише поточна категорія"
+
+#: dialog.c:456
+msgid "Remove filter"
+msgstr "Видалити фільтр"
+
+#: dialog.c:457
+msgid "Toggle AND/OR filtering"
+msgstr "Перемкнути фільтрування ТА/АБО (AND/OR)"
+
+#: dialog.c:458
+msgid "Show new headlines"
+msgstr "Показати нові заголовки"
+
+#: dialog.c:459
+msgid "Add conversion filter..."
+msgstr "Додати фільтр конвертації..."
+
+#: dialog.c:460
+#: dialog.c:508
+msgid "Type Ahead Find"
+msgstr "Пошук вперед"
+
+#: dialog.c:461
+msgid "About"
+msgstr "Про"
+
+#: dialog.c:462
+msgid "Quit program"
+msgstr "Вийти з програми"
+
+#: dialog.c:465
+#: dialog.c:512
+#: dialog.c:544
+msgid "Press the any(tm) key to exit help screen."
+msgstr "Натисніть будь-яку(тм) клавішу для виходу з екрану допомоги."
+
+#: dialog.c:487
+#, c-format
+msgid "%c, up:"
+msgstr "%c, вгору:"
+
+#: dialog.c:488
+#, c-format
+msgid "%c, down:"
+msgstr "%c, вниз:"
+
+#: dialog.c:489
+msgid "enter:"
+msgstr "ввід:"
+
+#: dialog.c:499
+#: dialog.c:538
+msgid "Previous item"
+msgstr "Попередній елемент"
+
+#: dialog.c:500
+#: dialog.c:539
+msgid "Next item"
+msgstr "Наступний елемент"
+
+#: dialog.c:501
+msgid "View item"
+msgstr "Переглянути елемент"
+
+#: dialog.c:503
+msgid "Open homepage"
+msgstr "Відкрити домашню сторінку"
+
+#: dialog.c:504
+#: dialog.c:540
+msgid "Open link"
+msgstr "Відкрити посилання"
+
+#: dialog.c:506
+msgid "Mark item unread"
+msgstr "Помітити елемент непрочитаним"
+
+#: dialog.c:507
+msgid "Show feed info..."
+msgstr "Показати інформацію про потік..."
+
+#: dialog.c:509
+msgid "Return to main menu"
+msgstr "Повернутись до головного меню"
+
+#: dialog.c:531
+msgid "cursor:"
+msgstr "курсор:"
+
+#: dialog.c:535
+#, c-format
+msgid "%c, enter:"
+msgstr "%c, ввід"
+
+#: dialog.c:537
+msgid "Scroll text"
+msgstr "Прокрутити текст"
+
+#: dialog.c:541
+msgid "Return to overview"
+msgstr "Повернутись до огляду"
+
+#: dialog.c:581
+#: dialog.c:582
+#, c-format
+msgid "Category configuration for %s"
+msgstr "Конфігурація категорії для %s"
+
+#: dialog.c:589
+msgid "No category defined. Select one or add a new category:"
+msgstr "Не визначена жодна категорія. Виберіть якусь чи додайте нову:"
+
+#: dialog.c:598
+#: dialog.c:638
+#, c-format
+msgid "Select category number to add, press 'A' to add a new category or '%c' to quit."
+msgstr "Виберіть номер категорії, щоб додати, натисніть 'A' для додавання нової категорії чи '%c' для виходу."
+
+#: dialog.c:603
+msgid "Categories defined for this feed:"
+msgstr "Категорії, визначені для цього потоку:"
+
+#: dialog.c:612
+#, c-format
+msgid "Select a category number to delete, press 'A' to add a new one or '%c' to quit."
+msgstr "Виберіть номер категорії для видалення, натисніть 'A' для додававння нової чи '%c', щоб вийти."
+
+#: dialog.c:629
+msgid "Select a new category or add a new one:"
+msgstr "Виберіть нову категорію чи додайте нову:"
+
+#: dialog.c:650
+msgid "Enter new category name."
+msgstr "Введіть назву категорії."
+
+#: dialog.c:658
+msgid "Category already defined for this feed!"
+msgstr "Для цього потоку вже визначено категорію!"
+
+#: dialog.c:723
+msgid "Select filter to apply"
+msgstr "Виберіть фільтр, який потрібно застосувати"
+
+#: dialog.c:736
+msgid "Select a category number or any other key to reset filters."
+msgstr "Виберіть номер категорії чи іншу клавішу для скидання фільтрів."
+
+#: dialog.c:774
+msgid "Enter script to pipe feed through."
+msgstr "Введіть скрипт для пропускання потоку через нього."
+
+#: filters.c:52
+#, c-format
+msgid "Loading \"%s\""
+msgstr "Завантажую \"%s\""
+
+#: filters.c:109
+#, c-format
+msgid "Could not write temp file for filter: %s"
+msgstr "Неможливо записати тимчасові файли для фільтру: %s"
+
+#: interface.c:161
+#: interface.c:577
+#: interface.c:580
+msgid "No title"
+msgstr "Заголовок відсутній"
+
+#: interface.c:241
+#: interface.c:611
+msgid "-> No link"
+msgstr "-> Посилання відсутнє"
+
+#: interface.c:256
+#, c-format
+msgid "Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."
+msgstr "Натисніть '%c' чи Enter для повернення до попереднього екрану. Натисніть '%c' для виводу екрану допомоги."
+
+#: interface.c:627
+#, c-format
+msgid "Press '%c' to return to main menu, '%c' to show help."
+msgstr "Натисніть '%c' для повернення до головного меню, '%c' для підказки."
+
+#: interface.c:734
+#: interface.c:1184
+#: interface.c:1194
+#: interface.c:1204
+#: interface.c:1243
+#: interface.c:1468
+#: interface.c:1476
+#: interface.c:1484
+#: interface.c:1493
+msgid "Please deactivate the category filter before using this function."
+msgstr "Будь ласка, деактивуйте фільтр категорії перед використанням цієї функції."
+
+#: interface.c:1115
+#: interface.c:1117
+#: interface.c:1134
+msgid "new"
+msgstr "новий"
+
+#: interface.c:1128
+#, c-format
+msgid "%3d new"
+msgstr "Нових: %3d"
+
+#: interface.c:1150
+#, c-format
+msgid "Press '%c' for help window."
+msgstr "Натисніть '%c' для виводу вікна допомоги."
+
+#: interface.c:1210
+msgid "Successfully added new item..."
+msgstr "Успішно додано новий елемент..."
+
+#: interface.c:1217
+msgid "Invalid URL! Please add http:// if you forgot this."
+msgstr "Некоректний URL! Будь ласка, додайте http://, якщо Ви про це забули."
+
+#: interface.c:1221
+msgid "There was a problem adding the feed!"
+msgstr "При додаванні потоку виникла проблема!"
+
+#: interface.c:1420
+#: interface.c:1437
+msgid "You cannot move items while a category filter is defined!"
+msgstr "Ви не можете пересувати елементи, поки визначено фільтр категорії!"
+
+#: io-internal.c:53
+#, c-format
+msgid "Bad request"
+msgstr "Поганий запит"
+
+#: io-internal.c:56
+#, c-format
+msgid "Payment required"
+msgstr "Вимагається плата"
+
+#: io-internal.c:59
+#, c-format
+msgid "Access denied"
+msgstr "У доступі відмовлено"
+
+#: io-internal.c:62
+#, c-format
+msgid "Internal server error"
+msgstr "Внутрішня помилка сервера"
+
+#: io-internal.c:65
+#, c-format
+msgid "Not implemented"
+msgstr "Не реалізовано"
+
+#: io-internal.c:69
+#, c-format
+msgid "Service unavailable"
+msgstr "Сервіс недоступний"
+
+#: io-internal.c:88
+#, c-format
+msgid "%s: Invalid URL!"
+msgstr "%s: Некоректний URL!"
+
+#: io-internal.c:91
+#, c-format
+msgid "%s: Couldn't create network socket!"
+msgstr "%s: Неможливо створити мережевий сокет!"
+
+#: io-internal.c:94
+#, c-format
+msgid "%s: Can't resolve host!"
+msgstr "%s: Неможливо знайти адресу хоста!"
+
+#: io-internal.c:97
+#, c-format
+msgid "%s: Connection refused!"
+msgstr "%s: З'єднання відкинуто!"
+
+#: io-internal.c:100
+#, c-format
+msgid "%s: Couldn't connect to server: %s"
+msgstr "%s: Неможливо під'єднатися до сервера: %s"
+
+#: io-internal.c:105
+#, c-format
+msgid "%s: Connection timed out."
+msgstr "%s: Час з'єднання вичерпано."
+
+#: io-internal.c:110
+#, c-format
+msgid "%s: Too many HTTP redirects encountered! Giving up."
+msgstr "%s: Забагато HTTP перенаправлень мало місце. Виходжу."
+
+#: io-internal.c:113
+#, c-format
+msgid "%s: Server sent an invalid redirect!"
+msgstr "%s: Сервер надіслав некоректне перенаправлення!"
+
+#: io-internal.c:117
+#, c-format
+msgid "%s: This feed no longer exists. Please unsubscribe!"
+msgstr "%s: Цей потік більше не існує. Відпишіться, будь ласка!"
+
+#: io-internal.c:121
+#, c-format
+msgid "%s: Could not download feed: %s"
+msgstr "%s: Не можу завантажити потік: %s"
+
+#: io-internal.c:124
+#, c-format
+msgid "%s: Error in server reply."
+msgstr "%s: Помилка у відповіді сервера."
+
+#: io-internal.c:127
+#, c-format
+msgid "%s: Authentication failed!"
+msgstr "%s: Аутентифікація невдала!"
+
+#: io-internal.c:130
+#, c-format
+msgid "%s: URL does not contain authentication information!"
+msgstr "%s: URL не містить інформації для аутентифікації!"
+
+#: io-internal.c:133
+#, c-format
+msgid "%s: Could not generate authentication information!"
+msgstr "%s: Неможливо створити інформацію аутентифікації!"
+
+#: io-internal.c:136
+#, c-format
+msgid "%s: Unsupported authentication method requested by server!"
+msgstr "%s: Метод аутентифікації, якого вимагає сервер, не підтримується!"
+
+#: io-internal.c:139
+#, c-format
+msgid "%s: Error decompressing server reply!"
+msgstr "%s: Помилка при декомпресії відповіді сервера!"
+
+#: io-internal.c:207
+msgid "Invalid XML! Cannot parse this feed!"
+msgstr "Некоректний XML! Неможливо розібрати цей потік!"
+
+#: io-internal.c:251
+#, c-format
+msgid "Cache for %s is toast. Reloading from server..."
+msgstr "Кеш для %s застарий. Перезавантаження з сервера..."
+
+#: io-internal.c:286
+#, c-format
+msgid "Could not load %s!"
+msgstr "Не можу завантажити %s!"
+
+#: io-internal.c:305
+#: io-internal.c:306
+msgid "Loading cache ["
+msgstr "Завантаження кешу ["
+
+#: io-internal.c:351
+#: io-internal.c:352
+msgid "Saving settings ["
+msgstr "Зберігаю налаштування ["
+
+#: io-internal.c:357
+msgid "Save settings (browser)"
+msgstr "Зберегти налаштування (оглядач)"
+
+#: io-internal.c:374
+msgid "Save settings (urls)"
+msgstr "Зберегти налаштування (адреси)"
+
+#: io-internal.c:430
+msgid "Writing cache file"
+msgstr "Записую файл кешу"
+
+#: main.c:59
+#, c-format
+msgid ""
+"Bye.\n"
+"\n"
+msgstr ""
+"Бувайте. \n"
+"\n"
+
+#: main.c:68
+#, c-format
+msgid ""
+"Aborting program execution!\n"
+"An internal error occured. Snownews has quit, no changes has been saved!\n"
+msgstr ""
+"Перериваю виконання програми!\n"
+"Сталася внутрішня помилка. Snownews зупинено, зміни не були збережені!\n"
+
+#: main.c:69
+#, c-format
+msgid "This shouldn't happen, please submit a bugreport to kiza@kcore.de, tell me what you where doing and include the output below in your mail.\n"
+msgstr "Так не мало статись, будь ласка,  надішліть звіт про помилку на адресу kiza@kcore.de, розкажіть мені, що Ви робили та додайте виведене нижче то Вашого листа.\n"
+
+#: main.c:72
+#, c-format
+msgid "While executing: %s\n"
+msgstr "При виконанні: %s\n"
+
+#: main.c:73
+#, c-format
+msgid ""
+"Error as reported by the system: %s\n"
+"\n"
+msgstr ""
+"Система сповістила про помилку: %s\n"
+"\n"
+
+#: main.c:124
+#: main.c:135
+#, c-format
+msgid ""
+"Snownews version %s\n"
+"\n"
+msgstr ""
+"Snownews версія %s\n"
+"\n"
+
+#: main.c:130
+#, c-format
+msgid "The option \"--disable-versioncheck\" has been obsoleted.\n"
+msgstr "Опція  \"--disable-versioncheck\" застаріла.\n"
+
+#: main.c:131
+#, c-format
+msgid "Please see the manpage for details.\n"
+msgstr "Будь ласка, перегляньте сторінку документації (manpage), щоб дізнатись деталі.\n"
+
+#: main.c:132
+#, c-format
+msgid "(To deactivate check, put -1 into ~/.snownews/updatecheck)\n"
+msgstr "(Щоб вимкнути перевірку, напишіть -1 в ~/.snownews/updatecheck)\n"
+
+#: main.c:136
+#, c-format
+msgid ""
+"usage: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+msgstr ""
+"використання: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+
+#: main.c:137
+#, c-format
+msgid "\t--update|-u\tAutomatically update every feed.\n"
+msgstr "\t--update|-u\tАвтоматично поновити кожен потік.\n"
+
+#: main.c:138
+#, c-format
+msgid "\t--help|-h\tPrint this help message.\n"
+msgstr "\t--help|-h\tВивести це повідомлення допомоги.\n"
+
+#: main.c:139
+#, c-format
+msgid "\t--version|-V\tPrint version number and exit.\n"
+msgstr "\t--version|-V\tВивести номер версії і вийти.\n"
+
+#: main.c:140
+#, c-format
+msgid "\t--disable-versioncheck (obsoleted)\n"
+msgstr "\t--disable-versioncheck (застаріле)\n"
+
+#: netio.c:149
+#: netio.c:151
+#: netio.c:311
+#, c-format
+msgid "Downloading \"%s\""
+msgstr "Завантажую \"%s\""
+
+#: netio.c:309
+#, c-format
+msgid "Downloading \"http://%s%s\""
+msgstr "Завантажую \"http://%s%s\""
+
+#: netio.c:503
+#: netio.c:504
+msgid "URL points to permanent redirect, updating with new location..."
+msgstr "URL вказує на постійне перенаправлення, поновлюю з новим розташуванням..."
+
+#: os-support.c:90
+msgid "Allocating memory"
+msgstr "Виділення пам'яті"
+
+#: setup.c:64
+msgid "Creating new config \"browser\"..."
+msgstr "Створюю нову конфігурацію \"browser\"..."
+
+#: setup.c:67
+msgid "Create initial configfile \"config\""
+msgstr "Створити початковий конфігураційний файл \"config\""
+
+#: setup.c:557
+#: setup.c:561
+msgid "Creating config directory ~/.snownews/"
+msgstr "Створюю каталог конфігурації ~/.snownews/"
+
+#: setup.c:562
+msgid "A file with the name \"~/.snownews/\" exists!"
+msgstr "Файл з іменем \"~/.snownews/\" існує!"
+
+#: setup.c:570
+#: setup.c:573
+msgid "Creating config directory ~/.snownews/cache/"
+msgstr "Створюю каталог конфігурації ~/.snownews/cache/"
+
+#: setup.c:574
+msgid "A file with the name \"~/.snownews/cache/\" exists!"
+msgstr "Файл з іменем  \"~/.snownews/cache/\" існує!"
+
+#: setup.c:584
+msgid "Reading configuration settings..."
+msgstr "Читаю налаштування конфігурації..."
+
+#: setup.c:596
+msgid "Creating new configfile."
+msgstr "Створюю новий конфігураційний файл."
+
+#: setup.c:599
+msgid "Create initial configfile \"urls\""
+msgstr "Створити початковий конфігураційний файл \"urls\""
+
+#: ui-support.c:179
+msgid "Sorting, please wait..."
+msgstr "Сортую, зачекайте, будь ласка..."
+
+#: ui-support.c:256
+msgid "Invalid URL passed. Possible shell exploit attempted!"
+msgstr "Передано некоректний URL. Можливо, спроба застосувати експлоїт shell!"
+
+#: ui-support.c:261
+#: ui-support.c:263
+#, c-format
+msgid "Executing %s"
+msgstr "Виконання %s"
+
+#: ui-support.c:341
+msgid "(New headlines)"
+msgstr "(Нові заголовки)"
+
+#: updatecheck.c:96
+#, c-format
+msgid "A new version %s of Snownews is available.\n"
+msgstr "Доступна нова версія %s Snownews. \n"
+
+#: updatecheck.c:97
+#, c-format
+msgid ""
+"If you want to download it, go to http://snownews.kcore.de/downloading/\n"
+"\n"
+msgstr ""
+"Якщо Ви хочете завантажити це, відвідайте http://snownews.kcore.de/downloading/\n"
+"\n"
+
+#: updatecheck.c:98
+#, c-format
+msgid ""
+"To disable the auto version check see the manpage.\n"
+"\n"
+msgstr ""
+"Стосовно вимкнення автоперевірки версії перегляньте сторінку документації (manpage). \n"
+"\n"
+
+#: updatecheck.c:99
+#, c-format
+msgid "http://snownews.kcore.de/download/snownews-%s.tar.gz (.sign)\n"
+msgstr "http://snownews.kcore.de/download/snownews-%s.tar.gz (.sign)\n"
+
+#: updatecheck.c:100
+#, c-format
+msgid "http://snownews.kcore.de/download/snownews-%s.i386.tar.bz2 (.sign)\n"
+msgstr "http://snownews.kcore.de/download/snownews-%s.i386.tar.bz2 (.sign)\n"
+

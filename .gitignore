@@ -1,0 +1,6 @@
+.hgignore
+.DS_Store
+.gdb_history
+*.o
+*.mo
+platform_settings

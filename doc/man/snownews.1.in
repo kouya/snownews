@@ -1,0 +1,267 @@
+.\" Snownews manpage
+.\"
+.\" This manpage is copyrighted by Oliver Feiler 2003
+.\"                                <kiza@kcore.de>
+.\"
+.TH SNOWNEWS 1 "22 October 2004" Programs "Snownews VERSION"
+.SH NAME
+.B snownews
+\- console RSS newsreader
+.SH SYNOPSIS
+.B snownews [-huV] [--help|--update|--version]
+.SH DESCRIPTION
+Snownews is a console RSS/RDF news reader. It supports all versions of RSS
+natively and can be expanded via plugins to support many other other formats.
+.P
+The main program screen, that is shown right after you start snownews,
+lets you add/remove feeds and update them manually. On the right side of
+the screen the number of new items is shown for every newsfeed. To add
+a feed press
+.B 'a'
+and enter the URL. This can be either a http:// or a feed:// URL. If you
+omit the protocol specifier snownews asumes the HTTP protocol.
+To delete a listed feed highlight it with the
+cursor keys and press
+.B 'D'.
+A dialog will ask for confirmation.
+.P
+You can navigate through the main menu with up and down arrow keys or with
+.B 'n'
+and
+.B 'p'.
+The keys
+.B page up/page down, b/space
+and
+.B HOME/END, </>
+will scroll a page up or down and to the first or last entry respectively.
+Pressing
+.B 'r'
+reloads the highlighted feed from the server,
+.B 'R'
+updates all feeds in your list and
+.B 'T'
+refreshes the feed ignoring any cache control data. That means, even if the
+feed has not been modified on the server, Snownews will still download the file.
+.P
+The program will not sort this list alphabetically by default. You can move items
+up and down by pressing
+.B 'P'
+and
+.B 'N'.
+To sort the feed list alphabetically, press
+.B 's'.
+.P
+If you highlight a feed and hit Enter the program will display every
+item for this feed. Navigation in all sub menus works as usual. If you press
+.B 'r'
+the program will reload the current feed. Items may vanish from the list
+completely and new newsitems will appear bold or in colour.
+.P
+Select an item and hit Enter to read its description. If there is none
+attached to it the text "No description available." will be displayed
+instead. You can use the arrow keys left and right, repectively
+.B 'p'
+and
+.B 'n'
+to select the previous or next newsitem in the list. Pressing
+.B 'o'
+will open the link (usually the complete news text) in the browser.
+.P
+The default browser is lynx, but you can change this by pressing
+.B 'B'
+in the main menu and entering a new default browser. Or you can edit
+the file ~/.snownews/browser. The program replaces
+%s with the URL when expanding the string.
+.P
+You can rename a feed by pressing the key
+.B 'c'
+and entering its new name. To reset its name to the original title enter '-'
+in this textfield.
+.P
+A context help window is available everytime by pressing
+.B 'h'.
+.P
+.B Type Ahead Find
+.P
+For faster navigation in your feedlist you can use Snownews' Type Ahead
+Find feature. Press the TAB key and the statusline will change into a
+text entry field. While you enter the text you want to search for, highlight
+will be automatically placed on items as they match. If you have selected an
+item just press enter to open the feed. If there are multiple items
+matching you can switch between them by pressing TAB. To quit Type Ahead
+delete the search text or press CTRL+G
+.P
+.B Categories
+.P
+Snownews uses categories to manage large subscription lists. You can define
+as many categories for a feed as you like. You can then apply a filter in the
+main menu that will only show feeds that have a matching category defined.
+Feeds with a category will have it printed next to their name in the main menu.
+.P
+To add or remove a feed from a category, press
+.B 'C'
+while the feed is highlighted in the main menu. If you already have defined
+categories for other feeds you'll get a list of the existing categories.
+Just press its number to add the current feed to this category. To add the
+feed to a new category, press
+.B 'A'
+and enter the name of the new category. If you want to remove a feed from
+a category, just press its number in the feed categorization GUI.
+.P
+You can see all defined categories for a feed in the feed info.
+.P
+.B Customizing keybindings
+.P
+You can customize the keybindings by editing the file ~/.snownews/keybindings.
+The format is "function description:key". Do not change the string
+"function description". The single character behind the colon represents
+the key the program will associate with the corresponding function. If
+you delete a definition or the program cannot parse the file for some reason
+the default settings will be used instead.
+.P
+.B Colours
+.P
+If you prefer to see the world in colours you can enable (and configure) colour
+support in Snownews. Edit the file ~/.snownews/colors. To globally enable
+colours in the program, set enabled to "1". To set a colour, use the colour
+key value that is listed in the comment in that file. You can disable usage
+for single items by using the value "-1".
+.P
+.B HTML conversion
+.P
+Snownews will try to convert HTML content into plain text before displaying
+the text. Tags will be stripped alltogether and some common HTML entities
+will be translated. By default only the five entities defined in XML
+(&lt; (<), &gt; (>), &amp; (&), &quot; (") and &apos; (')) plus a default
+setting included will be translated. You can influence this behaviour with
+the definition file at ~/.snownews/html_entities. See the comments on top
+of the file for further details.
+.P
+.B Importing/exporting subscriptions from other programs:
+.P
+Snownews can import opml subscription files from other RSS readers into
+its own format with the included program "opml2snow".
+To convert an opml subscription file type "opml2snow MySubsriptions.opml" 
+with MySubscriptions.opml being the name of the file you want to convert.
+The program will print the converted data to stdout. Use 
+"opml2snow file.opml >converted" to put the converted data into the file
+"converted" or "opml2snow file.opml >>~/.snownews/urls"
+to append it to snownews' subscription list.
+.P
+You can also export snownews' internal format to an OPML file with
+"opml2snow --export".
+.P
+See "opml2snow -h" or its manpage for more usage examples.
+.P
+.B HTTP client features
+.P
+Snownews' HTTP client will follow HTTP server redirects. If the URL you have
+entered points to a permanent redirect it will update the internal URL
+to reflect the new location. Requests will be automatically sent to the
+new location from now on.
+.P
+Snownews supports
+.B HTTP authentication
+and
+.B Cookies.
+To subscribe to a feed that requires authentication, use an URL
+.B http://username:password@server/feed.rss.
+You can use cookies to supply log in information to a webserver. Put the
+cookies you want Snownews to use into the file
+.B ~/.snownews/cookies.
+The file has to be in standard Netscape cookies.txt file format. Mozilla uses
+this format for example. Snownews will automatically send the right cookies
+to the right webserver. You can also just place a symlink to your browser's
+cookie file, but it is not recommended. If a cookie is expired, Snownews will
+print a warning on program start and not use the cookie. If a cookie is
+marked as secure (only to be used via an SSL secured connection) Snownews will
+also discard the cookie.
+.P
+If you need to use a
+.B proxy server
+to access the internet, set the environment
+variable "http_proxy". Snownews expects this variable to be in the format
+.I http://your_proxy.org:PORT/
+(http://proxy.your_isp.com:8080/).
+.P
+.B Automatic update checking
+.P
+Once a week the program will automatically check for a new version when it exits.
+It will request a file named "version" from my webserver and compare
+the returned value with the local program version. If they differ it
+notifies the user of a new version. It is done on exit to be least
+annoying I hope. This way you can easily ignore it if you don't want
+to upgrade for some reason or can't, because you're using a package
+that came with your distribution, etc. To disable this check, put the value
+-1 into the file ~/.snownews/updatecheck. Snownews will
+not transfer anything to my server. It will just download a file
+containing the version number and compare it locally.
+.P
+.B Plugins
+.P
+Snownews has a plugin architecture that allows to load feeds from external
+scripts or pipe downloaded contents through a filter. Such a filter could
+be an Atom to RSS converter for example. The snownews website has a section
+with publically available extensions. See
+.B http://snownews.kcore.de/snowscripts/.
+.P
+There are two types of filters:
+.B execurls
+and
+.B filters.
+.P
+Execurls are scripts that produce a valid RSS file by themselves. You can add
+such extensions by subscribing to a feed "exec:/path/to/extension".
+.P
+Filters convert a downloaded resource on the fly. You usually subscribe to an
+URL that is a webpage or a non-RSS feed. If snownews asks you if you want
+to use a filter, because it couldn't parse the resource, enter the location
+of your script. You can also add filters to exisiting subscriptions by
+highlighting the feed and pressing
+.B 'e'
+in the main menu.
+.P
+For further documentation about this feature, please visit the website
+.B http://snownews.kcore.de/snowscripts/.
+.P
+.B Snownews is released under the GNU General Public License version 2.
+.SH OPTIONS
+.B \-\-charset or \-l,
+Force using this charset. Snownews tries to guess the correct charset of your
+terminal, but if fails, this option can be used to force using a specific one.
+.P
+.B \-\-cursor-on or \-c,
+Always display the cursor on the screen.
+.P
+.B \-\-update or \-u,
+Automatically update all subscribed feeds when the application starts.
+.P
+.B \-\-help or \-h,
+Show usage summary and available command line options and exit.
+.P
+.B \-\-version or \-V,
+Print program version and exit.
+.SH FILES
+PREFIX/bin/snownews
+.SH ENVIRONMENT
+.TP
+.B http_proxy
+Snownews will access the internet through the proxy server set in this variable.
+The expected format is http://your_proxy.org:PORT/.
+.SH BUGS
+.P
+.B Reporting bugs
+.P
+If you think you found a bug in Snownews, please report it. Anything that makes
+the program crash, regardless what you're doing is a bug and needs to be fixed.
+XML parsing errors are probably not fixable in Snownews since libxml is responsible
+for parsing a document's XML. Though you can report problematic feeds anyway,
+it may be a bug in Snownews.
+.P
+Please read http://kiza.kcore.de/software/snownews/faq#toc4 before you report a bug.
+
+.SH SEE ALSO
+.BR opml2snow (1).
+
+.SH AUTHOR
+Oliver Feiler <kiza@kcore.de>

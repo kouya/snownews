@@ -1,0 +1,407 @@
+# Spanish translation for Snownews.
+# Copyright (C) 2003 Fernando J. Pereda.
+# Fernando J. Pereda <ferdy@ferdyx.org>, 2003
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Snownews 1.0\n"
+"POT-Creation-Date: 2003-06-15 21:50+0200\n"
+"PO-Revision-Date: 2003-08-17 21:50+0200\n"
+"Last-Translator: Fernando J. Pereda <ferdy@ferdyx.org>\n"
+"Language-Team: Spanish <ferdy@ferdyx.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: interface.c:178
+#, c-format
+msgid "Current setting: %s"
+msgstr "Opción actual: %s"
+
+#: interface.c:225
+msgid "Enter URL of the feed you want to add. Blank line to abort."
+msgstr "Introduzca la URL que quiera añadir. Deje la línea en blanco para abortar."
+
+#: interface.c:532 interface.c:535
+msgid "No description available."
+msgstr "Descripción no disponible."
+
+#: interface.c:597
+msgid ""
+"Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."
+msgstr "Presione '%c' o Enter para volver a la pantalla anterior. Pulse '%c' para ayuda."
+
+#: interface.c:608 interface.c:785
+#, c-format
+msgid "Executing %s"
+msgstr "Ejecutando: %s"
+
+#: interface.c:741
+msgid "Press '%c' to return to main menu, '%c' to show help."
+msgstr "Presione '%c' para volver al menu principal, '%c' para ayuda."
+
+#: interface.c:857
+msgid "Press '%c' for help window."
+msgstr "Presione '%c' para abir la ventana de ayuda."
+
+#: interface.c:870
+#, c-format
+msgid "HTTP error %d - Could not update feed %s."
+msgstr "Error HTTP %d - No se pudo actualizar %s ."
+
+#: interface.c:875
+#, c-format
+msgid "Could not update feed %s - %s"
+msgstr "No se pudo actualizar %s - %s"
+
+#: interface.c:888
+msgid "Successfully added new item..."
+msgstr "Elemento añadido satisfactoriamente..."
+
+#: interface.c:901 interface.c:956
+msgid "Aborted."
+msgstr "Abortado."
+
+#: interface.c:905
+msgid "Invalid URL! Please add http:// if you forgot this."
+msgstr "¡URL Inválida! Por favor añada http:// si olvidó hacerlo."
+
+#: interface.c:1118
+msgid "Add RSS feed..."
+msgstr "Añadir fuente de noticias RSS..."
+
+#: interface.c:985
+msgid "Delete highlighted RSS feed..."
+msgstr "Borrar la fuente RSS..."
+
+#: interface.c:986
+msgid "Reload all feeds"
+msgstr "Regargar todas las fuentes"
+
+#: interface.c:987
+msgid "Reload this feed"
+msgstr "Recargar esta fuente"
+
+#:interface.c:1234
+msgid "Mark all read"
+msgstr "Marcar todos como leidos"
+
+#: interface.c:988
+msgid "Change default browser..."
+msgstr "Cambiar navegador por defecto..."
+
+#: interface.c:1123
+msgid "Move item up, down"
+msgstr "Mover elemento arriba, o abajo"
+
+#: interface.c:989
+msgid "Quit program"
+msgstr "Salir"
+
+#: interface.c:992 interface.c:1024 interface.c:1052
+msgid "Press the any(tm) key to exit help screen."
+msgstr "Presione cualquier(tm) tecla para salir de la pantalla de ayuda."
+
+#: interface.c:1016
+msgid "%c, up:"
+msgstr "%c, arriba:"
+
+#: interface.c:1016
+msgid "Previous item"
+msgstr "Elemento anterior"
+
+#: interface.c:1017
+msgid "%c, down:"
+msgstr "%c, abajo:"
+
+#: interface.c:1017
+msgid "Next item"
+msgstr "Elemento siguiente"
+
+#: interface.c:1018
+msgid "View item"
+msgstr "Ver elemento"
+
+#: interface.c:1020
+msgid "Open homepage"
+msgstr "Abrir 'homepage'"
+
+#:interface.c:1418
+msgid "Show feed info..."
+msgstr "Información de la fuente..."
+
+#: interface.c:1021
+msgid "Return to main menu"
+msgstr "Volver al menu principal"
+
+#: interface.c:1045
+msgid "Scroll text"
+msgstr "desplazamiento del texto"
+
+#: interface.c:1048
+msgid "Open link"
+msgstr "Abrir enlace"
+
+#: interface.c:1049
+msgid "Return to overview"
+msgstr "Volver"
+
+#: interface.c:1069
+msgid "Need at least 80 COLS terminal, sorry!"
+msgstr "¡Se necesita un terminal de al menos 80 columnas!"
+
+#: interface.c:1083
+msgid "Brought to you by:"
+msgstr "Programado por:"
+
+#: interface.c:1084
+msgid "Main code"
+msgstr "Código principal"
+
+#: interface.c:1086
+msgid "Additional code"
+msgstr "Código adicional"
+
+#: interface.c:1088
+msgid "Translation team"
+msgstr "Equipo de traducción"
+
+#: interface.c:820
+msgid "Are you sure you want to delete this feed?"
+msgstr "¿Esta seguro de que quiere borrar esta fuente?"
+
+#: interface.c:823
+msgid "Type 'y' to delete, any other key to abort."
+msgstr "Pulse 'y' para borrarlo, cualquier otra tecla para abortar."
+
+#: interface.c:793
+msgid "No title"
+msgstr "Sin título"
+
+#: main.c:67
+#, c-format
+msgid ""
+"The program has crash^H^H^H^H^H exited abnormally.\n"
+"Error %s occured in function %s.\n"
+"Please bother maintainer.\n"
+"\n"
+msgstr "El programna se ha colgado^H^H^H^H^H saliendo de forma anormal.\n"
+"Error %s ocurrió en la función %s.\n"
+"Por favor, contacte con el encargado del paquete.\n"
+"\n"
+
+#: main.c:99
+msgid "Creating config directory ~/.snownews/"
+msgstr "Creando el directorio de configuración ~/.snownews/"
+
+#: main.c:106
+msgid "Creating config directory ~/.snownews/cache/"
+msgstr "Creando el directorio de configuración ~/.snownews/cache/"
+
+#: main.c:109
+msgid "Reading configuration settings..."
+msgstr "Leyendo la configuración..."
+
+#: main.c:116
+msgid "Creating new config \"browser\"..."
+msgstr "Creando nueva configuración \"browser\"..."
+
+#: main.c:119
+msgid "Create initial configfile \"config\""
+msgstr "Cree el fichero de configuración inicial \"config\""
+
+#: main.c:135
+msgid "Creating new configfile."
+msgstr "Creando nuevo fichero de configuración"
+
+#: main.c:138
+msgid "Create initial configfile \"urls\""
+msgstr "Cree el fichero de configuración inicial \"urls\""
+
+#: main.c:219
+#, c-format
+msgid "Cache for %s is toast. Reloading from server..."
+msgstr "La cache de %s esta corrupta. recargando..."
+
+#: main.c:252
+#, c-format
+msgid "Loading cache ["
+msgstr "Cargando cache ["
+
+#: main.c:280
+msgid "Saving settings ["
+msgstr "Guardando la configuración ["
+
+#: main.c:285
+msgid "Save settings (browser)"
+msgstr "Guardando configuración (browser)"
+
+#: main.c:293
+msgid "Save settings (urls)"
+msgstr "Guardando configuración (urls)"
+
+#: main.c:383
+msgid ""
+"usage: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+msgstr "Modo de empleo: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+
+#: main.c:384
+msgid "\t--update|-u\tAutomatically update every feed.\n"
+msgstr "\t--update|-u\tRecargar automáticamente todas las fuentes.\n"
+
+#: main.c:385
+msgid "\t--help|-h\tPrint this help message.\n"
+msgstr "\t--help|-h\tMostrar esta ayuda.\n"
+
+#: main.c:386
+msgid "\t--version|-V\tPrint version number and exit.\n"
+msgstr "\t--version|-V\tMostrar número de versión y salir.\n"
+
+#: main.c:274
+msgid "Sorting list..."
+msgstr "Ordenando lista..."
+
+#: netio.c:102
+#, c-format
+msgid "Downloading \"http://%s%s\""
+msgstr "Descargando \"http://%s%s\""
+
+#netio.c:271
+#, c-format
+msgid "Downloading \"%s\""
+msgstr "Descargando \"%s\""
+
+#: netio.c:154
+msgid "Following HTTP redirects"
+msgstr "Siguiento la redirección HTTP"
+
+#: netio.c:172
+msgid "URL points to permanent redirect, updating with new location..."
+msgstr "La URL apunta a una redirección permanente, actualizando con la nueva dirección..."
+
+#: netio.c:201
+msgid "Reconnecting for Redirect"
+msgstr "Reconectando para la redirección"
+
+#: netio.c:225
+#, c-format
+msgid "The webserver %s sent illegal HTTP/1.0 reply! I cannot parse this."
+msgstr "¡El servidor %s envió una respuesta HTTP/1.0 no válida!"
+
+#: netio.c:286
+msgid "This URL doesn't look too valid to me, don't you think?"
+msgstr "Esta URL no me parece muy válida, ¿no crees?"
+
+#: netio.c:303
+msgid "Couldn't create network socket!"
+msgstr "¡No puedo crear un socket de red!"
+
+#: netio.c:308
+#, c-format
+msgid "Can't resolve host %s!"
+msgstr "¡No puedo resolver el nombre %s!"
+
+#: netio.c:314
+#, c-format
+msgid "Could not connect to server %s: %s"
+msgstr "No pude conectar con el servidorr %s: %s"
+
+#: updatecheck.c:139
+#, c-format
+msgid "A new version %s of this program is available.\n"
+msgstr "Una versión (%s) está disponible.\n"
+
+#: updatecheck.c:140
+msgid ""
+"If you want to download it, go to http://snownews.kcore.de/downloading/\n"
+"\n"
+msgstr "Si quiere descargarla vaya a http://snownews.kcore.de/downloading/\n"
+"\n"
+
+#: updatecheck.c:141
+msgid ""
+"To disable the auto version check see the manpage.\n"
+"\n"
+msgstr "Para deshabilitar la comprobación de nuevas versiones lea la página del manual.\n"
+"\n"
+
+#: interface.c:988 interface.c:1007
+msgid "new"
+msgstr "nuevo"
+
+#: interface.c:1006
+msgid "%3d new"
+msgstr "%3d nuevo"
+
+#: netio.c:235
+msgid "Too many HTTP redirects encountered! Giving up."
+msgstr "¡Demasiadas redirecciones HTTP!."
+
+#: interface.c:324
+#, c-format
+msgid "Last updated: %s"
+msgstr "Última actualización: %s"
+
+#: interface.c:326
+msgid "No modification date."
+msgstr "No hay fecha de modificación."
+
+#: interface.c:329
+#, c-format
+msgid "In disk cache: %lld bytes"
+msgstr "En cache de disco: %lld bytes"
+
+#: interface.c:331
+msgid "Not in disk cache."
+msgstr "No esta en la cache del disco."
+
+#: interface.c:333
+msgid "Displaying feed information."
+msgstr "Mostrando la información de la fuente."
+
+#: netio.c:66
+msgid "Connecting to "
+msgstr "Conectando a "
+
+#: netio.c:68
+msgid "Connecting to %s..."
+msgstr "Conectando a %s..."
+
+#:netio.c:418
+msgid "The feed \"%s\" no longer exists. Please unsubscribe!"
+msgstr "La fuente \"%s\" no exister. Por favor, bórrela"
+
+#:interface.c:1584
+msgid "About"
+msgstr "Acerca de"
+
+#:interface.c:171
+msgid "Enter new name. Blank line to abort. '-' to reset."
+msgstr "Introduzca un nuevo nombre. Línea en blanco para abortar.'-' Para reiniciar."
+
+#:interface.c:1304
+msgid "Exit Snownews? Press '%c' again to quit."
+msgstr "¿Salir de snownews? Presione '%c' otra vez para salir."
+
+#:interface.c:1534
+msgid "Title changed successfully."
+msgstr "Titulo cambiado satisfactoriamente."
+
+#:interface.c:1543
+msgid "Original title restored."
+msgstr "Título original restaurado."
+
+#:interface.c:1636
+msgid "Rename feed..."
+msgstr "Renombrar fuente..."
+
+#:dialog.c:634
+msgid "Merry Christmas from the Snownews developers."
+msgstr "Los desarrolladores de snownews le desean Feliz Navidad."
+
+#:dialog.c:365
+msgid "Sort feed list alphabetically"
+msgstr "Ordenar fuentes alfabéticamente"

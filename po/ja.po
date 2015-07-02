@@ -1,0 +1,703 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: snownews-1.5.6.1\n"
+"POT-Creation-Date: 2005-04-25 19:56+0900\n"
+"PO-Revision-Date: 2005-04-25 23:08+0900\n"
+"Last-Translator: Ray Iwata <iwata@quasiquote.org>\n"
+"Language-Team: Japanese <iwata@quasiquote.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=EUC-JP\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: about.c:314
+msgid "Merry Christmas from the Snownews developers."
+msgstr "Snownews 開発者よりメリークリスマス。"
+
+#: about.c:315 about.c:685
+msgid "Main code"
+msgstr "メインコード"
+
+#: about.c:317 about.c:687
+msgid "Additional code"
+msgstr "追加コード"
+
+#: about.c:319 about.c:689
+msgid "Translation team"
+msgstr "翻訳チーム"
+
+#: about.c:346
+#, c-format, fuzzy
+msgid "Move: cursor or %c/%c; shoot: space; quit: %c"
+msgstr "移動: カーソル、または %c/%c; 撃つ: space; 終了: %c"
+
+#: about.c:363
+#, c-format
+msgid "Score: %d"
+msgstr "スコア: %d"
+
+#: about.c:367
+#, c-format
+msgid "Level: %d"
+msgstr "レベル: %d"
+
+#: about.c:666
+msgid "Need at least 80 COLS terminal, sorry!"
+msgstr "最低でも横 80 文字が表示できる端末が必要です。ごめんなさい！"
+
+#: about.c:684
+msgid "Brought to you by:"
+msgstr "次の人達が貢献しました:"
+
+#: conversions.c:155 interface.c:184 interface.c:187
+msgid "No description available."
+msgstr "概要がありません"
+
+#: conversions.c:708
+msgid ", %H:%M"
+msgstr ""
+
+#: conversions.c:709 conversions.c:710
+msgid "Posted "
+msgstr "投稿日時 "
+
+#: conversions.c:715 conversions.c:716
+msgid "today"
+msgstr "今日"
+
+#: conversions.c:722 conversions.c:723
+msgid "yesterday"
+msgstr "昨日"
+
+#: conversions.c:729
+#, c-format
+msgid "%d days ago"
+msgstr "%d 日前"
+
+#: conversions.c:737 conversions.c:738
+msgid "a week ago"
+msgstr "一週間前"
+
+#: conversions.c:744 conversions.c:745
+msgid "Not yet posted: "
+msgstr "まだ投稿されていません: "
+
+#: conversions.c:747 conversions.c:753
+#, c-format
+msgid "%x"
+msgstr ""
+
+#: conversions.c:749 conversions.c:755
+msgid "%x, %H:%M"
+msgstr ""
+
+#: cookies.c:185
+#, c-format
+msgid "Cookie for %s has expired!"
+msgstr "クッキー %s は有効期限が終了しています！"
+
+#: dialog.c:85 dialog.c:87
+#, c-format
+msgid "Current setting: %s"
+msgstr "現在の設定: %s"
+
+#: dialog.c:100 dialog.c:641
+msgid "Aborted."
+msgstr "中止しました。"
+
+#: dialog.c:107
+#, c-format
+msgid "Only %s format strings allowed for default browser!"
+msgstr "フォーマット文字列 %s はデフォルトブラウザのためだけに使用可能です！"
+
+#: dialog.c:112 ui-support.c:242
+msgid ""
+"Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"
+msgstr "安全でないブラウザ名です(クオートを含んでいます)！snownews.kcore.de/faq#toc2.4 を読んでください。"
+
+#: dialog.c:132
+msgid "Enter new name. Blank line to abort. '-' to reset."
+msgstr "新しい名前を入力してください。'-' でリセットします。"
+
+#: dialog.c:145
+msgid "The new title must not contain a \"|\" character!"
+msgstr "新しいタイトル文字列に \"|\" を含ませることはできません！"
+
+#: dialog.c:193
+msgid "Enter URL of the feed you want to add. Blank line to abort."
+msgstr "追加したいフィードの URL を入力してください。空行で中止します。"
+
+#: dialog.c:254
+msgid ""
+"The feed could not be parsed. Do you need a filter script for this feed? (y/"
+"n)"
+msgstr "フィードがパースできませんでした。このフィードに対してフィルタスクリプトは必要ですか？ (y/n)"
+
+#: dialog.c:306
+#, c-format
+msgid "Last updated: %s"
+msgstr "最終更新: %s"
+
+#: dialog.c:308
+msgid "No modification date."
+msgstr "日付の修正はありません。"
+
+#: dialog.c:311
+#, c-format
+msgid "In disk cache: %lld bytes"
+msgstr "ディスクキャッシュ: %lld バイト"
+
+#: dialog.c:313
+msgid "Not in disk cache."
+msgstr "ディスクキャッシュにありません。"
+
+#: dialog.c:316 dialog.c:318 dialog.c:321
+msgid "Categories:"
+msgstr "カテゴリ:"
+
+#: dialog.c:318
+msgid "none"
+msgstr "なし"
+
+#: dialog.c:327
+msgid "Feed uses authentication."
+msgstr "フィードは認証を使用しています。"
+
+#: dialog.c:329
+msgid "Feed does not use authentication."
+msgstr "フィードは認証を使用していません。"
+
+#: dialog.c:336 dialog.c:337
+#, c-format
+msgid "Last webserver status: %d"
+msgstr "最後に確認した時のウェブサーバの状態: %d"
+
+#: dialog.c:339 dialog.c:340
+#, c-format
+msgid "Last webserver status: (%s) %d"
+msgstr "最後に確認した時のウェブサーバの状態: (%s) %d"
+
+#: dialog.c:369 dialog.c:370
+msgid "Filtered through:"
+msgstr "フィルタ適用:"
+
+#: dialog.c:373
+msgid "Displaying feed information."
+msgstr "フィード情報を表示します。"
+
+#: dialog.c:388
+msgid "Are you sure you want to delete this feed?"
+msgstr "このフィードを本当に削除します。よろしいですか？"
+
+#: dialog.c:391
+msgid "Type 'y' to delete, any other key to abort."
+msgstr "'y' を押せば削除します。その他のキーで中止します。"
+
+#: dialog.c:428 dialog.c:484
+msgid "tab:"
+msgstr ""
+
+#: dialog.c:432
+msgid "Add RSS feed..."
+msgstr "RSS フィードを追加します..."
+
+#: dialog.c:433
+msgid "Delete highlighted RSS feed..."
+msgstr "RSS フィードを削除します..."
+
+#: dialog.c:434
+msgid "Rename feed..."
+msgstr "フィードの名前を変更します..."
+
+#: dialog.c:435
+msgid "Reload all feeds"
+msgstr "すべてのフィードを再読み込みします"
+
+#: dialog.c:436 dialog.c:490
+msgid "Reload this feed"
+msgstr "このフィードを再読み込みします"
+
+#: dialog.c:437 dialog.c:493
+msgid "Mark all read"
+msgstr "すべてを既読にマークします"
+
+#: dialog.c:438
+msgid "Change default browser..."
+msgstr "デフォルトブラウザを変更します..."
+
+#: dialog.c:439
+msgid "Move item up, down"
+msgstr "アイテムを上下に移動します"
+
+#: dialog.c:440
+msgid "Sort feed list alphabetically"
+msgstr "アルファベット順に並び換えます"
+
+#: dialog.c:441
+msgid "Categorize feed..."
+msgstr "フィードのカテゴリを設定します..."
+
+#: dialog.c:442
+msgid "Apply filter..."
+msgstr "フィルタを適用します..."
+
+#: dialog.c:443
+msgid "Only current category"
+msgstr "このカテゴリのみを表示します"
+
+#: dialog.c:444
+msgid "Remove filter"
+msgstr "フィルタを取り除きます"
+
+#: dialog.c:445
+msgid "Toggle AND/OR filtering"
+msgstr "AND/OR フィルタをトグルします"
+
+#: dialog.c:446
+msgid "Show new headlines"
+msgstr "新規フィードを表示します"
+
+#: dialog.c:447
+msgid "Add conversion filter..."
+msgstr "コンバージョンフィルタを追加します"
+
+#: dialog.c:448 dialog.c:496
+msgid "Type Ahead Find"
+msgstr "Type Ahead で検索します"
+
+#: dialog.c:449
+msgid "About"
+msgstr ""
+
+#: dialog.c:450
+msgid "Quit program"
+msgstr "プログラムを終了します"
+
+#: dialog.c:453 dialog.c:500 dialog.c:532
+msgid "Press the any(tm) key to exit help screen."
+msgstr "なにかキーを押すとヘルプ画面を終了します。"
+
+#: dialog.c:475
+#, c-format
+msgid "%c, up:"
+msgstr ""
+
+#: dialog.c:476
+#, c-format
+msgid "%c, down:"
+msgstr ""
+
+#: dialog.c:477
+msgid "enter:"
+msgstr ""
+
+#: dialog.c:487 dialog.c:526
+msgid "Previous item"
+msgstr "前のアイテムに移動します"
+
+#: dialog.c:488 dialog.c:527
+msgid "Next item"
+msgstr "次のアイテムに移動します"
+
+#: dialog.c:489
+msgid "View item"
+msgstr "アイテムを表示します"
+
+#: dialog.c:491
+msgid "Open homepage"
+msgstr "ホームページを開きます"
+
+#: dialog.c:492 dialog.c:528
+msgid "Open link"
+msgstr "リンクを開きます"
+
+#: dialog.c:494
+msgid "Mark item unread"
+msgstr "マークしたアイテムを未読にします"
+
+#: dialog.c:495
+msgid "Show feed info..."
+msgstr "フィードの情報を表示します..."
+
+#: dialog.c:497
+msgid "Return to main menu"
+msgstr "メインメニューに戻ります"
+
+#: dialog.c:519
+msgid "cursor:"
+msgstr ""
+
+#: dialog.c:523
+#, c-format
+msgid "%c, enter:"
+msgstr ""
+
+#: dialog.c:525
+msgid "Scroll text"
+msgstr "テキストをスクロールします"
+
+#: dialog.c:529
+msgid "Return to overview"
+msgstr "概説に戻ります"
+
+#: dialog.c:569 dialog.c:570
+#, c-format
+msgid "Category configuration for %s"
+msgstr "%s のカテゴリを設定します"
+
+#: dialog.c:577
+msgid "No category defined. Select one or add a new category:"
+msgstr "カテゴリが定義されていません。どれかひとつを選択するか新しいカテゴリを追加してください:"
+
+#: dialog.c:586 dialog.c:626
+#, c-format
+msgid ""
+"Select category number to add, press 'A' to add a new category or '%c' to "
+"quit."
+msgstr "追加したいカテゴリ番号を選択し、'A' で新しいカテゴリを追加するか '%c' で終了してください。"
+
+#: dialog.c:591
+msgid "Categories defined for this feed:"
+msgstr "このフィードのカテゴリを定義しました:"
+
+#: dialog.c:600
+#, c-format
+msgid ""
+"Select a category number to delete, press 'A' to add a new one or '%c' to "
+"quit."
+msgstr "削除したいカテゴリ番号を選択し、'A' で新しいカテゴリを追加するか '%c' で終了してください。"
+
+#: dialog.c:617
+msgid "Select a new category or add a new one:"
+msgstr "新しいカテゴリを選択するか新たなカテゴリを作ってください:"
+
+#: dialog.c:638
+msgid "Enter new category name."
+msgstr "新しいカテゴリ名を入力してください。"
+
+#: dialog.c:646
+msgid "Category already defined for this feed!"
+msgstr "このフィードのためのカテゴリはすでに定義されています！"
+
+#: dialog.c:711
+msgid "Select filter to apply"
+msgstr "適用するフィルタを選択してください"
+
+#: dialog.c:724
+msgid "Select a category number or any other key to reset filters."
+msgstr "カテゴリ番号かフィルタをリセットするためのキーを選択してください。"
+
+#: dialog.c:762
+msgid "Enter script to pipe feed through."
+msgstr "フィードをパイプするスクリプトを入力してください。"
+
+#: filters.c:59
+#, c-format
+msgid "Loading \"%s\""
+msgstr "\"%s\" を読み込んでいます"
+
+#: filters.c:123
+#, c-format
+msgid "Could not write temp file for filter: %s"
+msgstr "フィルタのための一時ファイルに書き込みできません: %s"
+
+#: interface.c:181 interface.c:597 interface.c:600
+msgid "No title"
+msgstr "タイトルがありません"
+
+#: interface.c:261 interface.c:631
+msgid "-> No link"
+msgstr "-> リンクがありません"
+
+#: interface.c:276
+#, c-format
+msgid ""
+"Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."
+msgstr "'%c' かエンターキーで前の画面に戻ります。'%c' でヘルプ画面を表示します。"
+
+#: interface.c:647
+#, c-format
+msgid "Press '%c' to return to main menu, '%c' to show help."
+msgstr "'%c' でメインメニューに戻ります。'%c' でヘルプ画面を表示します。"
+
+#: interface.c:754 interface.c:1208 interface.c:1218 interface.c:1228
+#: interface.c:1263 interface.c:1482 interface.c:1490 interface.c:1498
+#: interface.c:1507
+msgid "Please deactivate the category filter before using this function."
+msgstr "この機能を使用する前にカテゴリフィルタを停止させてください"
+
+#: interface.c:1135 interface.c:1137 interface.c:1154
+msgid "new"
+msgstr "未読"
+
+#: interface.c:1148
+#, c-format
+msgid "%3d new"
+msgid_plural "%3d new"
+msgstr[0] "%3d 未読"
+msgstr[1] "%3d 未読"
+
+#: interface.c:1170
+#, c-format
+msgid "Press '%c' for help window."
+msgstr "'%c' でヘルプウィンドウが開きます。"
+
+#: interface.c:1172
+#, c-format
+msgid "Press '%c' for help window. (Press '%c' to play Santa Hunta!)"
+msgstr "'%c' でヘルプウィンドウが開きます。('%c' で Santa Hunta を再生します！)"
+
+#: interface.c:1234
+msgid "Successfully added new item..."
+msgstr "新しいアイテムの追加に成功しました..."
+
+#: interface.c:1237
+msgid "Invalid URL! Please add http:// if you forgot this."
+msgstr "無効な URL です！http:// を忘れていたなら追加してください。"
+
+#: interface.c:1241
+msgid "There was a problem adding the feed!"
+msgstr "フィードの追加に問題がありました！"
+
+#: interface.c:1434 interface.c:1451
+msgid "You cannot move items while a category filter is defined!"
+msgstr "カテゴリフィルタが定義されているためアイテムの移動はできません！"
+
+#: io-internal.c:120
+#, c-format
+msgid "%s: Invalid URL!"
+msgstr "%s: 無効な URL です！"
+
+#: io-internal.c:123
+#, c-format
+msgid "%s: Couldn't create network socket!"
+msgstr "%s: ネットワークソケットを作成できませんでした！"
+
+#: io-internal.c:126
+#, c-format
+msgid "%s: Can't resolve host!"
+msgstr "%s: ホストの名前解決ができません！"
+
+#: io-internal.c:129
+#, c-format
+msgid "%s: Connection refused!"
+msgstr "%s: 接続が拒否されました！"
+
+#: io-internal.c:132
+#, c-format
+msgid "%s: Couldn't connect to server: %s"
+msgstr "%s: サーバに接続できませんでした: %s"
+
+#: io-internal.c:137
+#, c-format
+msgid "%s: Connection timed out."
+msgstr "%s: 接続がタイムアウトしました。"
+
+#: io-internal.c:142
+#, c-format
+msgid "%s: Too many HTTP redirects encountered! Giving up."
+msgstr "%s: HTTP リダイレクト回数が限界です。あきらめます。"
+
+#: io-internal.c:145
+#, c-format
+msgid "%s: Server sent an invalid redirect!"
+msgstr "%s: サーバは無効なリダイレクトを送ってきました！"
+
+#: io-internal.c:149
+#, c-format
+msgid "%s: This feed no longer exists. Please unsubscribe!"
+msgstr "%s: このフィードはもはや存在しません。講読をやめてください！"
+
+#: io-internal.c:153
+#, c-format
+msgid "%s: Could not download feed: %s"
+msgstr "%s: フィードをダウンロードできませんでした: %s"
+
+#: io-internal.c:156
+#, c-format
+msgid "%s: Error in server reply."
+msgstr "%s: サーバはエラーを返しました。"
+
+#: io-internal.c:159
+#, c-format
+msgid "%s: Authentication failed!"
+msgstr "%s: 認証に失敗しました！"
+
+#: io-internal.c:162
+#, c-format
+msgid "%s: URL does not contain authentication information!"
+msgstr "%s: URL は認証に関する情報を含んでいません！"
+
+#: io-internal.c:165
+#, c-format
+msgid "%s: Could not generate authentication information!"
+msgstr "%s: 認証に関する情報を作成できませんでした！"
+
+#: io-internal.c:168
+#, c-format
+msgid "%s: Unsupported authentication method requested by server!"
+msgstr "%s: サポートしていない認証方法をサーバから要求されました！"
+
+#: io-internal.c:171
+#, c-format
+msgid "%s: Error decompressing server reply!"
+msgstr "%s: サーバからの返ってきたデータを展開することができません！"
+
+#: io-internal.c:239
+msgid "Invalid XML! Cannot parse this feed!"
+msgstr "無効な XML です！このフィードを解析することはできません！"
+
+#: io-internal.c:283
+#, c-format
+msgid "Cache for %s is toast. Reloading from server..."
+msgstr "キャッシュ %s は壊れています。サーバから再読み込みしています..."
+
+#: io-internal.c:318
+#, c-format
+msgid "Could not load %s!"
+msgstr "%s を読み込みできませんでした！"
+
+#: io-internal.c:337 io-internal.c:338
+msgid "Loading cache ["
+msgstr "キャッシュを読み込んでいます ["
+
+#: io-internal.c:384 io-internal.c:385
+msgid "Saving settings ["
+msgstr "設定を保存しています ["
+
+#: io-internal.c:390
+msgid "Save settings (browser)"
+msgstr "設定 (browser) を保存します"
+
+#: io-internal.c:407
+msgid "Save settings (urls)"
+msgstr "設定 (urls) を保存します"
+
+#: io-internal.c:463
+msgid "Writing cache file"
+msgstr "キャッシュファイルを書き込んでいます"
+
+#: main.c:88
+msgid ""
+"Bye.\n"
+"\n"
+msgstr "さようなら。\n\n"
+
+#: main.c:97
+msgid ""
+"Aborting program execution!\n"
+"An internal error occured. Snownews has quit, no changes has been saved!\n"
+msgstr ""
+"プログラムの実行を中止しました！\n"
+"内部エラーが発生しました。Snownews は終了しました。変更点はセーブされませんでした！\n"
+
+#: main.c:98
+msgid ""
+"This shouldn't happen, please submit a bugreport to kiza@kcore.de, tell me "
+"what you where doing and include the output below in your mail.\n"
+msgstr "これは起こってはいけないことです。バグレポートを kiza@kcore.de まで送ってください。どのような操作をしたか、そのときの出力を含めてメールで教えてください。\n"
+
+#: main.c:148 main.c:159
+#, c-format
+msgid ""
+"Snownews version %s\n"
+"\n"
+msgstr "Snownews バージョン %s\n\n"
+
+#: main.c:160
+msgid ""
+"usage: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+msgstr ""
+
+#: main.c:161
+msgid "\t--update|-u\tAutomatically update every feed.\n"
+msgstr "\t--update|-u\tフィードごとに自動的にアップデートします。\n"
+
+#: main.c:162
+msgid "\t--help|-h\tPrint this help message.\n"
+msgstr "\t--help|-h\tこのヘルプメッセージを表示します。\n"
+
+#: main.c:163
+msgid "\t--version|-V\tPrint version number and exit.\n"
+msgstr "\t--version|-V\tバージョンナンバーを表示して終了します。\n"
+
+#: main.c:164
+msgid "\t--disable-versioncheck (obsoleted)\n"
+msgstr "\t--disable-versioncheck (メンテナンスされていません)\n"
+
+#: netio.c:150 netio.c:152 netio.c:306
+#, c-format
+msgid "Downloading \"%s\""
+msgstr "\"%s\" をダウンロードしています"
+
+#: netio.c:304
+#, c-format
+msgid "Downloading \"http://%s%s\""
+msgstr "\"http://%s%s\" をダウンロードしています"
+
+#: netio.c:529 netio.c:530
+msgid "URL points to permanent redirect, updating with new location..."
+msgstr "URL は永続的リダイレクトを指しています。新たな場所に更新します..."
+
+#: setup.c:66
+msgid "Creating new config \"browser\"..."
+msgstr "新しい設定 \"browser\" を作成しています..."
+
+#: setup.c:69
+msgid "Create initial configfile \"config\""
+msgstr "初期設定ファイル \"config\" を作成します"
+
+#: setup.c:576
+msgid "Creating config directory ~/.snownews/cache/"
+msgstr "初期設定ディレクトリ ~/.snownews/cache/ を作成しています"
+
+#: setup.c:590
+msgid "Reading configuration settings..."
+msgstr "初期設定ファイルを読み込んでいます..."
+
+#: setup.c:602
+msgid "Creating new configfile."
+msgstr "新しい初期設定ファイルを作成しています。"
+
+#: setup.c:605
+msgid "Create initial configfile \"urls\""
+msgstr "初期設定ファイル \"urls\" を作成します"
+
+#: ui-support.c:177
+msgid "Sorting, please wait..."
+msgstr "ソートしています。しばらくお待ちください..."
+
+#: ui-support.c:254
+msgid "Invalid URL passed. Possible shell exploit attempted!"
+msgstr "無効な URL がチェックをすり抜けました。shell exploit が試みられた可能性があります！"
+
+#: ui-support.c:259 ui-support.c:261
+#, c-format
+msgid "Executing %s"
+msgstr "%s を実行しています"
+
+#: ui-support.c:339
+msgid "(New headlines)"
+msgstr "(新規ヘッドライン)"
+
+#: updatecheck.c:93
+#, c-format
+msgid "A new version %s of Snownews is available.\n"
+msgstr "Snownews の新しいバージョン %s が利用できます。\n"
+
+#: updatecheck.c:94
+msgid ""
+"If you want to download it, go to http://snownews.kcore.de/downloading/\n"
+"\n"
+msgstr "msgstr \"もしこれをダウンロードしたいなら、http://snownews.kcore.de/downloading/ を訪れてください\n\n"
+
+#: updatecheck.c:95
+msgid ""
+"To disable the auto version check see the manpage.\n"
+"\n"
+msgstr "自動バージョンチェックを無効にしたければ、マニュアルを読んでください\n\n"

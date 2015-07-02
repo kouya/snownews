@@ -1,0 +1,16 @@
+Install ncurses > 5.0
+Install libxml2
+
+./configure
+make
+(root) make install
+
+
+The configure does not use autotools. If compiling fails on a platform the
+script already knows, please let me know. If you have an unknown platform
+and you can get it to compile, please send me your 'uname' output and the
+CFLAGS and LDFLAGS you needed.
+
+For opml2snow to work you also need the Perl module XML::LibXML installed.
+As root start "perl -MCPAN -e shell" and type "install XML::LibXML". That
+should be the most convenient way to install it.

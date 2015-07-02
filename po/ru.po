@@ -1,0 +1,831 @@
+# Russian translations for snownews package.
+# Copyright (C) 2004 Dmitry Petukhov <pdg@r66.ru>
+# This file is distributed under the same license as the snownews package.
+#
+#: about.c:275 about.c:276 main.c:114 net-support.c:100 netio.c:351
+#: netio.c:352 netio.c:359 netio.c:360 netio.c:373 netio.c:374 netio.c:382
+#: netio.c:383
+msgid ""
+msgstr ""
+"Project-Id-Version: snownews 1.5.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-09-22 12:10+0200\n"
+"PO-Revision-Date: 2004-03-09 02:54+0500\n"
+"Last-Translator: Dmitry Petukhov <pdg@r66.ru>\n"
+"Language-Team: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: about.c:254
+msgid "Need at least 80 COLS terminal, sorry!"
+msgstr "К сожалению, необходим терминал минимум в 80 колонок!"
+
+#: about.c:306 about.c:328
+#, c-format
+msgid "Version %s"
+msgstr "Версия %s"
+
+#: about.c:307
+msgid "Merry Christmas from the Snownews developers."
+msgstr "Счастливого рождества от разработчиков Snownews."
+
+#: about.c:308 about.c:331
+msgid "Main code"
+msgstr "Основной программный код"
+
+#: about.c:310 about.c:333
+msgid "Additional code"
+msgstr "Дополнительный программный код"
+
+#: about.c:312 about.c:335
+msgid "Translation team"
+msgstr "Команда переводчиков"
+
+#: about.c:328
+msgid "Version"
+msgstr "Версия"
+
+#: about.c:330
+msgid "Brought to you by:"
+msgstr "Для вас работали:"
+
+#: conversions.c:129 interface.c:164 interface.c:167
+msgid "No description available."
+msgstr "Описание недоступно."
+
+#: conversions.c:443
+#, c-format
+msgid "ERROR: zlib_uncompress: %d %s\n"
+msgstr "ОШИБКА: zlib_uncompress: %d %s\n"
+
+#: conversions.c:459
+msgid "ERROR: No output during decompression"
+msgstr "ОШИБКА: Нет выходных данных во время декомпрессии"
+
+#: conversions.c:492
+msgid "ERROR: Invalid magic bytes for GZIP data"
+msgstr "ОШИБКА: Неверные маркерные значения данных GZIP"
+
+#: conversions.c:497
+msgid "ERROR: Compression method is not deflate"
+msgstr "ОШИБКА: Метод компрессии - не deflate"
+
+#: conversions.c:502
+#, c-format
+msgid "ERROR: Unsupported flags %d\n"
+msgstr "ОШИБКА: флаг %d не поддерживается\n"
+
+#: cookies.c:184
+#, c-format
+msgid "Cookie for %s has expired!"
+msgstr "Время действия Cookie %s истекло!"
+
+#: dialog.c:84 dialog.c:86
+#, c-format
+msgid "Current setting: %s"
+msgstr "Сейчас используется: %s"
+
+#: dialog.c:99 dialog.c:653 interface.c:1213 interface.c:1342
+msgid "Aborted."
+msgstr "Отменено."
+
+#: dialog.c:106
+#, c-format
+msgid "Only %s format strings allowed for default browser!"
+msgstr "Для браузера по умолчанию разрешены только строки формата %s "
+
+#: dialog.c:111 ui-support.c:244
+msgid ""
+"Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"
+msgstr ""
+"Небезоасная строка браузера (содержит кавычки)! Смотри snownews.kcore.de/faq#toc2.4"
+
+#: dialog.c:131
+msgid "Enter new name. Blank line to abort. '-' to reset."
+msgstr "Введите новое имя. Пустая строка - отмена, '-' сброс."
+
+#: dialog.c:144
+msgid "The new title must not contain a \"|\" character!"
+msgstr "Новый заголовок не должен содержать символ \"|\"!"
+
+#: dialog.c:192
+msgid "Enter URL of the feed you want to add. Blank line to abort."
+msgstr "Введите URL ленты, которую хотите добавить. Пустая строка - отмена."
+
+#: dialog.c:272
+msgid ""
+"The feed could not be parsed. Do you need a filter script for this feed? (y/"
+"n)"
+msgstr ""
+"Обработать ленту не удалось. Использовать скрипт-фильтр? (y/n)"
+
+#: dialog.c:324
+#, c-format
+msgid "Last updated: %s"
+msgstr "Последнее обновление: %s"
+
+#: dialog.c:326
+msgid "No modification date."
+msgstr "Нет даты модификации."
+
+#: dialog.c:329
+#, c-format
+msgid "In disk cache: %lld bytes"
+msgstr "В дисковом кеше: %lld байт"
+
+#: dialog.c:331
+msgid "Not in disk cache."
+msgstr "Отсутствует в дисковом кеше."
+
+#: dialog.c:334 dialog.c:336 dialog.c:339
+msgid "Categories:"
+msgstr "Категории:"
+
+#: dialog.c:336
+msgid "none"
+msgstr "Нет"
+
+#: dialog.c:345
+msgid "Feed uses authentication."
+msgstr "Лента требует аутентификации."
+
+#: dialog.c:347
+msgid "Feed does not use authentication."
+msgstr "Лента не требует аутентификации."
+
+#: dialog.c:353 dialog.c:354
+#, c-format
+msgid "Last webserver status: %d"
+msgstr "Последний код статуса вебсервера: %d"
+
+#: dialog.c:381 dialog.c:382
+msgid "Filtered through:"
+msgstr "Профильтровано через:"
+
+#: dialog.c:385
+msgid "Displaying feed information."
+msgstr "Отображается информация о ленте."
+
+#: dialog.c:400
+msgid "Are you sure you want to delete this feed?"
+msgstr "Вы уверены, что желаете удалить эту ленту?"
+
+#: dialog.c:403
+msgid "Type 'y' to delete, any other key to abort."
+msgstr "Введите 'y' (латинское) для удаления, любая другая клавиша - отмена."
+
+#: dialog.c:440 dialog.c:496
+msgid "tab:"
+msgstr "tab:"
+
+#: dialog.c:444
+msgid "Add RSS feed..."
+msgstr "Добавить RSS ленту..."
+
+#: dialog.c:445
+msgid "Delete highlighted RSS feed..."
+msgstr "Удалить выделенную RSS ленту..."
+
+#: dialog.c:446
+msgid "Rename feed..."
+msgstr "Переименовать ленту..."
+
+#: dialog.c:447
+msgid "Reload all feeds"
+msgstr "Перезагрузить все ленты"
+
+#: dialog.c:448 dialog.c:502
+msgid "Reload this feed"
+msgstr "Перезагрузить эту ленту"
+
+#: dialog.c:449 dialog.c:505
+msgid "Mark all read"
+msgstr "Пометить все как прочитанное"
+
+#: dialog.c:450
+msgid "Change default browser..."
+msgstr "Смена браузера по умолчанию"
+
+#: dialog.c:451
+msgid "Move item up, down"
+msgstr "Передвинуть ленту вверх,вниз"
+
+#: dialog.c:452
+msgid "Sort feed list alphabetically"
+msgstr "Сортировать список лент по алфавиту"
+
+#: dialog.c:453
+msgid "Categorize feed..."
+msgstr "Занести ленту в категорию..."
+
+#: dialog.c:454
+msgid "Apply filter..."
+msgstr "Применить фильтр..."
+
+#: dialog.c:455
+msgid "Only current category"
+msgstr "Только текущая категория"
+
+#: dialog.c:456
+msgid "Remove filter"
+msgstr "Удалить фильтр"
+
+#: dialog.c:457
+msgid "Toggle AND/OR filtering"
+msgstr "Переключить логику флитра (И/ИЛИ)"
+
+#: dialog.c:458
+#, fuzzy
+msgid "Show new headlines"
+msgstr "Свежие заголовки"
+
+#: dialog.c:459
+msgid "Add conversion filter..."
+msgstr "Добавить фильтр конвертации..."
+
+#: dialog.c:460 dialog.c:508
+msgid "Type Ahead Find"
+msgstr "Инкрементный поиск"
+
+#: dialog.c:461
+msgid "About"
+msgstr "О программе"
+
+#: dialog.c:462
+msgid "Quit program"
+msgstr "Выйти из программы"
+
+#: dialog.c:465 dialog.c:512 dialog.c:544
+msgid "Press the any(tm) key to exit help screen."
+msgstr "Нажмите любую клавишу, чтобы покинуть экран подсказки."
+
+#: dialog.c:487
+#, c-format
+msgid "%c, up:"
+msgstr "%c, вверх:"
+
+#: dialog.c:488
+#, c-format
+msgid "%c, down:"
+msgstr "%c, вниз:"
+
+#: dialog.c:489
+msgid "enter:"
+msgstr "enter:"
+
+#: dialog.c:499 dialog.c:538
+msgid "Previous item"
+msgstr "Предыдущая запись"
+
+#: dialog.c:500 dialog.c:539
+msgid "Next item"
+msgstr "Следующая запись"
+
+#: dialog.c:501
+msgid "View item"
+msgstr "Просмотр записи"
+
+#: dialog.c:503
+msgid "Open homepage"
+msgstr "Открыть домашнюю страницу"
+
+#: dialog.c:504 dialog.c:540
+msgid "Open link"
+msgstr "Открыть ссылку"
+
+#: dialog.c:506
+msgid "Mark item unread"
+msgstr "Пометить запись непрочитанной"
+
+#: dialog.c:507
+msgid "Show feed info..."
+msgstr "Показать информацию о ленте..."
+
+#: dialog.c:509
+msgid "Return to main menu"
+msgstr "Возврат в предыдущее меню"
+
+#: dialog.c:531
+msgid "cursor:"
+msgstr "курсор:"
+
+#: dialog.c:535
+#, c-format
+msgid "%c, enter:"
+msgstr "%c, enter:"
+
+#: dialog.c:537
+msgid "Scroll text"
+msgstr "Прокрутка текста"
+
+#: dialog.c:541
+msgid "Return to overview"
+msgstr "Возврат к обзору"
+
+#: dialog.c:581 dialog.c:582
+#, c-format
+msgid "Category configuration for %s"
+msgstr "Конфигурация категории для %s"
+
+#: dialog.c:589
+msgid "No category defined. Select one or add a new category:"
+msgstr "Категория не определена. Выберите или добавьте новую категорию:"
+
+#: dialog.c:598 dialog.c:638
+#, c-format
+msgid ""
+"Select category number to add, press 'A' to add a new category or '%c' to "
+"quit."
+msgstr ""
+"Выберите номер категории для добавления, нажмите 'A' для создания новой "
+"категории, или '%c' для выхода"
+
+#: dialog.c:603
+msgid "Categories defined for this feed:"
+msgstr "Для этой ленты определены категории:"
+
+#: dialog.c:612
+#, c-format
+msgid ""
+"Select a category number to delete, press 'A' to add a new one or '%c' to "
+"quit."
+msgstr ""
+"Выберите номер категории для удаления, нажмите 'A' для создания "
+"новойкатегории, или '%c' для выхода"
+
+#: dialog.c:629
+msgid "Select a new category or add a new one:"
+msgstr "Выберите или добавьте новую категорию:"
+
+#: dialog.c:650
+msgid "Enter new category name."
+msgstr "Введите имя новой категории."
+
+#: dialog.c:658
+msgid "Category already defined for this feed!"
+msgstr "Для этой ленты уже определена категория!"
+
+#: dialog.c:723
+msgid "Select filter to apply"
+msgstr "Выберите фильтр для использования"
+
+#: dialog.c:736
+msgid "Select a category number or any other key to reset filters."
+msgstr "Выберите номер категории, либо любую другую клавишу для выхода."
+
+#: dialog.c:774
+msgid "Enter script to pipe feed through."
+msgstr "Задайте скрипт, через который пропустить ленту."
+
+#: filters.c:52
+#, c-format
+msgid "Loading \"%s\""
+msgstr "Загрузка \"%s\""
+
+#: filters.c:109
+#, c-format
+msgid "Could not write temp file for filter: %s"
+msgstr "Не удалось записать фременный файл для фильтра: %s"
+
+#: interface.c:161 interface.c:577 interface.c:580
+msgid "No title"
+msgstr "Нет заголовка."
+
+#: interface.c:241 interface.c:611
+msgid "-> No link"
+msgstr "-> Нет ссылки"
+
+#: interface.c:256
+#, c-format
+msgid ""
+"Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."
+msgstr ""
+"Нажмите '%c' или Enter для возврата к предыдущему экрану. '%c' для подсказки."
+
+#: interface.c:627
+#, c-format
+msgid "Press '%c' to return to main menu, '%c' to show help."
+msgstr "Нажмите '%c' для возврата к предыдущему меню, '%c' для подсказки."
+
+#: interface.c:734 interface.c:1184 interface.c:1194 interface.c:1204
+#: interface.c:1243 interface.c:1468 interface.c:1476 interface.c:1484
+#: interface.c:1493
+msgid "Please deactivate the category filter before using this function."
+msgstr "Отключите фильтр категорий перед использованием этой функции."
+
+# FIXME: as above + merge
+#: interface.c:1115 interface.c:1117 interface.c:1134
+msgid "new"
+msgstr "Новых:"
+
+# FIXME: potrebbe essere nuovo o nuovi
+#: interface.c:1128
+#, c-format
+msgid "%3d new"
+msgstr "Новых: %3d"
+
+#: interface.c:1150
+#, c-format
+msgid "Press '%c' for help window."
+msgstr "Нажмите '%c' Для подсказки."
+
+#: interface.c:1210
+msgid "Successfully added new item..."
+msgstr "Успешно добавлена новая запись..."
+
+#: interface.c:1217
+msgid "Invalid URL! Please add http:// if you forgot this."
+msgstr "Неверный URL! Добавьте http:// , если забыли"
+
+#: interface.c:1221
+msgid "There was a problem adding the feed!"
+msgstr "Возникла проблема при добавлении ленты!"
+
+#: interface.c:1420 interface.c:1437
+msgid "You cannot move items while a category filter is defined!"
+msgstr "Нельзя двигать записи пока определен фильтр категорий!"
+
+#: io-internal.c:53
+#, c-format
+msgid "Bad request"
+msgstr "Плохой запрос"
+
+#: io-internal.c:56
+#, c-format
+msgid "Payment required"
+msgstr "Необходима оплата"
+
+#: io-internal.c:59
+#, c-format
+msgid "Access denied"
+msgstr "Доступ запрещен"
+
+#: io-internal.c:62
+#, c-format
+msgid "Internal server error"
+msgstr "Внутренняя ошибка сервера"
+
+#: io-internal.c:65
+#, c-format
+msgid "Not implemented"
+msgstr "Не реализовано"
+
+#: io-internal.c:69
+#, c-format
+msgid "Service unavailable"
+msgstr "Сервис недоступен"
+
+#: io-internal.c:88
+#, c-format
+msgid "%s: Invalid URL!"
+msgstr "%s: Неправильный URL!"
+
+#: io-internal.c:91
+#, fuzzy, c-format
+msgid "%s: Couldn't create network socket!"
+msgstr "Не получается создать сетевой сокет!"
+
+#: io-internal.c:94
+#, fuzzy, c-format
+msgid "%s: Can't resolve host!"
+msgstr "Не определяется адрес хоста по имени%s!"
+
+#: io-internal.c:97
+#, c-format
+msgid "%s: Connection refused!"
+msgstr "%s: Соединение отвергнуто!"
+
+#: io-internal.c:100
+#, fuzzy, c-format
+msgid "%s: Couldn't connect to server: %s"
+msgstr "Не получается присоединиться к серверу %s: %s"
+
+#: io-internal.c:105
+#, fuzzy, c-format
+msgid "%s: Connection timed out."
+msgstr "Подключение к "
+
+#: io-internal.c:110
+#, fuzzy, c-format
+msgid "%s: Too many HTTP redirects encountered! Giving up."
+msgstr "Встретилось слишком много HTTP перенаправлений! Отмена действия."
+
+#: io-internal.c:113
+#, fuzzy, c-format
+msgid "%s: Server sent an invalid redirect!"
+msgstr "Вебсервер выдал неверное перенаправление!"
+
+#: io-internal.c:117
+#, fuzzy, c-format
+msgid "%s: This feed no longer exists. Please unsubscribe!"
+msgstr "Лента \"%s\" больше не существует. Удалите подписку на нее пожалуйста!"
+
+#: io-internal.c:121
+#, fuzzy, c-format
+msgid "%s: Could not download feed: %s"
+msgstr "Невозможно загрузить %s!"
+
+#: io-internal.c:124
+#, c-format
+msgid "%s: Error in server reply."
+msgstr "%s: Ошибка в ответе сервера."
+
+#: io-internal.c:127
+#, fuzzy, c-format
+msgid "%s: Authentication failed!"
+msgstr "Аутентификация не прошла!"
+
+#: io-internal.c:130
+#, fuzzy, c-format
+msgid "%s: URL does not contain authentication information!"
+msgstr "URL не содержит аутентификационной информации!"
+
+#: io-internal.c:133
+#, fuzzy, c-format
+msgid "%s: Could not generate authentication information!"
+msgstr "Не получается создать аутентификационные данные!"
+
+#: io-internal.c:136
+#, fuzzy, c-format
+msgid "%s: Unsupported authentication method requested by server!"
+msgstr "Метод аутентификации, запрошенный сервером, не поддерживается!"
+
+#: io-internal.c:139
+#, c-format
+msgid "%s: Error decompressing server reply!"
+msgstr "%s: Ошибка декомпрессии ответа сервера!"
+
+#: io-internal.c:207
+msgid "Invalid XML! Cannot parse this feed!"
+msgstr "Неверный XML! Невозможно обработать эту ленту!"
+
+#: io-internal.c:251
+#, c-format
+msgid "Cache for %s is toast. Reloading from server..."
+msgstr "Кеш для %s поврежден. Перезагрузка с сервера..."
+
+#: io-internal.c:286
+#, c-format
+msgid "Could not load %s!"
+msgstr "Невозможно загрузить %s!"
+
+#: io-internal.c:305 io-internal.c:306
+msgid "Loading cache ["
+msgstr "Загрузка кеша ["
+
+#: io-internal.c:351 io-internal.c:352
+msgid "Saving settings ["
+msgstr "Сохранение настроек ["
+
+#: io-internal.c:357
+msgid "Save settings (browser)"
+msgstr "Сохранение настроек (browser)"
+
+#: io-internal.c:374
+msgid "Save settings (urls)"
+msgstr "Сохранение настроек (url)"
+
+#: io-internal.c:430
+#, fuzzy
+msgid "Writing cache file"
+msgstr "Загрузка кеша ["
+
+#: main.c:59
+#, c-format
+msgid ""
+"Bye.\n"
+"\n"
+msgstr ""
+"Пока!\n"
+"\n"
+
+#: main.c:68
+#, c-format
+msgid ""
+"Aborting program execution!\n"
+"An internal error occured. Snownews has quit, no changes has been saved!\n"
+msgstr ""
+"Прерывание работы программы!\n"
+"Произошла внутренняя ошибка. Snownews завершается, изменения не сохранены!\n"
+
+#: main.c:69
+#, c-format
+msgid ""
+"This shouldn't happen, please submit a bugreport to kiza@kcore.de, tell me "
+"what you where doing and include the output below in your mail.\n"
+msgstr ""
+"Этого не должно было произойти, отошлите пожалуйста отчет об ошибке на\n"
+"kiza@kcore.de (на английском или немецком), опишите, что вы делали и\n"
+"включите нижеследующие данные в ваше письмо.\n"
+
+#: main.c:72
+#, fuzzy, c-format
+msgid "While executing: %s\n"
+msgstr "Выполнение %s"
+
+#: main.c:73
+#, c-format
+msgid ""
+"Error as reported by the system: %s\n"
+"\n"
+msgstr ""
+"Ошибка,полученная от системы: %s\n"
+"\n"
+
+#: main.c:124 main.c:135
+#, c-format
+msgid ""
+"Snownews version %s\n"
+"\n"
+msgstr ""
+"Версия Snownews %s\n"
+"\n"
+
+#: main.c:130
+#, c-format
+msgid "The option \"--disable-versioncheck\" has been obsoleted.\n"
+msgstr "Опция \"--disable-versioncheck\" устарела.\n"
+
+#: main.c:131
+#, c-format
+msgid "Please see the manpage for details.\n"
+msgstr "Детали смотрите в man-странице.\n"
+
+#: main.c:132
+#, c-format
+msgid "(To deactivate check, put -1 into ~/.snownews/updatecheck)\n"
+msgstr "(Для отмены проверки, поместите -1 в ~/.snownews/updatecheck)\n"
+
+#: main.c:136
+#, c-format
+msgid ""
+"usage: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+msgstr ""
+"запуск: snownews [-huV] [--help|--update|--version]\n"
+"\n"
+
+#: main.c:137
+#, c-format
+msgid "\t--update|-u\tAutomatically update every feed.\n"
+msgstr "\t--update|-u\tАвтоматически обновить каждую ленту.\n"
+
+#: main.c:138
+#, c-format
+msgid "\t--help|-h\tPrint this help message.\n"
+msgstr "\t--help|-h\tВывести эту подсказку.\n"
+
+#: main.c:139
+#, c-format
+msgid "\t--version|-V\tPrint version number and exit.\n"
+msgstr "\t--version|-V\tВывести номер версии и выйти.\n"
+
+#: main.c:140
+#, c-format
+msgid "\t--disable-versioncheck (obsoleted)\n"
+msgstr "\t--disable-versioncheck (устарела)\n"
+
+#: netio.c:149 netio.c:151 netio.c:311
+#, c-format
+msgid "Downloading \"%s\""
+msgstr "Загрузка \"%s\""
+
+#: netio.c:309
+#, c-format
+msgid "Downloading \"http://%s%s\""
+msgstr "Загрузка \"http://%s%s\""
+
+#: netio.c:503 netio.c:504
+msgid "URL points to permanent redirect, updating with new location..."
+msgstr ""
+"URL указывает на постоянное перенаправление, обновление адреса на новый..."
+
+#: os-support.c:90
+msgid "Allocating memory"
+msgstr "Резервирование памяти"
+
+#: setup.c:64
+msgid "Creating new config \"browser\"..."
+msgstr "Создание новой настройки \"browser\"..."
+
+#: setup.c:67
+msgid "Create initial configfile \"config\""
+msgstr "Создание начального файла конфигурации\"config\""
+
+#: setup.c:557 setup.c:561
+msgid "Creating config directory ~/.snownews/"
+msgstr "Создание каталога конфигурации ~/.snownews/"
+
+#: setup.c:562
+msgid "A file with the name \"~/.snownews/\" exists!"
+msgstr "Файл с именем \"~/.snownews/\" уже существует!"
+
+#: setup.c:570 setup.c:573
+msgid "Creating config directory ~/.snownews/cache/"
+msgstr "Создание каталога конфигурации ~/.snownews/cache/"
+
+#: setup.c:574
+msgid "A file with the name \"~/.snownews/cache/\" exists!"
+msgstr "Файл с именем \"~/snownews/cache/\" уже существует!"
+
+#: setup.c:584
+msgid "Reading configuration settings..."
+msgstr "Чтение настроек..."
+
+#: setup.c:596
+msgid "Creating new configfile."
+msgstr "Создание нового файла конфигурации"
+
+#: setup.c:599
+msgid "Create initial configfile \"urls\""
+msgstr "Создание начального файла конфигурации \"urls\""
+
+#: ui-support.c:179
+msgid "Sorting, please wait..."
+msgstr "Сортировка, пожалуйста подождите..."
+
+#: ui-support.c:256
+msgid "Invalid URL passed. Possible shell exploit attempted!"
+msgstr "Передан неверный URL. Это может быть попыткой взлома через shell!"
+
+#: ui-support.c:261 ui-support.c:263
+#, c-format
+msgid "Executing %s"
+msgstr "Выполнение %s"
+
+#: ui-support.c:341
+msgid "(New headlines)"
+msgstr "Свежие заголовки"
+
+#: updatecheck.c:96
+#, c-format
+msgid "A new version %s of Snownews is available.\n"
+msgstr "Доступна новая версия %s Snownews.\n"
+
+#: updatecheck.c:97
+#, fuzzy, c-format
+msgid ""
+"If you want to download it, go to http://snownews.kcore.de/downloading/\n"
+"\n"
+msgstr ""
+"Если желаете загрузить ее, заходите на http://kiza.kcore.de/software/"
+"snownews/\n"
+"\n"
+
+#: updatecheck.c:98
+#, c-format
+msgid ""
+"To disable the auto version check see the manpage.\n"
+"\n"
+msgstr "О выключении автоматической проверки версии смотрите в man-странице.\n"
+
+#: updatecheck.c:99
+#, c-format
+msgid "http://snownews.kcore.de/download/snownews-%s.tar.gz (.sign)\n"
+msgstr ""
+
+#: updatecheck.c:100
+#, c-format
+msgid "http://snownews.kcore.de/download/snownews-%s.i386.tar.bz2 (.sign)\n"
+msgstr ""
+
+#~ msgid "HTTP error %d - Could not update feed."
+#~ msgstr "Ошибка HTTP %d - Невозможно обновить ленту."
+
+#~ msgid "Could not update feed %s - %s"
+#~ msgstr "Невозможно обновить ленту %s - %s"
+
+#~ msgid "smartfeed:/newitems"
+#~ msgstr "smartfeed:/newitems"
+
+#~ msgid "Title changed successfully."
+#~ msgstr "Заголовок успешно изменен."
+
+#~ msgid "Original title restored."
+#~ msgstr "Восстановлен изначальный заголовок."
+
+#~ msgid "Connecting to %s..."
+#~ msgstr "Подключение к %s..."
+
+#~ msgid "socket connect"
+#~ msgstr "socket connect"
+
+#~ msgid "Following HTTP redirects"
+#~ msgstr "Переход по HTTP перенаправлениям"
+
+#~ msgid "The webserver %s sent illegal HTTP/1.0 reply! I cannot parse this."
+#~ msgstr ""
+#~ "Вебсервер %s Выдал неверный HTTP/1.0 ответ! Невозможно это обработать."
+
+#~ msgid "This URL doesn't look too valid to me, don't you think?"
+#~ msgstr "Этот URL выглядит не слишком правильным, как по вашему?"
+
+#~ msgid "Snownews/%s (%s; %s; http://kiza.kcore.de/software/snownews/)"
+#~ msgstr "Snownews/%s (%s; %s; http://kiza.kcore.de/software/snownews/)"
+
+#~ msgid "Snownews/%s (%s; http://kiza.kcore.de/software/snownews/)"
+#~ msgstr "Snownews/%s (%s; http://kiza.kcore.de/software/snownews/)"
+
+#~ msgid "Creating config directory ~/.snownews/cache"
+#~ msgstr "Создание каталога конфигурации ~/.snownews/cache"

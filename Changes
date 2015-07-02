@@ -1,0 +1,190 @@
+﻿1.5.12
+2009-09-17
+- Use OpenSSL for MD5 calculations
+- Fix 64bit digest calc. Readstatus wasn't remembered on 64bit versions.
+- HTTP digest auth might be broken.
+- Removed old md5 code.
+2009-06-27
+- Corrected two crashes (oh the dreaded NULL-pointer) when using mark unread and open URL on non-existent items.
+
+1.5.11
+- Output charset can now be forced with cmdline option -l|--charset
+- Tabs are now completely stripped in all output CleanupString()
+- Added own timegm() function via #ifdef SUN for Solaris
+- Don't allow multiple instances of snownews running
+- config file backups now use file move instead of file copy and new file is written in a temporary and then move in place.
+
+1.5.10
+- shift+t now force reloads a selected feed, ignoring the last modified value
+- Added a lot of OpenBSD supplied patches (Martynas Venckus)
+- net-support.c: HTTP header only needs to be ASCII in the token
+- conversions.c: Determine output charset with nl_langinfo()
+- xmlparse.c: Convert feed title to target charset, too. Should probaly be in interface.c
+- main.c, interface.h, interface.c: Add a signal handler for resizing to work on many other ncurses implementations
+
+1.5.9
+2008-01-25
+- Added Ukrainian translation (Anton Lytvynenko)
+2008-01-09
+- Include Debian patch #403812, FTBFS on GNU/kFreeBSD
+- Mark unread now toggles read status, Debian bug #394312
+
+1.5.8
+2008-01-08
+- manpages now go into .../share/man/
+2007-12-04
+- Added swedish translation (Mats Berglund)
+2007-11-27
+- Added Belarusian Latin translation. (Ihar Hrachyshka)
+- Remove snowsync from distribution.
+2007-06-28
+- Filename hashing wrong in opml2snow (patch from Dominic Cleal)
+
+1.5.7
+2005-06-05
+- Release
+- Feeds can now be forcefully reloaded. Default keybindings is 'T'.
+  Refreshing will ignore last modified server date.
+2005-05-17
+- Add clearLine() to remove duplicate code all over the place. Now that
+  did I it I only found two other places where this is useful. 8)
+- 'E' now displays the error log in the user's pager
+2005-05-sometimes
+- Move cursor to current highlighted line
+  -> this makes screen readers happy
+- endwin() before launching external app
+  If external app does not use term library like ncurses the terminal
+  is pretty messed up.
+2005-04-25
+- execvp() instead of execv()
+  Bug #85, r1034
+2005-03-06
+- install/$(DESTDIR) broken in Makefile
+2004-12-08
+- Colour default to enabled
+
+1.5.6
+2004-12-08
+- Santa Hunta!
+- Added "snowsync delete"
+- Added support.c
+- Manpage update
+2004-11-29
+- Send Accept: mime/type header
+2004-11-24
+- Moved <lastmodified> in cache file into snowNS
+2004-11-21
+- pubDate, dc:date
+- Created snow NS and moved internal cache tags to snowNS
+- Write about colour support in the manpage
+2004-11-16
+- Catch SIGHUP, SIGINT (already) and SIGTERM and call MainQuit in the handler.
+- Snowsync added to distribution
+2004-11-11
+- Nimm guid, wenn sie da ist.
+  title+link+guid -> MD5
+- Crash with 'g' (filter current) on empty feed list
+Unknown date
+- $DESTDIR support im Makefile
+
+1.5.5.1
+2004-10-30
+- Unzombify children attempt #2
+  Use waitpid() in a signal handler. OpenBSD seems to be happy with this.
+
+1.5.5
+2004-10-29
+- Release
+2004-10-28
+- HTTP header parser fixes
+2004-10-22
+- Filter werden in der manpage gar nicht erwähnt. Is doof.
+- do that OPML export thingy ppl want
+  Functionality merged into opml2snow.
+2004-10-21
+- URLs im Programm ändern (updatecheck)
+- Make updatecheck behave nicely with redirects.
+2004-10-20
+- New Jaguardecompression code.
+  gzip direct with inflateInit2 -> windowBits -> 32 -> zlib >= 1.2.0.4
+  But nobody really knows how it works.
+2004-10-11
+- Pipes!
+  Filter now use pipes instead of temp files. Yay!
+  Now without Zombies.
+2004-10-01
+- Extract Content-Type from webserver header
+
+1.5.4
+- fixed crash when parsing "HTTP/1.0 200 OK" reply
+- API change of NetIO
+- Basic/Digest auth types != case sensitive
+- Don't free() ->items when removing smartfeeds!
+- Make the URL parser understand http://www.example.org
+- (New headlines) stimmt nimmer, wenn im Hauptmen¸ sortiert wird
+  blöd, die Titel werden kopiert, items -> ptr
+  Am besten smartfeed neu generieren.
+  Und nur einmal added lassen!
+- (new headlines) should only be added once
+  or fix the smart feed generation function
+- fix multiple (new headlines) extreme memory trashing
+- Add pt_BR translation.
+- netio.c: cur_ptr->contentlength = strlen (body);
+  (does not work with binary data!)
+2004-09-08
+- Added support for feed:// URLs.
+- Auto remove whitespace from beginning of URLs
+- item read status depends on <link> and <title> now.
+2004-09-09
+- Type ahead case insensitive matching
+- Progressbars are extremly slow. Excessive calling of refresh().
+2004-09-12
+- Error feedback (show feedname)
+2004-09-15
+- Highlight COL-1->COLS so that the selection bar fills the whole line.
+  Also in UIStatus().
+2004-09-20
+- Print entry with timestamp into error.log
+2004-09-29
+- Fixed UTF8 string length calculations in interface.c.
+  xmlStrlen() -> xmlUTF8Strlen()
+- Chunked transfer encoding support
+- Splitted quit/return to previous menu keybindings
+- Credits update
+  
+1.5.3
+- prevent opening of smartfeeds										[done]
+- config enter key brakes typeahead									[done]
+- d/l feedback in netconnect										[done]
+- new screenshot for webpage; current from 1.0 sucks ;)				[done]
+  (lame, took the one from fm :P )
+- finetune HTML: \n\n -> \n											[done]
+- Update snownews user agent URL									[done]
+- Bunte Fehlermeldungen												[done]
+- write into error.log on update feed error							[done]
+- make it compile again on Solaris!									[done]
+  Switched build system to kizatools 0.0.1alpha ;)
+
+- shortcut in iconvert (just switch it on and wait for complaints ;)[done]
+  (fixed)
+- Warn and disallow unsafe browser strings							[done]
+
+1.5.2
+- change (New headlines) into feed name in article view				[done]
+- Auth via proxy													[done]
+- finish pipethrough												[done]
+- Use mvaddnstr() for title/item/text printing						[done]
+- new headlines - add with keybinding 'H'							[done]
+- Remove all newlines in feed/item titles (CleanupString2)			[done]
+- Kein Hauptfeed Name in (New headlines) wenn "No title"			[done]
+- add ru manpage													[done]
+- fixed crashing with (New headlines) - (sometimes inconsistent		[done]
+  reporting of unread news; don't stomp on my news struct!)
+- check return of fopen on cache file in WriteCache					[done]
+- make less use of MainQuit on errors (it sucks!)					[done]
+- don't allow colons in filenames on Cygwin - actually, doesn't		[done]
+  allow _any_ special character :(
+- secure tmpfile													[done]
+- netio threading issues -> connectresult							[done]
+- xmlparse.c - don't call											[done]
+  ptr->[strlen(item->data->title)-1] == '\n') on strings <= 1!

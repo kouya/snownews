@@ -1,0 +1,237 @@
+.\" Snownews manpage
+.\"
+.\" This manpage is copyrighted by Oliver Feiler 2003
+.\"                                <kiza@kcore.de>
+.\"
+.\" Traduzione di Marco Cova <marco.cova@studio.unibo.it>
+.\"
+.TH SNOWNEWS 1 "18 September 2003" Programs "Snownews VERSION"
+.SH NOME
+.B snownews
+\- newsreader RSS per console
+.SH SINTASSI
+.B snownews [-huV] [--help|--update|--version]
+.SH DESCRIZIONE
+Snownews �un piccolo newsreader RSS/RDF per console. Supporta
+feed in formato RSS 1.0 che rispettano lo standard W3C RDF e 
+feed in formato RSS versioni 0.91 e 2.0.
+.P
+La schermata principale del programma �mostrata immediatamente dopo 
+l'avvio del programma. Attraverso questa schermata �possibile aggiungere e
+rimuovere feed e aggiornarli manualmente. Sulla parte destra della schermata
+�mostrato il numero di nuovi elementi presenti in ogni newsfeed. 
+Per aggiungere un feed, �sufficiente premere
+.B 'a'
+e specificare l'URL cui si trova il feed. L'URL deve essere una URL http 
+valida. In particolare, 
+.I deve includere http://
+nella sua parte iniziale. Per eliminare un feed, �sufficiente evidenziarlo
+con il cursore e premere
+.B 'D'.
+Prima di procedere, una finestra di dialogo chieder�conferma 
+dell'eliminazione.
+.P
+E' possibile esplorare la lista dei feed registrati usando i tasti freccia-su,
+freccia-gi, 
+.B 'n'
+e
+.B 'p'.
+Il tasto
+.B 'r'
+permette di ricaricare dal server il feed selezionato.
+.B 'R'
+ricarica tutti i feed registrati.
+.P
+Si pu ordinare alfabeticamente la lista dei feed usando il tasto
+.B 's'.
+E' anche possibile spostare gli elementi in su o gi nella lista attraverso
+i tasti
+.B 'P'
+e
+.B 'N'.
+.P
+Selezionando un feed e premendo Invio, il programma visualizza tutti gli 
+elementi contenuti nel feed. E' possibile usare i tasti freccia-su e 
+freccia-gi,
+.B 'n'
+e
+.B 'p'
+per scorrere la lista.
+Premendo 
+.B 'r'
+verr�ricaricato il feed corrente.
+Nota che alcuni elementi potrebbero scomparire dalla lista e nuovi
+esserne introdotti. I nuovi elementi saranno presentati in grassetto.
+.P
+Se si seleziona un elemento e si preme Invio, verr�fornita la descrizione
+per l'elemento. Se l'elemento non �corredato di descrizione, apparir�un breve
+messaggio d'errore.
+E' possibile usare i tasti freccia-sinistra e freccia-destra,
+.B 'p'
+e
+.B 'n'
+per selezionare l'elemento precedente o successivo nella lista.
+Premendo il tasto 
+.B 'o'
+si aprir�nel browser il link collegato all'elemento. Tipicamente questo 
+contiene il testo completo della notizia.
+.P
+Il browser preselezionato �lynx, ma �possibile modificare questa opzione
+premendo il tasto
+.B 'B'
+nel menu principale e impostando un browser differente.
+In alternativa, si pu modificare il file di configurazione
+~/.snownews/browser. Il programma sostituisce alla stringa
+%s l'URL indicata dal link.
+.P
+Le connessioni ai siti possono essere interrotte premendo il tasto 
+.B 'z'.
+Questo �particolarmente utile se il programma si blocca in attesa di dati
+da un server web lento o congestionato.
+.P
+Si pu cambiare il nome di un feed premendo il tasto
+.B 'c'
+e specificando il nuovo nome.
+Per impostare nuovamente il titolo originale �sufficiente specificare
+come nome '-'.
+.P
+.B Ricerca incrementale in avanti.
+.P
+Per agevolare la ricerca di un particolare feed incluso nella propria lista 
+di feed,
+Snownews permette di effettuare ricerche incrementali in avanti.
+Quando si preme il tasto TAB, la barra di stato viene modificata in un campo
+di testo.
+Mentre vi si digita il testo da cercare, gli elementi della lista
+che
+fanno match con il testo inserito vengono evidenziati.
+E' sufficiente premere Invio per aprire il feed selezionato.
+Se pi di un feed soddisfa la ricerca inserita, si pu passare dall'uno 
+all'altro premendo TAB. Per interrompere la ricerca incrementale, basta 
+cancellare il campo di testo o premere CTRL+G.
+.P
+.B Categorie
+.P
+
+Snownews utilizza ``categorie'' per facilitare la gestione della lista
+dei feed sottoscritti. Si possono definire nuove categorie e inserire 
+i feed in una o pi� categorie.
+Nel menu principale, poi, si pu� applicare un filtro cos� che solo
+i feed inseriti nelle categorie specificate siano visualizzati.
+Sempre nel menu principale, vengono visualizzate, vicino al nome di un feed, 
+le categorie cui � stato inserito.
+
+Si pu� inserire o rimuovere un feed da una categoria, premendo il tasto
+.B 'C'
+mentre il feed � evidenziato nel menu principale. Se ne sono gi� state
+definite, si otterr�� la lista delle categorie correnti e baster�� digitare il 
+numero di una categoria per aggiungervi il feed selezionato. Per
+definire una nuova categoria e inserirvi il feed corrente, basta premere
+.B 'A'
+e inserire il nome della nuova categoria. Si si vuole rimuovere un feed da 
+una categoria, � sufficiente digitarne il numero nell'interfaccia di 
+gestione delle categorie.
+.P
+Si possono vedere tutte le categorie cui un feed fa parte tra le informazioni
+relative ad un feed.
+.P
+Si possono personalizzare le associazioni dei tasti modificando il file
+~/.snownews/keybindings.
+Il formato del file �semplicemente
+"descrizione della funzione:key". Attenzione: non si deve modificare la stringa
+"descrizione della funzione". 
+Il carattere che segue i due punti rappresenta il tasto da associare alla
+funzione specificata.
+Se si eliminano delle definizioni o se, per qualsiasi motivo, il programma 
+non �in grado di effettuare il parsing del file, verranno usate le 
+impostazioni predefinite.
+.P
+.B Importare sottoscrizioni da altri programmi.
+.P
+Snownews �in grado di importare file di sottoscrizioni opml da altri lettori 
+RSS usando il programma "opml2snow".
+Per convertire un file opml nel formato usato da Snownews, �sufficiente digitare il comando 
+"opml2snow MySubsriptions.opml", dove
+MySubscriptions.opml rappresenta il nome del file con le sottoscrizioni da 
+importare.
+opml2snow stampa i dati convertiti sullo stdout.
+Basta digitare
+"opml2snow file.opml >converted" per salvare tali dati nel file
+"converted", o "opml2snow file.opml >>~/.snownews/urls"
+per appenderli alla lista dei feed sottoscritti da Snownews.
+Per maggiori informazioni, si pu lanciare
+"opml2snow -h".
+.P
+.B Alcuni particolari interessanti.
+.P
+Se si sta visualizzando la descrizione di un elemento, �possibile
+ritornare alla schermata precedente premendo
+.B 'q'
+o Invio. A questo punto, verr�evidenziato automaticamente l'elemento
+non letto successivo.
+E' possibile leggere tutti i nuovi elementi di un feed premendo
+continuamente Invio.
+In tal caso, Snownews visualizza la descrizione dell'elemento, ritorna 
+alla lista degli elementi, evidenzia il messaggio successivo che
+risulta ancora da leggere, e cos�via.
+Pulisci, risciacqua, ripeti. Basta premere Invio.
+.P
+Il client HTTP usato da Snownews segue le redirezioni fornitegli dai
+server HTTP. Se l'URL specificata punta ad una redirezione permanente,
+questa verr�aggiornata automaticamente con la nuova locazione. Richieste
+successive verranno indirizzate direttamente alla nuova locazione.
+.P
+Una finestra d'aiuto �sempre accessibile premendo il tasto
+.B 'h'.
+.P
+Una volta per settimana, Snownews controlla automaticamente se �stata
+rilasciata una nuova versione: richiede un file di nome "version" dal
+sito web dell'autore e confronta il valore ottenuto con la versione
+del programma utilizzato. Se queste non sono uguali, l'utente viene
+informato della disponibilit�di una nuova versione.
+Questo controllo viene fatto quando si esce dal programma, in modo da
+risultare il meno fastidioso possibile.
+In questo modo, �possibile ignorare eventuali notifiche se non �possibile o non si vuole procedere ad aggiornare il programma.
+E' comunque possibile disabilitare completamente questo controllo, 
+lanciando Snownews con l'opzione "--disable-versioncheck". 
+Nota che in ogni caso non viene trasferita alcuna informazione al sito
+dell'autore. Infatti, il sistema di controllo automatico degli aggiornamenti
+trasferisce soltanto un file dal sito dell'autore al sito locale e
+confronta il numero di versione registrato in tale file con la
+versione del programma usata localmente.
+.P
+Se si utilizza un 
+.B proxy server
+server proxy per accedere a Internet, si deve impostare la variabile
+d'ambiente "http_proxy". Snownews si aspetta che il contenuto di
+questa variabile sia
+.I http://your_proxy.org:PORT/,
+per esempio, http://proxy.your_isp.com:8080/.
+.P
+.B Snownews �coperto dalla licenza GNU General Public License versione
+2.
+
+.SH OPZIONI
+.B \-\-update o \-u,
+Automaticamente aggiorna tutti i feed all'avvio dell'applicazione.
+.P
+.B \-\-help o \-h,
+Mostra un messaggio d'aiuto sull'uso del programma e le opzioni
+disponibili ed esce.
+.P
+.B \-\-version or \-V,
+Stampa il numero di versione ed esce.
+.P
+.B \-\-disable\-versioncheck,
+Disabilita il controllo automatico degli aggiornamenti.
+.SH FILE
+PREFIX/bin/snownews
+.SH AMBIENTE
+.TP
+.B http_proxy
+Snownews accede a internet usando il server proxy specificato in
+questa variabile. Il formato �
+http://your_proxy.org:PORT/.
+.SH BUG
+.SH AUTORE
+Oliver Feiler <kiza@kcore.de>

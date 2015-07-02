@@ -1,0 +1,96 @@
+#!/usr/bin/perl
+# $Id: configure 1181 2008-07-27 07:27:56Z kiza $
+
+use strict;
+
+# The defaults. Change here if you need.
+my $os = `uname`;
+chomp($os);
+my $xmlcflags = `xml2-config --cflags`;
+chomp($xmlcflags);
+my $xmlldflags = `xml2-config --libs`;
+chomp($xmlldflags);
+
+my $prefix = "/usr/local";
+my $cflags = "-Wall -Wno-format-y2k -O2 -DLOCALEPATH=\"\\\"\$(LOCALEPATH)\\\"\" -DOS=\\\"$os\\\" $xmlcflags \$(EXTRA_CFLAGS) ";
+my $ldflags = "-lncurses -lcrypto $xmlldflags \$(EXTRA_LDFLAGS) ";
+
+my $use_nls = 1;
+parse_cmdl_line();
+
+
+##############################
+# OS dependent configuration #
+##############################
+
+if (lc($os) eq "linux") {
+	print "Configuring for a Linux system... ";
+} elsif ($os =~ /gnu/) {
+	print "Configuring for a GNU based system... ";
+} elsif (lc($os) =~ /bsd|darwin|freemint/) {
+	print "Configuring for a BSD style system... ";
+	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/local/include';
+	if ($use_nls == 1) {
+		$ldflags .= ' -lintl ';
+	}
+	$ldflags .= ' -liconv';
+} elsif (lc($os) =~ /cygwin/) {
+	print "Configuring for a Cygwin system... ";
+	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/include/libxml2';
+	if ($use_nls == 1) {
+		$ldflags .= ' -lintl ';
+	}
+	$ldflags .= ' -liconv';
+} elsif (lc($os) eq "sunos") {
+	print "Configuring for a Solaris system... ";
+	$cflags = $cflags.' -DSUN -I/opt/sfw/include';
+	$ldflags .= ' -L/opt/sfw/lib -liconv';
+	if ($use_nls == 1) {
+		$ldflags .= ' -lintl ';
+	}
+} else {
+	print "Unknown host system. Type 'make' and hope for the best. :) ... \n";
+	$cflags = $cflags,' -I/usr/local/include';
+	$ldflags .= ' -L/usr/local/lib -liconv ';
+	if ($use_nls == 1) {
+		$ldflags .= ' -lintl ';
+	}
+}
+
+open (SETTINGS, ">platform_settings") || die "Cannot write platform_settings file: $!\n";
+print SETTINGS "PREFIX=  $prefix\n";
+print SETTINGS "CFLAGS=  $cflags\n";
+print SETTINGS "LDFLAGS= $ldflags\n";
+close (SETTINGS);
+
+# And we're...
+print "Done\n";
+# with the program. :)
+
+sub parse_cmdl_line {
+	while ($_ = shift @ARGV) {
+		if (($_ eq "--help") || ($_ eq "-h")) {
+			print_help();
+		} elsif (/--prefix=/) {
+			$prefix = (split(/=/,$_))[1];
+		} elsif (/--disable-nls/) {
+			$cflags =~ s/-DLOCALEPATH="\\"\$\(LOCALEPATH\)\\""//;
+			$use_nls = 0;
+		} elsif (/--use-experimental/) {
+			$cflags .= " -DUSE_UNSUPPORTED_AND_BROKEN_CODE ";
+		} else {
+			print_help();
+		}
+	}
+}
+
+sub print_help {
+	print	"Snownews configure script\n".
+			"=========================\n\n".
+			"Available options:\n".
+			"\t--prefix=[path]    Install root (default: /usr/local)\n".
+			"\t--help             This help screen\n\n".
+			"\t--disable-nls      Disable translations\n".
+			"\t--use-experimental Compile in experimental and broken code.\n";
+	exit(0);
+}
