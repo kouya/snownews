@@ -13,7 +13,7 @@ chomp($xmlldflags);
 
 my $prefix = "/usr/local";
 my $cflags = "-Wall -Wno-format-y2k -O2 -DLOCALEPATH=\"\\\"\$(LOCALEPATH)\\\"\" -DOS=\\\"$os\\\" $xmlcflags \$(EXTRA_CFLAGS) ";
-my $ldflags = "-lncurses -lcrypto $xmlldflags \$(EXTRA_LDFLAGS) ";
+my $ldflags = "\$(EXTRA_LDFLAGS) -lncurses -lcrypto $xmlldflags ";
 
 my $use_nls = 1;
 parse_cmdl_line();
@@ -27,7 +27,14 @@ if (lc($os) eq "linux") {
 	print "Configuring for a Linux system... ";
 } elsif ($os =~ /gnu/) {
 	print "Configuring for a GNU based system... ";
-} elsif (lc($os) =~ /bsd|darwin|freemint/) {
+} elsif (lc($os) =~ /darwin/) {
+	print "Configuring for a Darwin/OS X system...";
+	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/local/include';
+	if ($use_nls == 1) {
+		$ldflags .= ' -lintl ';
+	}
+	$ldflags .= ' -lz -liconv';
+} elsif (lc($os) =~ /bsd|freemint/) {
 	print "Configuring for a BSD style system... ";
 	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/local/include';
 	if ($use_nls == 1) {
