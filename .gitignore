@@ -4,3 +4,5 @@
 *.o
 *.mo
 platform_settings
+*.1
+snownews
