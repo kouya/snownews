@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# animexx-abos - Converts subscribed threads from Animexx
+#
+# Copyright (c) 2004 Alexander Reiter <leckse@gmx.net>
+# Released under the terms of the GNU General Public License (GPL) Version 2.
+# See http://www.gnu.org/ for details.
+
+# This is a filter for http://animexx.de/forum
+# UNTESTED AS OF 2017
+# Instructions: 
+
+wget --http-user=username --http-passwd=password -q -O - \
+'http://animexx.4players.de/forum/?anzeige=abos' | sed -n 's/&szlig;/?/g;
+s/&auml;/?/g; s/&ouml;/?/g; s/&uuml;/?/g; s/&Auml;/?/g;
+s/&Ouml;/?/g; s/&Uuml;/?/g; s/&eacute;/?/g; s/&ocirc;/?/g; 1i\
+<?xml version="1.0" encoding="ISO-8859-1"?>\
+<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"\
+	"http://my.netscape.com/publish/formats/rss-0.91.dtd">\
+<rss version="0.91">\
+<channel>\
+	<title>Animexx-Abo</title>\
+	<link>http://www.animexx.de/forum/</link>\
+	<description>Animexx - abonnierte Threads</description>
+s/[ 	]*<td class=ftyp1 nowrap><[^<]*<a href="\/forum\/?forum=[0123456789]\+&kategorie=[0123456789]\+&thread=\([0123456789]\+\)&seite=[0123456789]\+&PHPSESSID=[abcdef1234567890]\+">\([^<]*\)<\/a>.*<\/td>$/<item>\
+	<link>http:\/\/www.animexx.de\/forum\/?thread=\1<\/link>\
+	<title>\2<\/title>/p;
+s/[ 	]*<td class=ftyp3 nowrap>&nbsp;<img [^>]*>&nbsp;\([^<]\+\)<div class=usr>\([^<]\+\)<\/div><\/td>$/	<description>Letzter Eintrag von \1 um \2<\/description>\
+<\/item>/p
+$i\
+<\/channel>\
+<\/rss>'

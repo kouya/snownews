@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+
+# Like its friend, but for full test. Dumps a bunch of gabrage, very slow.
+
+# NO MAINTAINER
+# NO LICENSE (claims GPL)
+# UNTESTED AS OF 2017
+# Instructions: 
+
+my($contentblock) = 0;
+my($what) = 0;
+my(@news);
+
+my %urls_heads = ();
+my @lines = <>;
+
+# get last article number
+my $lastnr = `cat ~/.liferea/.heise3rss-last-nr 2>/dev/null`;
+if ($lastnr =~ /^(\d+)$/) {
+        $lastnr = $1;
+} else {
+	$lastnr = 0;
+}
+
+# gather links to article full texts
+foreach (@lines) {
+	chomp;
+	if ($_ eq "<!-- Liste der Meldungen -->") {
+		$contentblock = 1;
+		next;
+	}
+	
+	if ($_ eq "<!-- &Uuml;berblick -->") {
+		last;
+	}
+
+	if ($contentblock == 1) {
+		if(/^<h3.*<a href=\"(.*)\">(.*)<\/a>/) {
+			$urls_heads{$1} = $2
+		}
+	}
+}
+
+# test for curl
+`curl --help`;
+if($? == 512) {
+	# process collected links and get article texts
+	foreach my $url (sort keys %urls_heads) {
+		$url =~ /meldung\/(\d+)$/;
+		if($lastnr < $1) {
+			$lastnr = $1;
+			@lines = `curl -s http://www.heise.de$url`;
+			$contentblock = 0;
+			$content = "";
+			foreach(@lines) {
+				s#<img.*?>##i;
+				s#<span.*?>Anzeige</span><br>##i;
+
+				if($_ =~ /<\!-- Meldung -->/) {
+					$contentblock = 1;
+					next;
+				}
+				
+				last if($_ =~ /<\!-- untere News-Navigation -->/);	
+				
+				if($contentblock == 1) {
+					$content .= $_;
+				}
+			}
+			push(@news, $urls_heads{$url});
+			push(@news, $url);
+			push(@news, "<![CDATA[$content]]>");
+		}
+	}
+} else {
+	push(@news, "Filter script failed! curl not found!");
+	push(@news, " ");
+	push(@news, "This filter script uses curl to download websites. And it seems like curl is not installed!\n");
+}
+
+print "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n".
+	"<rdf:RDF\n".
+	"xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n".
+	"xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"\n".
+	"xmlns=\"http://my.netscape.com/rdf/simple/0.9/\">\n".
+	"<channel>\n".
+	"  <title>heise online news</title>\n".
+	"  <link>http://www.heise.de/newsticker/</link>\n".
+	"  <description>Nachrichten aus der Welt des Computers</description>\n".
+	"</channel>\n";
+
+$what = 0;
+foreach (@news) {
+	if ($_ eq "") {
+		next;
+	}
+	if ($what == 0) {
+		print "<item>\n<title>$_</title>\n";
+		$what = 1;
+		next;
+	} elsif ($what == 1) {
+		print "<link>http://www.heise.de$_</link>\n";
+		$what = 2;
+		next;
+	} else {	
+		print "<description>Sorry but your reader must support the content namespace!</description>\n";
+		print "<content:encoded>$_</content:encoded>\n</item>\n";
+		$what = 0;
+	}
+}
+
+print "</rdf:RDF>\n";
+
+`test -d ~/.liferea || mkdir ~/.liferea`;
+`echo $lastnr > ~/.liferea/.heise3rss-last-nr 2>/dev/null`;
+
+

@@ -1,0 +1,127 @@
+#!/usr/bin/perl
+#######################################################################
+# This script generates a feed with descriptions from
+# a bugzilla page bug.
+# It allow to survey comment on bug not owned
+# It works currently with gentoo, gnome and freedesktop
+#
+# Copyright (c) 2005 Starox <fredo@starox.org> 
+# This code is released under the GPL2 licence or above.
+
+# Bugzilla filter script
+# UNTESTED AS OF 2017
+# Instructions: 
+
+use strict;
+
+my $state;
+my $title;
+my $reporter;
+my $num_item;
+my @comments;
+my @items;
+my @dates;
+my $description;
+my $comment;
+
+my(@lines) = <>;
+
+$state = "none";
+$num_item = 0;
+foreach (@lines) {
+        chomp;
+#        print STDERR "0 $state\n";
+        # get title
+        if (/<title>(.*)<\/title>/ )
+        {
+          $title=$1;
+          $state="title_ended";
+          next;
+        }
+        # get reporter
+        if ( /Reporter:<\/b>(.+)/ ) { # for gnome bugzilla
+          $reporter=$1;
+          $state="reporter_ended";
+          next;
+        }
+        if ( /Reporter:/ ) { # else for gentoo & freedesktop
+          $state="reporter";
+          next;
+        }
+        if ( $state eq "reporter" && /<td>/ ) {
+          $state="reporter_next";
+          next;
+        }
+        if ( $state eq "reporter_next" ) {
+          $reporter=$_;
+          $state="none";
+          next;
+        }
+        # get description and comments
+        if ($state eq "description_ended") {
+          $items[$num_item] = $description;
+          $num_item++;
+          $state = "none";
+        }
+        if ( /^<pre.*?>(.*)<\/pre/) {
+          $description = $1;
+          $state="description_ended";
+          next;
+        }
+        if ( /^<pre.*?>(.*)/) {
+          $description = $1."<br />";
+          $state="description";
+          next;
+        }
+        if ($state eq "description" && /^(.*)<\/pre/) {
+          $description .= $1;
+          $state="description_ended";
+          next;
+        }
+        if ($state eq "description" ) {
+          $description .= $_."<br />";
+          next;
+        }
+        # get title comments
+        if ($state eq "comment_end" ) {
+          $comment =~ s/ +/ /;
+          push @comments, $comment;
+          $state = "none";
+        }
+        if ( /\-\-\-.*Additional/ ) {
+          $comment="";
+          $state = "comment";
+          next;
+        }
+        if ($state eq "comment" && /(\d+-\d+-\d+ \d+:\d+ .?.?.?)/)  {
+          push @dates, `date -R --date '$1'`;
+        }
+        if ($state eq "comment" && /\-\-\-/ ) {
+          $comment .= $_;
+          $state = "comment_end";
+          next;
+        }
+        if ($state eq "comment" ) {
+          $comment .= $_;
+          next;
+        }
+}
+
+print   "<?xml version='1.0' encoding='iso-8859-1'?>\n<rss version='2.0'>\n\t<channel>\n".
+                "\t\t<title><![CDATA[$title]]></title>\n".
+                "\t\t<link><![CDATA[$ARGV[0]]]></link>\n".
+                "\t\t<language>en</language>\n".
+                "\t\t<ttl>180</ttl>\n".
+                "\t\t<description><![CDATA[$items[0]]]></description>\n".
+                "\t\t<managingEditor><![CDATA[$reporter]]></managingEditor>\n";
+shift @items;
+foreach(@items) {
+        print   "<item>\n".
+                        "\t<title><![CDATA[$comments[0]]]></title>\n".
+                        "\t<description><![CDATA[$_]]></description>\n".
+                        "\t<pubDate><![CDATA[$dates[0]]]></pubDate>\n".
+                        "</item>\n";
+        shift @comments;
+        shift @dates;
+}
+print   "\t</channel>\n</rss>\n";

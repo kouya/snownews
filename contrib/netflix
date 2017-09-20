@@ -1,0 +1,19 @@
+# netflix - a lifrea conversion script which adds leading zeros to netflix queue RSS feeds
+#           which makes them much easier to sort by title in lifrea!
+#
+# (c) 2006 Ted Carnahan <ted@tedcarnahan.com>
+#
+# This is released under the GPL license.
+
+# UNTESTED AS OF 2017
+# Instructions: 
+
+while(<>) {
+    $text = $text . $_;
+}
+
+$_ = $text;
+
+s/<title>(\d)-/<title>00$1-/gsi;
+s/<title>(\d\d)-/<title>0$1-/gsi;
+print $_;

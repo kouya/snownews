@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+# RSS creator for Liferea/Snownews and www.8sidor.se
+#
+# Author: Florian Brucker
+# E-Mail: torf at torfbold dot com
+# Homepage: http://www.torfbold.com
+# Version: 0.1
+#
+# History:
+#   0.1 - First release
+#   
+# This software is provided "as is", without any warranty. Feel free to
+# do with it what you like.
+
+# This is a filter for http://www.8sidor.se
+# UNTESTED AS OF 2017
+# MAINTAINER UNREACHABLE
+# Instructions:
+
+import sys, re, time
+
+html = ''.join(sys.stdin.read().splitlines())
+articles = re.findall('<h4>(.*?)</a>', html, re.IGNORECASE | re.DOTALL | re.MULTILINE)
+
+title_pattern = re.compile('^(.*?)</h4>', re.IGNORECASE)
+body_pattern = re.compile('</h4>(.*?)<br>(?:8 SIDOR.*?<br>)?<br><a', re.IGNORECASE)
+link_pattern = re.compile('href=\"(.*?)\"', re.IGNORECASE)
+
+# print feed header
+print """<?xml version='1.0'?>
+<rss version='2.0' xmlns:content="http://purl.org/rss/1.0/modules/content/">
+	<channel>
+		<title>8 Sidor</title>
+		<link>http://www.8sidor.se/</link>
+		<description>RSS for 8 Sidor</description>
+		<language>sv</language>
+		<ttl>15</ttl>
+		<image>
+			<url>http://www.8sidor.se/images/8sidor_logo.gif</url>
+			<title>8 Sidor Logo</title>
+			<link>http://www.8sidor.se/</link>
+		</image>
+		<docs>http://blogs.law.harvard.edu/tech/rss</docs>
+"""
+
+pubdate = "\t\t\t<pubDate>%s</pubDate>" % time.strftime("%a, %d %b %Y 00:00:00 +0000")
+
+for article in articles:
+	title = title_pattern.search(article).group(1)
+	body = body_pattern.search(article).group(1)
+	link = 'http://www.8sidor.se' + link_pattern.search(article).group(1)
+	title = title.replace('<br>', ' ')
+	body = body.replace('<br>', ' ')
+
+	print "\t\t<item>"
+	print "\t\t\t<title>%s</title>" % title
+	print "\t\t\t<guid isPermaLink=\"false\">%s</guid>" % title
+	print "\t\t\t<description>%s</description>" % body
+	#print "\t\t\t<link>%s</link>" % link
+	print pubdate
+	print "\t\t</item>"
+
+print "\t</channel>\n</rss>\n";

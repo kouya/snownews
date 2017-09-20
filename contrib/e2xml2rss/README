@@ -1,0 +1,49 @@
+e2xml2rss
+
+by Sergey Goldgaber
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+LICENSE:
+
+  This software is released under the Hacktivismo Enhanced-Source Software
+  License Agreement (see LICENSE file), with the additional provision that
+  no part of this software may be used to wage or support war, or by the
+  military or military contractors.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+DESCRIPTION:
+
+This program converts everything2's xml to RSS
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+QUICK START:
+
+./e2xml2rss.pl > e2.rss
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+REQUIREMENTS:
+
+    perl - http://www.perl.org
+    xmlstarlet - http://xmlstar.sourceforge.net
+    wget - http://www.gnu.org/software/wget/wget.html
+
+This software was tested only with perl 5.8.4 on a Debian Linux system,
+running kernel 2.4.29.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+FILES:
+
+The following is a description of the files included with this release:
+
+    README - this file
+    LICENSE - the license this program is released under
+    examples/e2.xml - a sample xml file downloaded from e2
+    examples/e2.rss - the result of converting e2.xml in to RSS via
+                      this program
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

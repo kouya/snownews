@@ -1,0 +1,38 @@
+# Generating RSS 2.0 from FTP NLST output for FTP site content monitoring.
+# Author: Anton Dedov
+
+# UNTESTED AS OF 2017
+# MAINTAINER UNREACHABLE
+# NO LICENSE (apparently PD)
+# Instructions: 
+
+BEGIN {
+        print "<rss version=\"2.0\">";
+        print "<channel>";
+        print "\t<title>" title "</title>";
+        print "\t<link>" url "</link>";
+        print "\t<description/>";
+}
+
+{
+        if ($1 ~ /total/) {
+                next;
+        }
+
+        file = $9;
+        gsub("\r", "", file);
+
+        print "<item>";
+        print "\t<title>" file "</title>";
+        print "\t<link>" url "/" file "</link>";
+        print "\t<pubDate>" $6 " " $7 " " $8 "</pubDate>";
+        print "</item>";
+}
+
+END {
+        print "</channel>";
+        print "</rss>";
+}
+
+
+

@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+# Atom feed creator for Liferea/Snownews and user photo pages of fotocommunity.de
+#
+# Author: Florian Brucker
+# E-Mail: torf at torfbold dot com
+# Homepage: http://www.torfbold.com
+# Version: 0.1
+#
+# History:
+#   0.1 - First release
+#
+# Simply use the desired user's fotocommunity.de photo page URL as a 
+# feed url for Snownews/Liferea. The URLs look like this:
+#
+#     http://www.fotocommunity.de/pc/pc/mypics/ + NUMBER
+#
+# Note: Only the newest 8 photos are included in the feed
+#   
+# This software is provided "as is", without any warrenty. Feel free to
+# do with it what you like.
+
+# MAINTAINER UNREACHABLE
+# UNTESTED AS OF 2017
+# Instructions: 
+
+import sys, re, time
+
+def format_date(t=None):
+	if t is None: t = time.localtime()
+	return time.strftime("%Y-%m-%dT%H:%M:%S-00:00", t)
+
+flags = re.IGNORECASE | re.DOTALL | re.MULTILINE
+title_pattern = re.compile('<span class="bildtitel">(.*?)</span>', flags)
+src_pattern = re.compile('src="(.*?)"', flags)
+link_pattern = re.compile('href="(.*?)"', flags)
+date_pattern = re.compile ('(?:(\d\d\.\d\d\.\d\d), )?(\d\d?:\d\d)h', flags)
+
+html = ''.join(sys.stdin.read().splitlines())
+
+# find author name
+author = re.search('NAME="author" CONTENT="(.*?)"', html)
+if author is None:
+	author = 'Unknown'
+else:
+	author = author.group(1)
+
+# find author's id
+id = re.search('/pc/account/myprofile/(\d+)"', html, flags)
+if id is not None: 
+	id = 'http://www.fotocommunity.de/pc/pc/mypics/' + id.group(1)
+
+# print feed header
+print """<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">"""
+print "<title>%s</title>" % ("fotocommunity.de Photos By " + author)
+if id is not None:
+	print '<link href="%s" />' % id
+	print '<id>%s</id>' % id
+else:
+	print '<id>faked</id>'
+print "<author><name>%s</name></author>" % author
+print '<link rel="self" href="http://does.not.exist.nowhere" />'
+print "<updated>%s</updated>" % format_date()
+
+# parse photo information
+boxes = re.findall('Anfang NPicture-Box(.*?)Ende NPicture-Box', html, flags)
+for box in boxes:
+	entries = re.split('<div class="pad">', box)
+	for entry in entries:
+		title = title_pattern.search(entry)
+		src = src_pattern.search(entry)
+		link = link_pattern.search(entry)
+		pubdate = date_pattern.search(entry)
+
+		if (title is None
+				or src is None
+				or link is None
+				or pubdate is None): continue
+
+		title = title.group(1)
+		src = src.group(1)
+		link = link.group(1)
+		if pubdate.group(1) is not None: 
+			pubdate = pubdate.group(1) + " " + pubdate.group(2)
+		else:
+			pubdate = time.strftime("%d.%m.%y", time.gmtime()) + " " + pubdate.group(2) 
+		pubdate = time.strptime(pubdate, "%d.%m.%y %H:%M")
+		pubdate = format_date(pubdate)
+
+		print "<entry>"
+		print "<title>%s</title>" % title
+		print '<link href="%s" />' % link
+		print "<updated>%s</updated>" % pubdate
+		print "<id>%s</id>" % src
+		print '<content type="html">&lt;a href="%s"&gt;&lt;img src="%s" /&gt;&lt;/a&gt;</content>' % (link, src)
+		print "</entry>"
+
+print "</feed>"

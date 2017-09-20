@@ -1,0 +1,30 @@
+#!/bin/sed -nf
+#
+# bahnnet2rss - Converts News from Bahnnet to an RSS feed.
+#
+# For usage with http://www.db.de/site/bahn/de/unternehmen/presse/presseinformationen/presseinformationen.html
+#
+# Copyright (c) 2004 Alexander Reiter <leckse@gmx.net>
+# Released under the terms of the GNU General Public License (GPL) Version 2.
+# See http://www.gnu.org/ for details.
+
+# This is a filter for http://www.db.de/site/bahn/de/unternehmen/presse/presseinformationen/presseinformationen.html
+# UNTESTED AS OF 2017
+# Instructions:
+
+1i\
+<?xml version="1.0" encoding="UTF-8"?>\
+<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"\
+	"http://my.netscape.com/publish/formats/rss-0.91.dtd">\
+<rss version="0.91">\
+<channel>\
+<title>Die Bahn</title>\
+	<link>http://www.db.de/site/bahn/de/unternehmen/presse/presseinformationen/presseinformationen.html</link>\
+	<description>Die Bahn</description>
+s/^[ 	]*<td class="tblCnt tblNrmLnk"><a href="\([^"]\+\)">\([^<]*\)<\/a><br \/>[ 	]*/<item>\
+	<link>http:\/\/www.db.de\1<\/link>\
+	<title>\2<\/title>\
+<\/item>/p; $a\
+<\/channel>\
+<\/rss>
+
