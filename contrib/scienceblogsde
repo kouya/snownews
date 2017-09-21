@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# Fix for issue on scienceblogs.de
-# UNTESTED AS OF 2017
-# NO MAINTAINER
-# NO LICENSE (claims any)
-# Instructions: 
-
-sed 's/mt:asset-id/asset-id/g'

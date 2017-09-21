@@ -2,9 +2,11 @@
 
 <!-- Atom to RSS 1.0 Transformation, written by René Puls (rp@kianga.eu) -->
 <!-- Includes enhancements for YouTube video feeds -->
-
-<!-- Snownews filter command for this extension: "xsltproc /path/to/atom2rss -" -->
-<!-- Instructions: -->
+<!-- Requires: xsltproc -->
+<!-- Instructions:
+     1) Add the Atom feed as a feed source
+     2) Use 'xsltproc atom2rss -' as a filter script -->
+<!-- Last tested: 21/09/17 -->
 
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
