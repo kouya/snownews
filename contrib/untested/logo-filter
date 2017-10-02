@@ -1,0 +1,20 @@
+# Logo Filter
+#
+# - removes all logos in a feed.
+#
+# (c) 2005 Mathis Dirksen-Thedens <newsletter3@jesusfan.de>
+#
+# This is released under the GPL license.
+
+# UNTESTED AS OF 2017
+# Instructions: 
+
+while(<>) {
+    $text = $text . $_;
+}
+
+$_ = $text;
+# remove Logo:
+s@\s*<image.*?/>@@gs;
+s@\s*<image.*?</image>@@gs;
+

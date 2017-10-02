@@ -1,0 +1,136 @@
+#!/usr/bin/perl
+# Copyright (C) 2005 Starox <fredo@starox.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Generates an RSS feed from a Bugzilla bug page.
+# Requires: Perl
+# Instructions: 
+# 1) Add the Bugzilla bug page as a feed source
+# 2) Use 'perl bugzilla2rss' as a filter script
+# Last tested: 21/09/17
+
+use strict;
+
+my $state;
+my $title;
+my $reporter;
+my $num_item;
+my @comments;
+my @items;
+my @dates;
+my $description;
+my $comment;
+
+my(@lines) = <>;
+
+$state = "none";
+$num_item = 0;
+foreach (@lines) {
+        chomp;
+#        print STDERR "0 $state\n";
+        # get title
+        if (/<title>(.*)<\/title>/ )
+        {
+          $title=$1;
+          $state="title_ended";
+          next;
+        }
+        # get reporter
+        if ( /Reporter:<\/b>(.+)/ ) { # for gnome bugzilla
+          $reporter=$1;
+          $state="reporter_ended";
+          next;
+        }
+        if ( /Reporter:/ ) { # else for gentoo & freedesktop
+          $state="reporter";
+          next;
+        }
+        if ( $state eq "reporter" && /<td>/ ) {
+          $state="reporter_next";
+          next;
+        }
+        if ( $state eq "reporter_next" ) {
+          $reporter=$_;
+          $state="none";
+          next;
+        }
+        # get description and comments
+        if ($state eq "description_ended") {
+          $items[$num_item] = $description;
+          $num_item++;
+          $state = "none";
+        }
+        if ( /^<pre.*?>(.*)<\/pre/) {
+          $description = $1;
+          $state="description_ended";
+          next;
+        }
+        if ( /^<pre.*?>(.*)/) {
+          $description = $1."<br />";
+          $state="description";
+          next;
+        }
+        if ($state eq "description" && /^(.*)<\/pre/) {
+          $description .= $1;
+          $state="description_ended";
+          next;
+        }
+        if ($state eq "description" ) {
+          $description .= $_."<br />";
+          next;
+        }
+        # get title comments
+        if ($state eq "comment_end" ) {
+          $comment =~ s/ +/ /;
+          push @comments, $comment;
+          $state = "none";
+        }
+        if ( /\-\-\-.*Additional/ ) {
+          $comment="";
+          $state = "comment";
+          next;
+        }
+        if ($state eq "comment" && /(\d+-\d+-\d+ \d+:\d+ .?.?.?)/)  {
+          push @dates, `date -R --date '$1'`;
+        }
+        if ($state eq "comment" && /\-\-\-/ ) {
+          $comment .= $_;
+          $state = "comment_end";
+          next;
+        }
+        if ($state eq "comment" ) {
+          $comment .= $_;
+          next;
+        }
+}
+
+print   "<?xml version='1.0' encoding='iso-8859-1'?>\n<rss version='2.0'>\n\t<channel>\n".
+                "\t\t<title><![CDATA[$title]]></title>\n".
+                "\t\t<link><![CDATA[$ARGV[0]]]></link>\n".
+                "\t\t<language>en</language>\n".
+                "\t\t<ttl>180</ttl>\n".
+                "\t\t<description><![CDATA[$items[0]]]></description>\n".
+                "\t\t<managingEditor><![CDATA[$reporter]]></managingEditor>\n";
+shift @items;
+foreach(@items) {
+        print   "<item>\n".
+                        "\t<title><![CDATA[$comments[0]]]></title>\n".
+                        "\t<description><![CDATA[$_]]></description>\n".
+                        "\t<pubDate><![CDATA[$dates[0]]]></pubDate>\n".
+                        "</item>\n";
+        shift @comments;
+        shift @dates;
+}
+print   "\t</channel>\n</rss>\n";
