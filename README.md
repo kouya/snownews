@@ -60,8 +60,8 @@ details.
 License
 -------
 
-Snownews is licensed under the GNU General Public License, version 2 *only*
-(SPDX code ``GPL-2.0``). For more details, as well as the text of the license,
+Snownews is licensed under the GNU General Public License, version 3 *only*
+(SPDX code ``GPL-3.0``). For more details, as well as the text of the license,
 please see the ``COPYING`` file.
 
 [1]: https://retro-freedom.nz/tech-101-snownews.html 
