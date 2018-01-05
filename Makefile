@@ -35,7 +35,7 @@ snownews: $(OBJFILES)
 	$(CC) $(OBJFILES) -o snownews $(LDFLAGS)
 
 snownews-static: manpages locales
-	$(CC) -s -static -o snownews main.c netio.c interface.c xmlparse.c updatecheck.c conversions.c dialog.c ui-support.c categories.c about.c cookies.c setup.c net-support.c digcalc.c md5.c filters.c io-internal.c zlib_interface.c os-support.c support.c $(CFLAGS) $(LDFLAGS) 
+	$(CC) -s -static -o snownews main.c netio.c interface.c xmlparse.c updatecheck.c conversions.c dialog.c ui-support.c categories.c about.c cookies.c setup.c net-support.c digcalc.c filters.c io-internal.c zlib_interface.c os-support.c support.c $(CFLAGS) $(LDFLAGS) 
 
 locales:
 	for L in $(LOCALES); do \
