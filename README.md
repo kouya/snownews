@@ -41,6 +41,7 @@ You will need the following:
 - libxml2 (any version)
 - openssl 1.0 *only*
 - Perl (any recent version will do)
+- gettext (lib and msgfmt tool)
 
 Simply do the following steps:
 
