@@ -9,6 +9,28 @@ lightweight, and integrates well with other command-line tools, for both
 generating and filtering the feeds it reads. Snownews runs on almost anything
 Unix (and will even build with Cygwin).
 
+Features
+--------
+
+* Runs on Linux, *BSD, OS X (Darwin), Solaris and probably many more Unices. Yes, even works under Cygwin.
+* Fast and very resource friendly.
+* Builtin HTTP client will follow server redirects and update feed URLs that point to permanent redirects (301) automatically.
+* Snownews understands "Not-Modified" (304) server replies and handles gzip compression.
+* Local cache for minimal network traffic.
+* HTTP proxy support.
+* HTTP authentication support (basic and digest methods).
+* Optional, basic cookie support.
+* A help menu available throughout the program.
+* Automatic update checking (can be deactivated).
+* Few dependencies on external libraries; ncurses and libxml2.
+* Import feature for OPML subscription lists.
+* Fully customizable key bindings of all program functions.
+* Type Ahead Find for quick and easy navigation.
+* Color support.
+* Extensible via plugins.
+* Feed categories and many other useful features!
+
+
 Building Snownews
 -----------------
 
@@ -56,6 +78,29 @@ If you would like to contribute to Snownews, consider fixing one of our issues,
 adding a helper script, or writing a localization. If you are interested in
 contributing a helper script, please read ``contrib/CONTRIBUTING.md`` for
 details. 
+
+Localization
+------------
+
+Snownews and its documentation is currently available in the following languages:
+
+* Belarusian Latin
+* Chinese, Traditional
+* Chinese, Simplified
+* Dutch
+* English
+* French
+* German
+* Italian
+* Japanese
+* Polish
+* Portuguese, Brazilian
+* Russian
+* Slovenian
+* Spanish
+* Swedish
+
+If you want to create a new translation or update an exisiting one, send a patch or a pull request on github.
 
 License
 -------
