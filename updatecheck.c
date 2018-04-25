@@ -45,7 +45,6 @@ void AutoVersionCheck (void) {
 	int oldtime;
 	char *versionstring = NULL;
 	char *url;
-	char *freeme;
 	
 	update = newFeedStruct();
 	
@@ -77,7 +76,6 @@ void AutoVersionCheck (void) {
 	
 	url = strdup ("http://kiza.kcore.de/software/snownews/version");
 	update->feedurl = strdup(url);
-	freeme = url;
 	versionstring = DownloadFeed (url, update, 1);
 	free (url);
 	

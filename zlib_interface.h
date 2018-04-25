@@ -32,8 +32,6 @@ enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_BAD_FLAGS = -6
 };
 
-extern int JG_ZLIB_DEBUG;
-
 int jg_zlib_uncompress(void const *in_buf, int in_size, 
                        void **out_buf_ptr, int *out_size,
                        int gzip);   

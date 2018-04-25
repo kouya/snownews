@@ -39,7 +39,7 @@
  * The following function was written by François Gouget.
  */
 #ifdef SUN
-char* strsep(char** str, const char* delims)
+char* strsep (char** str, const char* delims)
 {
     char* token;
 
@@ -93,29 +93,21 @@ time_t timegm(struct tm *t)
 #endif
 
 /* strcasestr stolen from: http://www.unixpapa.com/incnote/string.html */
-char *s_strcasestr(char *a, char *b) {
-	size_t l;
+const char* s_strcasestr (const char* a, const char* b) {
+	const size_t lena = strlen(a), lenb = strlen(b);
 	char f[3];
-	int lena = strlen(a);
-	int lenb = strlen(b);
-	
 	snprintf(f, sizeof(f), "%c%c", tolower(*b), toupper(*b));
-	for (l = strcspn(a, f); l != lena; l += strcspn(a + l + 1, f) + 1)
+	for (size_t l = strcspn(a, f); l != lena; l += strcspn(a + l + 1, f) + 1)
 		if (strncasecmp(a + l, b, lenb) == 0)
-			return(a + l);
-	return(NULL);
+			return a + l;
+	return NULL;
 }
 
 
 /* Private malloc wrapper. Aborts program execution if malloc fails. */
-void * s_malloc (size_t size) {
-	void *newmem;
-	
-	newmem = malloc (size);
-	
-	if (newmem == NULL) {
+void* s_malloc (size_t size) {
+	void* newmem = malloc (size);
+	if (!newmem)
 		MainQuit ("Allocating memory", strerror(errno));
-	}
-	
 	return newmem;
 }

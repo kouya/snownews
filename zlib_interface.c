@@ -26,7 +26,7 @@
 #include <zlib.h>
 #include <string.h>
 
-int JG_ZLIB_DEBUG = 0;
+static const int JG_ZLIB_DEBUG = 0;
 
 struct gzip_header {
 	unsigned char magic[2];
@@ -50,33 +50,33 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 	z_stream stream;
 	char *out_buf = NULL;
 	int out_buf_bytes = 0;
-	char tmp_buf[4096];
+	unsigned char tmp_buf[4096];
 	int result;
 	int new_bytes;
-	
+
 	/* Prepare the stream structure. */
 	stream.zalloc = NULL;
 	stream.zfree = NULL;
 	stream.opaque = NULL;
-	stream.next_in = (void *)in_buf;	
+	stream.next_in = (void*) in_buf;
 	stream.avail_in = in_size;
 	stream.next_out = tmp_buf;
 	stream.avail_out = sizeof tmp_buf;
-	
+
 	if (out_size != NULL)
 		*out_size = 0;
-	
+
 	if (gzip)
 		result = inflateInit2(&stream, MAX_WBITS + 32); /* UNTESTED */
 	else
 		result = inflateInit2(&stream, -MAX_WBITS);
-	
+
 	if (result != 0) {
 		if (JG_ZLIB_DEBUG)
 			fprintf(stderr, "inflateInit2 failed: %d\n", result);
 		return JG_ZLIB_ERROR_OLDVERSION;
 	}
-	
+
 	do {
 		/* Should be Z_FINISH? */
 		result = inflate(&stream, Z_NO_FLUSH);
@@ -84,6 +84,7 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 			case Z_BUF_ERROR:
 				if (stream.avail_in == 0)
 					goto DONE; /* zlib bug */
+				/* fallthrough */
 			case Z_ERRNO:
 			case Z_NEED_DICT:
 			case Z_MEM_ERROR:
@@ -114,19 +115,19 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 			return JG_ZLIB_ERROR_NODATA;
 		}
 	} while (result != Z_STREAM_END);
-	
+
 DONE:
-	
+
 	inflateEnd(&stream);
-	
+
 	/* Null-terminate the output buffer so it can be handled like a string. */
 	out_buf = realloc(out_buf, out_buf_bytes + 1);
 	out_buf[out_buf_bytes] = 0;
-	
+
 	/* The returned size does NOT include the additionall null byte! */
 	if (out_size != NULL)
 		*out_size = out_buf_bytes;
-	
+
 	*out_buf_ptr = out_buf;
 
 	return 0;
@@ -141,24 +142,24 @@ int jg_gzip_uncompress(void const *in_buf, int in_size,
 	struct gzip_header const *header;
 	char *data_start;
 	int offset = sizeof *header;
-	
+
 	header = in_buf;
-	
+
 	if (out_size != NULL)
 		*out_size = 0;
-	
+
 	if ((header->magic[0] != 0x1F) || (header->magic[1] != 0x8B)) {
 		if (JG_ZLIB_DEBUG)
 			fprintf(stderr, "ERROR: Invalid magic bytes for GZIP data\n");
 		return JG_ZLIB_ERROR_BAD_MAGIC;
 	}
-	
+
 	if (header->method != 8) {
 		if (JG_ZLIB_DEBUG)
 			fprintf(stderr, "ERROR: Compression method is not deflate\n");
 		return JG_ZLIB_ERROR_BAD_METHOD;
 	}
-	
+
 	if (header->flags != 0 && header->flags != 8) {
 		if (JG_ZLIB_DEBUG) {
 			snprintf (tmpstring, sizeof(tmpstring), "ERROR: Unsupported flags %d", header->flags);
@@ -166,7 +167,7 @@ int jg_gzip_uncompress(void const *in_buf, int in_size,
 		}
 		return JG_ZLIB_ERROR_BAD_FLAGS;
 	}
-	
+
 	if (header->flags & 8) {
 		/* skip the file name */
 		while (offset < in_size) {
@@ -177,7 +178,7 @@ int jg_gzip_uncompress(void const *in_buf, int in_size,
 			offset++;
 		}
 	}
-	
+
 	data_start = (char *)in_buf + offset;
 
 	return jg_zlib_uncompress(data_start, in_size - offset - 8, 

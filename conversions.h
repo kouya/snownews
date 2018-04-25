@@ -30,11 +30,11 @@ char * iconvert (const char * inbuf);
 char * iconvert (char * inbuf);
 #endif
 char * UIDejunk (char * feed_description);
-char * WrapText (char * text, int width);
+char* WrapText (const char* text, unsigned width);
 char *base64encode(char const *inbuf, unsigned int inbuf_size);
 void CleanupString (char * string, int tidyness);
 char * Hashify (const char * url);
-char * genItemHash (char ** hashitems, int items);
+char* genItemHash (const char* const* hashitems, int items);
 int ISODateToUnix (char const * const ISODate);
 int pubDateToUnix (char const * const pubDate);
 char * unixToPostDateString (int unixDate);

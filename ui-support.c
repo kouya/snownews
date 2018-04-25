@@ -223,7 +223,7 @@ void UISupportDrawHeader (const char * headerstring) {
 	
 	mvprintw (0, 1, "* Snownews %s", VERSION);
 	if (headerstring != NULL) {
-		if (strlen(headerstring) > COLS-18)
+		if (strlen(headerstring) > COLS-18u)
 			mvaddnstr (0, 19, headerstring, COLS-20);
 		else
 			mvaddstr (0, COLS-strlen(headerstring)-1, headerstring);

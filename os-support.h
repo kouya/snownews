@@ -27,10 +27,10 @@
 #define OS_SUPPORT_H
 
 #ifdef SUN
-char* strsep(char** str, const char* delims);
+char* strsep (char** str, const char* delims);
 #endif
 
-char *s_strcasestr(char *a, char *b);
-void * s_malloc (size_t size);
+const char* s_strcasestr (const char* a, const char* b);
+void* s_malloc (size_t size);
 
 #endif

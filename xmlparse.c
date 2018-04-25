@@ -183,7 +183,6 @@ void parse_rdf10_item(struct feed *feed, xmlDocPtr doc, xmlNodePtr node)
 {
 	xmlNodePtr cur;
 	xmlChar *readstatusstring;
-	char **hashitems = NULL;
 	char *guid = NULL;
 	char *date_str = NULL;
 	struct newsitem *item;
@@ -277,14 +276,9 @@ void parse_rdf10_item(struct feed *feed, xmlDocPtr doc, xmlNodePtr node)
 	   <guid> is not saved in the cache, thus we would generate a different
 	   hash than the one from the live feed. */
 	if (item->data->hash == NULL) {
-		hashitems = malloc (sizeof(char *) * 4);
-		hashitems[0] = item->data->title;
-		hashitems[1] = item->data->link;
-		hashitems[2] = guid;
-		hashitems[3] = NULL;
+		const char* hashitems[] = { item->data->title, item->data->link, guid, NULL };
 		item->data->hash = genItemHash (hashitems, 3);
 		xmlFree (guid);
-		free (hashitems);
 	}
 	
 	/* If saverestore == 1, restore readstatus. */
