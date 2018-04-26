@@ -21,7 +21,9 @@
  *
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+    #define _GNU_SOURCE
+#endif
 #include <sys/types.h>
 #include <string.h>
 #include <iconv.h>
@@ -665,7 +667,6 @@ int pubDateToUnix (char const * const pubDate) {
 	struct tm *t;
 	time_t tt = 0;
 	int time_unix = 0;
-	char *oldlocale;
 
 	/* Do not crash with an empty Tag */
 	if (pubDate == NULL)
@@ -685,7 +686,7 @@ int pubDateToUnix (char const * const pubDate) {
 	 *
 	 * This is also not thread safe!
 	 */
-	oldlocale = strdup(setlocale(LC_TIME, NULL));
+	char* oldlocale = strdup(setlocale(LC_TIME, NULL));
 	if (oldlocale) {
 		/* Only reset if setlocale returned something !NULL.
 		 * Will not parse the date correctly in this case, but will also not

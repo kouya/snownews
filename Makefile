@@ -1,141 +1,141 @@
-CC=         gcc
-MAKE=       make
-INSTALL=    install
-LOCALEPATH= $(PREFIX)/share/locale
-MANPATH=    $(PREFIX)/share/man
+include Config.mk
 
-### Compiler/linker flags   ###
-### Generated via configure ###
-include platform_settings
+################ Source files ##########################################
 
-### Object files ###
-OBJFILES= main.o netio.o interface.o xmlparse.o updatecheck.o conversions.o dialog.o ui-support.o categories.o about.o cookies.o setup.o net-support.o digcalc.o filters.o io-internal.o os-support.o zlib_interface.o support.o
+EXE	:= $O${NAME}
+SRCS	:= $(wildcard *.c)
+OBJS	:= $(addprefix $O,$(SRCS:.c=.o))
+DEPS	:= ${OBJS:.o=.d}
+CONFS	:= Config.mk config.h
+ONAME   := $(notdir $(abspath $O))
 
-VERSION= `grep VERSION version.h | sed s/\"//g | sed s/\#define\ VERSION\ //`
-DISTDIR= snownews-$(VERSION)
-DISTFILES = AUTHOR COPYING CREDITS Changelog README README.de README.patching INSTALL opml2snow \
-	Makefile configure \
-	doc po scripts \
-	main.c interface.c netio.c xmlparse.c updatecheck.c os-support.c conversions.c dialog.c ui-support.c categories.c about.c cookies.c setup.c net-support.c digcalc.c filters.c io-internal.c zlib_interface.c support.c \
-	config.h version.h main.h interface.h netio.h xmlparse.h updatecheck.h os-support.h conversions.h dialog.h ui-support.h categories.h about.h cookies.h setup.h net-support.h digcalc.h filters.h io-internal.h zlib_interface.h support.h
+################ Compilation ###########################################
 
-### Translations ###
-LOCALES= de es fr it nl ru sl se zh_TW zh_CN pt_BR pl ja be@latin uk_UA
-LOC=     po
+.PHONY:	all run
 
-### Manpages ##
-LANGS= de fr it nl ru_RU.KOI8-R
-MAN=   doc/man
+all:	${EXE}
 
-### Compile ###
+run:	${EXE}
+	${EXE}
 
-all: snownews manpages locales
+${EXE}:	${OBJS}
+	@echo "Linking $@ ..."
+	@${CC} -o $@ $^ ${LDFLAGS}
 
-snownews: $(OBJFILES)
-	$(CC) $(OBJFILES) -o snownews $(LDFLAGS)
+${EXE}-static: ${SRCS}
+	${CC} -s -static -o $@ ${CFLAGS} ${SRCS} ${LDFLAGS}
 
-snownews-static: manpages locales
-	$(CC) -s -static -o snownews main.c netio.c interface.c xmlparse.c updatecheck.c conversions.c dialog.c ui-support.c categories.c about.c cookies.c setup.c net-support.c digcalc.c filters.c io-internal.c zlib_interface.c os-support.c support.c $(CFLAGS) $(LDFLAGS) 
+$O%.o:	%.c
+	@echo "    Compiling $< ..."
+	@${CC} ${CFLAGS} -MMD -MT "$(<:.c=.s) $@" -o $@ -c $<
 
-locales:
-	for L in $(LOCALES); do \
-		msgfmt -o $(LOC)/$$L.mo $(LOC)/$$L; \
-	done
+%.s:	%.c
+	@echo "    Compiling $< to assembly ..."
+	@${CC} ${CFLAGS} -S -o $@ -c $<
 
-manpages:
-	cat $(MAN)/snownews.1.in | sed s#PREFIX#$(PREFIX)# | \
-	sed s/VERSION/$(VERSION)/ > $(MAN)/snownews.1
-	
-	for L in $(LANGS); do \
-		cat $(MAN)/$$L/snownews.1.$$L.in | sed s#PREFIX#$(PREFIX)# | \
-		sed s/VERSION/$(VERSION)/ > $(MAN)/$$L/snownews.1; \
-	done
+include man/Module.mk
+include po/Module.mk
 
-### Install ###
+################ Installation ##########################################
+ifdef BINDIR
 
-install: install-bin install-locales install-man
-	@echo ""
+.PHONY:	install uninstall install-bin uninstall-bin
 
-install-bin: snownews
-	if [ ! -d "$(DESTDIR)$(PREFIX)/bin" ]; then \
-		mkdir -p $(DESTDIR)$(PREFIX)/bin; \
+EXEI	:= ${BINDIR}/$(notdir ${EXE})
+O2SI	:= ${BINDIR}/opml2snow
+S2OI	:= ${BINDIR}/snow2opml
+
+install:	install-bin
+install-bin:	${EXEI} ${O2SI} ${S2OI}
+
+${EXEI}:	${EXE}
+	@echo "Installing $@ ..."
+	@${INSTALLEXE} $< $@
+${O2SI}:	opml2snow
+	@echo "Installing $@ ..."
+	@${INSTALLSCR} $< $@
+${S2OI}:	${O2SI}
+	@echo "Installing $@ ..."
+	@(cd ${BINDIR}; rm -f $@; ln -s $(notdir $<) $(notdir $@))
+
+uninstall:	uninstall-bin
+uninstall-bin:
+	@if [ -f ${EXEI} ]; then\
+	    echo "Uninstalling ${EXEI} ...";\
+	    rm -f ${EXEI} ${O2SI} ${S2OI};\
 	fi
-	$(INSTALL) -s snownews $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) opml2snow $(DESTDIR)$(PREFIX)/bin
-	if [ ! -f "$(DESTDIR)$(PREFIX)/bin/snow2opml" ]; then \
-		(cd $(DESTDIR)$(PREFIX)/bin && \
-		 ln -sf opml2snow snow2opml ); \
-	fi;
 
-install-locales: locales
-	for L in $(LOCALES); do \
-		if [ ! -d "$(DESTDIR)$(LOCALEPATH)/$$L/LC_MESSAGES" ]; then \
-			mkdir -p $(DESTDIR)$(LOCALEPATH)/$$L/LC_MESSAGES; \
-		fi; \
-		$(INSTALL) -m 0644 $(LOC)/$$L.mo $(DESTDIR)$(LOCALEPATH)/$$L/LC_MESSAGES/snownews.mo; \
-	done
+endif
+################ Maintenance ###########################################
 
-install-man: manpages
-	if [ ! -d "$(DESTDIR)$(MANPATH)/man1" ]; then \
-		mkdir -p $(DESTDIR)$(MANPATH)/man1; \
+.PHONY:	clean distclean maintainer-clean dist dist-binary
+
+clean:
+	@if [ -h ${ONAME} ]; then\
+	    rm -f ${EXE} ${EXE}-static ${OBJS} ${DEPS} $O.d ${ONAME};\
+	    rmdir ${BUILDDIR};\
 	fi
-	$(INSTALL) -m 0644 $(MAN)/snownews.1 $(DESTDIR)$(MANPATH)/man1
-	$(INSTALL) -m 0644 $(MAN)/opml2snow.1 $(DESTDIR)$(MANPATH)/man1
-	
-	for L in $(LANGS); do \
-		if [ ! -d "$(DESTDIR)$(MANPATH)/$$L/man1" ]; then \
-			mkdir -p $(DESTDIR)$(MANPATH)/$$L/man1; \
-		fi; \
-		$(INSTALL) -m 0644 $(MAN)/$$L/snownews.1 $(DESTDIR)$(MANPATH)/$$L/man1; \
-	done
 
-### Cleanup ###
+distclean:	clean
+	@rm -f ${CONFS} config.status
 
-clean: clean-bin clean-locales clean-man
-	rm -f platform_settings
-	@echo ""
-	@echo "Run ./configure before building again!"
+maintainer-clean: distclean
 
-clean-bin:
-	rm -f snownews *.o
+$O.d:	${BUILDDIR}/.d
+	@[ -h ${ONAME} ] || ln -sf ${BUILDDIR} ${ONAME}
+$O%/.d:	$O.d
+	@[ -d $(dir $@) ] || mkdir $(dir $@)
+	@touch $@
+${BUILDDIR}/.d:	Makefile
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+	@touch $@
 
-clean-locales:
-	rm -f $(LOC)/*.mo
+Config.mk:	Config.mk.in
+config.h:	config.h.in
+${OBJS}:	Makefile ${CONFS} $O.d
+${CONFS}:	configure
+	@if [ -x config.status ]; then echo "Reconfiguring ...";\
+	    ./config.status;\
+	else echo "Running configure ...";\
+	    ./configure;\
+	fi
 
-clean-man:
-	rm -f $(MAN)/snownews.1
-	
-	for L in $(LANGS); do \
-		rm -f $(MAN)/$$L/snownews.1; \
-	done
+-include ${DEPS}
 
-### Dist ###
+################ Dist ##################################################
+
+.PHONY:	dist dist-binary
+
+DISTDIR		:= ${NAME}-${VERSION}
+DISTFILES	:= AUTHOR COPYING CREDITS Changelog README README.de README.patching opml2snow \
+	Makefile configure doc po scripts ${SRCS} $(wildcard *.h) config.h
 
 dist: clean
 	./configure
-	mkdir $(DISTDIR)
-	cp -R $(DISTFILES) $(DISTDIR)
-	tar -czf $(DISTDIR).tar.gz $(DISTDIR)
-	rm -rf $(DISTDIR)
+	mkdir ${DISTDIR}
+	cp -R ${DISTFILES} ${DISTDIR}
+	tar -czf ${DISTDIR}.tar.gz ${DISTDIR}
+	rm -rf ${DISTDIR}
 
-dist-binary: clean snownews-static
-	DISTDIR=snownews-i386-$(VERSION)
-	mkdir $(DISTDIR)
-	mkdir $(DISTDIR)/man
-	mkdir $(DISTDIR)/man/de
-	mkdir $(DISTDIR)/man/nl
-	mkdir $(DISTDIR)/man/fr
-	mkdir $(DISTDIR)/man/it
-	mkdir $(DISTDIR)/man/ru_RU.KOI8-R
-	mkdir $(DISTDIR)/po
-	cp AUTHOR COPYING CREDITS Changelog README README.de INSTALL.binary snownews opml2snow $(DISTDIR)
-	cp doc/man/de/snownews.1 $(DISTDIR)/man/de
-	cp doc/man/nl/snownews.1 $(DISTDIR)/man/nl
-	cp doc/man/fr/snownews.1 $(DISTDIR)/man/fr
-	cp doc/man/it/snownews.1 $(DISTDIR)/man/it
-	cp doc/man/ru_RU.KOI8-R/snownews.1 $(DISTDIR)/man/ru_RU.KOI8-R
-	cp doc/man/snownews.1 $(DISTDIR)/man
-	cp po/*.mo $(DISTDIR)/po
-	cp scripts/install.sh $(DISTDIR)
-	tar -cjf $(DISTDIR).i386.tar.bz2 $(DISTDIR)
-	rm -rf $(DISTDIR)
+dist-binary: clean ${EXE}-static
+	DISTDIR=${NAME}-i386-${VERSION}
+	mkdir ${DISTDIR}
+	mkdir ${DISTDIR}/man
+	mkdir ${DISTDIR}/man/de
+	mkdir ${DISTDIR}/man/nl
+	mkdir ${DISTDIR}/man/fr
+	mkdir ${DISTDIR}/man/it
+	mkdir ${DISTDIR}/man/ru_RU.KOI8-R
+	mkdir ${DISTDIR}/po
+	cp AUTHOR COPYING CREDITS Changelog README README.de scripts/INSTALL.binary opml2snow ${DISTDIR}
+	cp ${EXE}-static ${DISTDIR}/${NAME}
+	cp doc/man/de/${NAME}.1 ${DISTDIR}/man/de
+	cp doc/man/nl/${NAME}.1 ${DISTDIR}/man/nl
+	cp doc/man/fr/${NAME}.1 ${DISTDIR}/man/fr
+	cp doc/man/it/${NAME}.1 ${DISTDIR}/man/it
+	cp doc/man/ru_RU.KOI8-R/${NAME}.1 ${DISTDIR}/man/ru_RU.KOI8-R
+	cp doc/man/${NAME}.1 ${DISTDIR}/man
+	cp po/*.mo ${DISTDIR}/po
+	cp scripts/install.sh ${DISTDIR}
+	tar -cjf ${DISTDIR}.i386.tar.bz2 ${DISTDIR}
+	rm -rf ${DISTDIR}

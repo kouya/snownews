@@ -24,6 +24,27 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+/* Define to the one symbol short name of this package */
+#define @PKG_UNAME@_NAME		"@PKG_NAME@"
+/* Define to the version of this package */
+#define @PKG_UNAME@_VERSION	@PKG_VERSION@
+/* Define to the version string of this package */
+#define @PKG_UNAME@_VERSTRING	"@PKG_VERSTR@"
+/* Define to the address where bug reports for this package should be sent */
+#define @PKG_UNAME@_BUGREPORT	"@PKG_BUGREPORT@"
+
+/* Define to the value of LOCALEPATH environment variable */
+#define LOCALEPATH	"@localedir@"
+
+/* Define to use experimental code */
+#undef USE_UNSUPPORTED_AND_BROKEN_CODE
+
+/* Define to output of uname */
+#undef OS
+
+/* Define on SunOS and Solaris */
+#undef SUN
+
 #include "version.h"
 #include "netio.h"
 
