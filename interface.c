@@ -67,7 +67,7 @@ struct scrolltext {
 };
 
 #ifdef SIGWINCH
-void sig_winch(int p)
+void sig_winch (int p __attribute__((unused)))
 {
 	resize_dirty = 1;
 }

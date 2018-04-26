@@ -155,15 +155,9 @@ void MainSignalHandler (int sig) {
 }
 
 /* Automatic child reaper. */
-void sigChildHandler (int sig) {
-	int status, child_val;
-
+static void sigChildHandler (int sig __attribute__((unused))) {
 	/* Wait for any child without blocking */
-	if (waitpid(-1, &status, WNOHANG) < 0)
-			return;
-
-	if (WIFEXITED(status))
-		child_val = WEXITSTATUS(status);
+	waitpid (-1, NULL, WNOHANG);
 }
 
 void printHelp (void) {

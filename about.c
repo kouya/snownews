@@ -117,15 +117,15 @@ void Snowfall (int christmastree) {
 	int wind = 1;			/* 1: wind active, 0: inactive 
 							   set to 1 here so the first loop run clears it. */
 	int newflake = 0;		/* Time until a new flake appears. */
-	
+
 	/* Set ncurses halfdelay mode. */
 	halfdelay (3);
-	
+
 	/* White snowflakes! */
 	/* Doesn't work on white terminal background... obviously.
 	attron (COLOR_PAIR(16));
 	attron (WA_BOLD); */
-	
+
 	while (1) {
 		/* Set up the storm. */
 		if (windtimer == 0) {
@@ -161,7 +161,7 @@ void Snowfall (int christmastree) {
 			new->oldchar = new->oldchar2 = ' ';
 			new->vspeed = 1+(float)rand() / (float)RAND_MAX * 2;
 			new->hspeed = (1+(float)rand() / (float)RAND_MAX * 7)-4;
-			
+
 			/* Add our new snowflake to the pointer chain. */
 			new->next = NULL;
 			if (first == NULL) {
@@ -173,7 +173,7 @@ void Snowfall (int christmastree) {
 					new->prev = new->prev->next;
 				new->prev->next = new;
 			}
-			
+
 			/* Set new counter until next snowflake. */
 			newflake = 1+(float)rand() / (float)RAND_MAX * 2;
 			/*
@@ -181,7 +181,7 @@ void Snowfall (int christmastree) {
 			mvprintw (1,1,"New flake in %d rounds.", newflake);
 			*/
 		}
-		
+
 		for (cur = first; cur != NULL; cur = curnext) {
 			curnext = cur->next;
 			/* Draw every snowflake at its coordinates to the screen. */
@@ -204,7 +204,7 @@ void Snowfall (int christmastree) {
 					if ((cur->oldx < 14) && (cur->oldx > 9) && (cur->oldy < 24) && (cur->oldy > 20)) {
 						attroff (COLOR_PAIR(12));
 					}
-					
+
 					if (christmastree)
 						ChristmasTree();
 				}
@@ -214,7 +214,7 @@ void Snowfall (int christmastree) {
 			}
 			/* Set new hspeed for flake */
 			cur->hspeed = (1+(float)rand() / (float)RAND_MAX * 7)-4;
-			
+
 			/* Advance every flake downwards by a random amount and to
 			   the left or right.
 			   Check if the next position would obscure a character on the screen
@@ -223,7 +223,7 @@ void Snowfall (int christmastree) {
 			if (wind)
 				cur->hspeed += windspeed;
 			cur->x += cur->hspeed;
-			
+
 			if (cur->y > LINES) {
 				if (cur == first) {
 					first = first->next;
@@ -237,7 +237,7 @@ void Snowfall (int christmastree) {
 				free (cur);
 				continue;
 			}
-			
+
 			/* Only draw if we're still inside the window. */
 			if (cur->y <= LINES) {
 				/*
@@ -254,12 +254,12 @@ void Snowfall (int christmastree) {
 					cur->oldchar = ' ';
 			}
 		}
-	
+
 		windtimer--;
 		newflake--;
-		
+
 		refresh();
-		
+
 		/* Leave loop if anykey(tm) was pressed. */
 		if (getch() != ERR)
 			break;
@@ -319,7 +319,7 @@ void xmasAbout (void) {
 	mvaddstr (19, 29, "Fernando J. Pereda, Marco Cova");
 	mvaddstr (20, 29, "Cheng-Lung Sung, Dmitry Petukhov");
 	mvaddstr (21, 29, "Douglas Campos");
-	
+
 	Snowfall(1);
 }
 
@@ -331,7 +331,7 @@ void SHDrawGun (int gun_pos) {
 	clrtoeol();
 	move (LINES-2, 0);
 	clrtoeol();
-	
+
 	attron (WA_BOLD);
 	mvaddstr (LINES-3, gun_pos-3, "___/\\___");
 	mvaddstr (LINES-2, gun_pos-3, "|######|");
@@ -350,27 +350,27 @@ void SHDrawScore (int score, int level) {
 	int i, len;
 	char scorestr[16];
 	char levelstr[16];
-	
+
 	attron (WA_REVERSE);
 	for (i = 0; i < COLS; i++) {
 		mvaddch (0, i, ' ');
 	}
 	mvaddstr (0, 1, "Santa Hunta!");
-	
+
 	snprintf (scorestr, sizeof(scorestr), _("Score: %d"), score);
 	len = strlen (scorestr);
 	mvaddstr (0, COLS-1-len, scorestr);
-	
+
 	snprintf (levelstr, sizeof(levelstr), _("Level: %d"), level);
 	len = strlen (levelstr);
 	mvaddstr (0, COLS/2-len/2, levelstr);
-	
+
 	attroff (WA_REVERSE);
 }
 
 void SHClearScreen (void) {
 	int i;
-	
+
 	for (i = 0; i < LINES; i++) {
 		move (i, 0);
 		clrtoeol();
@@ -386,9 +386,9 @@ void SHDrawProjectile (shot shot) {
 void SHDrawSanta (santa santa) {
 	int len;
 	char *draw_string;
-	
+
 	len = COLS - santa.x;
-	
+
 	if (santa.anim == 0) {
 		if (santa.x < 0) {
 			draw_string = santa.gfx+abs(santa.x);
@@ -412,7 +412,7 @@ void SHDrawSanta (santa santa) {
 		} else
 			mvaddnstr (santa.y+1, santa.x, santa.altgfx_line2, len);
 	}
-	
+
 	attron (COLOR_PAIR(10));
 	mvaddch (santa.y, santa.x + santa.length - 1, '*');
 	attroff (COLOR_PAIR(10));
@@ -445,9 +445,9 @@ int SHAddScore (santa santa) {
 
 void SHDrawHitScore (scoreDisplay score) {
 	int rand_color;
-	
+
 	rand_color = 10 + ((float)rand() / (float)RAND_MAX * 6);
-	
+
 	attron (WA_BOLD);
 	attron (COLOR_PAIR(rand_color));
 	mvprintw (score.y, score.x, "%d", score.score);
@@ -472,15 +472,15 @@ void printFinalScore (int score) {
 	int y;
 	int divisor;
 	int digit;
-	
+
 	if (score == 0)
 		number_count = 1;
 	else
 		number_count = log10(score) + 1;
-	
-	
+
+
 	pos = COLS/2 - ((number_count * 8) / 2);
-	
+
 	for (i = 0; i < number_count; i++) {
 		y = 12;
 		divisor = pow (10, number_count-1-i);
@@ -491,30 +491,30 @@ void printFinalScore (int score) {
 			mvaddstr (y, pos + (i * 8), numbers[digit][j]);
 			y++;
 		}
-	}	
+	}
 	refresh();
 }
 
 void SHFinalScore (int score) {
 	int rand_color;
 
-	attron (WA_BOLD);	
+	attron (WA_BOLD);
 	mvaddstr (9, COLS/2-6, "Final score:");
 	refresh();
 	sleep(1);
-	
-	
+
+
 	for (;;) {
 		if (getch() == 'q')
 			break;
-		
+
 		rand_color = 10 + ((float)rand() / (float)RAND_MAX * 6);
 		attron (WA_BOLD);
 		attron (COLOR_PAIR(rand_color));
 		printFinalScore(score);
 		attroff (COLOR_PAIR(rand_color));
 		attroff (WA_BOLD);
-		
+
 		move (LINES-1, COLS-1);
 		refresh();
 	}
@@ -530,7 +530,6 @@ void santaHunta (void) {
 	int level = 1;
 	struct timeval before;
 	struct timeval after;
-	struct timeval delay;
 	int draw_loop = 0;
 	long draw_delay = 0;
 	shot shot;
@@ -538,31 +537,27 @@ void santaHunta (void) {
 	int targets = 0;
 	int hitcount = 0;
 	scoreDisplay scoreDisplay;
-	
+
 	shot.fired = 0;
 	shot.x = 0;
 	shot.y = 0;
-	
+
 	scoreDisplay.rounds = 0;
-	
+
 	/* Set ncurses halfdelay mode.
 	 * Max resolution is 1/10sec */
 	halfdelay (1);
-	
-	for (;;) {	
+
+	for (;;) {
 		gettimeofday (&before, NULL);
 		input = getch();
 		gettimeofday (&after, NULL);
 
 		if (after.tv_sec > before.tv_sec)
 			after.tv_usec += 1000000;
-		
-		delay.tv_sec = 0;
-		delay.tv_usec = abs(100000 - (after.tv_usec - before.tv_usec));
 
 		if (!targets) {
 			newSanta(&santa, level);
-			
 			targets = 1;
 		}
 
@@ -576,41 +571,41 @@ void santaHunta (void) {
 
 			if (targets)
 				SHDrawSanta(santa);
-			
+
 			if (santa.anim == 0)
 				santa.anim = 1;
 			else
 				santa.anim = 0;
-				
+
 			if (santa.x >= COLS)
 				targets = 0;
-			
+
 			if (shot.fired)
 				SHDrawProjectile(shot);
-				
+
 			if (scoreDisplay.rounds > 0)
 				SHDrawHitScore(scoreDisplay);
-			
+
 			if (SHHit(shot, santa)) {
 				targets = 0;
 				hitcount++;
 				last_score = SHAddScore(santa);
 				score += last_score;
-				
+
 				scoreDisplay.x = shot.x;
 				scoreDisplay.y = shot.y;
 				scoreDisplay.score = last_score;
 				scoreDisplay.rounds = 20;
 			}
-			
+
 			santa.x += santa.speed;
-			
+
 			scoreDisplay.rounds--;
-			
+
 			shot.y--;
 			if (shot.y == 0)
 				shot.fired = 0;
-			
+
 			if (hitcount == 10) {
 				hitcount = 0;
 				level++;
@@ -618,7 +613,7 @@ void santaHunta (void) {
 		}
 
 		count++;
-		
+
 		if ((input == KEY_RIGHT) || (input == keybindings.next)) {
 			if (gun_pos < COLS-5)
 				gun_pos++;
@@ -632,7 +627,7 @@ void santaHunta (void) {
 				mvaddstr (LINES-4, gun_pos-2, "\\***/");
 				attroff (COLOR_PAIR(12));
 				attroff (WA_BOLD);
-				
+
 				shot.x = gun_pos;
 				shot.y = LINES-4;
 				shot.fired = 1;
@@ -641,33 +636,33 @@ void santaHunta (void) {
 			SHFinalScore(score);
 			break;
 		}
-			
+
 		SHDrawGun(gun_pos);
 		SHDrawScore(score, level);
 		SHDrawStatus();
-		
+
 		refresh();
 	}
-	
+
 	/* Leave halfdelay mode. */
 	cbreak();
 }
 
 void UIAbout (void) {
 	int xpos;
-	
+
 	clear();				/* Get the crap off the screen to make room
 							   for our wonderful ASCII logo. :) */
 
 	xpos = COLS/2 - 40;
-	
+
 	if (COLS < 80) {
 		mvprintw (0, 0, _("Need at least 80 COLS terminal, sorry!"));
 		refresh();
 		getch();
 		return;
 	}
-	
+
 	if (easterEgg()) {
 		santaHunta();
 	} else {
@@ -679,7 +674,7 @@ void UIAbout (void) {
 		mvaddstr (6, xpos, "/______  / / ___|___/ \\____/  /__|__/  / ___|___/ \\____ \\   /__|__/  /______  /");
 		mvaddstr (7, xpos, "       \\/  \\/                          \\/              \\/                   \\/");
 		mvprintw (9, COLS/2-(strlen("Version")+strlen(VERSION)+1)/2, "Version %s", VERSION);
-		
+
 		mvaddstr (11, COLS/2-(strlen(_("Brought to you by:")))/2, _("Brought to you by:"));
 		mvaddstr (13, COLS/2-(strlen(_("Main code")))/2, _("Main code"));
 		mvaddstr (14, COLS/2-6, "Oliver Feiler");
@@ -690,7 +685,7 @@ void UIAbout (void) {
 		mvaddstr (21, COLS/2-32, "Fernando J. Pereda, Marco Cova, Cheng-Lung Sung, Dmitry Petukhov");
 		mvaddstr (22, COLS/2-26, "Douglas Campos, Ray Iwata, Piotr Ozarowski, Yang Huan");
 		mvaddstr (23, COLS/2-15, "Ihar Hrachyshka, Mats Berglund");
-		
+
 		refresh();
 		getch();
 	}

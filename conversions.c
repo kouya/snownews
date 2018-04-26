@@ -1,6 +1,6 @@
 /* Snownews - A lightweight console RSS newsreader
  * $Id: conversions.c 1173 2006-10-14 21:41:42Z kiza $
- * 
+ *
  * Copyright 2003-2009 Oliver Feiler <kiza@kcore.de> and
  *                     Rene Puls <rpuls@gmx.net>
  *
@@ -20,8 +20,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
- 
-#include <sys/types.h> 
+
+#define _GNU_SOURCE
+#include <sys/types.h>
 #include <string.h>
 #include <iconv.h>
 #include <stdio.h>
@@ -29,22 +30,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
 #include <openssl/evp.h>
-
+#include <openssl/md5.h>
 #include "os-support.h"
-
-/* I have no idea what needs to be defined to get strptime() on glibc.
- * This is stolen from somewhere else and it works for me(tm).
- * If you know how it's supposed to work, tell me. Manpage says
- * define _XOPEN_SOURCE for glibc2, but that doesn't work. */
-#define _XOPEN_SOURCE 500		/* Needed for glibc2 strptime(). What's the 500 for? */
-#define __USE_XOPEN
-#include <time.h>
-#undef __USE_XOPEN
-#undef _XOPEN_SOURCE
-
 #include "conversions.h"
 #include "config.h"
 #include "interface.h"
@@ -57,7 +48,7 @@ extern struct entity *first_entity;
 
 extern char *forced_target_charset;
 
-int calcAgeInDays (struct tm * t);
+static int calcAgeInDays (const struct tm* t);
 
 #ifdef STATIC_CONST_ICONV
 char * iconvert (const char * inbuf) {
@@ -72,11 +63,11 @@ char * iconvert (char * inbuf) {
 
 	/*(void)strlcpy(target_charset, nl_langinfo(CODESET), sizeof(target_charset));*/
 	strncpy(target_charset, nl_langinfo(CODESET), sizeof(target_charset));
-		
+
 	/* Take a shortcut. */
 	if (strcasecmp (target_charset, "UTF-8") == 0)
 		return strdup(inbuf);
-	
+
 	inbytesleft = strlen(inbuf);
 	outbytesleft = strlen(inbuf);
 
@@ -92,20 +83,20 @@ char * iconvert (char * inbuf) {
 	if (cd == (iconv_t) -1) {
 		return NULL;
 	}
-	
+
 	outbuf = malloc (outbytesleft+1);
 	outbuf_first = outbuf;
 
-	if (iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == -1) {
+	if (iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1) {
 		free(outbuf_first);
 		iconv_close(cd);
 		return NULL;
 	}
 
 	*outbuf = 0;
-	
+
 	iconv_close (cd);
-	
+
 	return outbuf_first;
 }
 
@@ -135,18 +126,18 @@ char * UIDejunk (char * feed_description) {
 	unsigned long ch;			/* Decoded numeric entity */
 #endif
 	const htmlEntityDesc *ep;	/* For looking up HTML entities */
-	
+
 	/* Gracefully handle passed NULL ptr. */
 	if (feed_description == NULL) {
 		newtext = strdup("(null)");
 		return newtext;
 	}
-	
+
 	/* Make a copy and point *start to it so we can free the stuff again! */
 	text = strdup (feed_description);
 	start = text;
-	
-	
+
+
 	/* If text begins with a tag, discard all of them. */
 	while (1) {
 		if (text[0] == '<') {
@@ -162,14 +153,14 @@ char * UIDejunk (char * feed_description) {
 	}
 	newtext = malloc (1);
 	newtext[0] = '\0';
-	
+
 	while (1) {
 		/* Strip tags... tagsoup mode. */
 		/* strsep puts everything before "<" into detagged. */
 		detagged = strsep (&text, "<");
 		if (detagged == NULL)
 			break;
-		
+
 		/* Replace <p> and <br> (in all incarnations) with newlines, but only
 		   if there isn't already a following newline. */
 		if (text != NULL) {
@@ -188,12 +179,12 @@ char * UIDejunk (char * feed_description) {
 
 		/* Now append detagged to newtext. */
 		strcat (newtext, detagged);
-		
+
 		/* Advance *text to next position after the closed tag. */
 		htmltag = strsep (&text, ">");
 		if (htmltag == NULL)
 			break;
-		
+
 		if (s_strcasestr(htmltag, "img src") != NULL) {
 /*			attribute = s_strcasestr(htmltag, "alt=");
 			if (attribute == NULL)
@@ -216,25 +207,25 @@ char * UIDejunk (char * feed_description) {
 		}*/
 	}
 	free (start);
-	
+
 	CleanupString (newtext, 0);
-	
+
 	/* See if there are any entities in the string at all. */
 	if (strchr(newtext, '&') != NULL) {
 		text = strdup (newtext);
 		start = text;
 		free (newtext);
-	
+
 		newtext = malloc (1);
 		newtext[0] = '\0';
-		
+
 		while (1) {
 			/* Strip HTML entities. */
 			detagged = strsep (&text, "&");
 			if (detagged == NULL)
 				break;
-			
-			if (detagged != '\0') {
+
+			if (*detagged) {
 				newtext = realloc (newtext, strlen(newtext)+strlen(detagged)+1);
 				strcat (newtext, detagged);
 			}
@@ -260,29 +251,29 @@ char * UIDejunk (char * feed_description) {
 					strcat (newtext, "'");
 					continue;
 				}
-				
+
 				/* Decode user defined entities. */
 				found = 0;
 				for (cur_entity = first_entity; cur_entity != NULL; cur_entity = cur_entity->next_ptr) {
 					if (strcmp (entity, cur_entity->entity) == 0) {
 						/* We have found a matching entity. */
-						
+
 						/* If entity_length is more than 1 char we need to realloc
 						   more space in newtext. */
 						if (cur_entity->entity_length > 1)
 							newtext = realloc (newtext,  strlen(newtext)+cur_entity->entity_length+1);
-						
+
 						/* Append new entity. */
 						strcat (newtext, cur_entity->converted_entity);
-						
+
 						/* Set found flag. */
 						found = 1;
-						
+
 						/* We can now leave the for loop. */
 						break;
 					}
 				}
-								
+
 				/* Try to parse some standard entities. */
 				if (!found) {
 					/* See if it was a numeric entity. */
@@ -330,7 +321,7 @@ char * UIDejunk (char * feed_description) {
 				break;
 		}
 		free (start);
-	}	
+	}
 	return newtext;
 }
 
@@ -340,7 +331,7 @@ char * UIDejunk (char * feed_description) {
  * the 4th version which corrupted some random memory unfortunately...
  * but this one works. Heureka!
  */
-char * WrapText (char * text, int width) {
+char* WrapText (const char* text, unsigned width) {
 	char *newtext;
 	char *textblob;			/* Working copy of text. */
 	char *chapter;
@@ -352,14 +343,14 @@ char * WrapText (char * text, int width) {
 	char *p;
 	int lena, lenb;
 	*/
-	
+
 	textblob = strdup (text);
 	start = textblob;
-	
+
 
 	line = malloc (1);
 	line[0] = '\0';
-	
+
 	newtext = malloc(1);
 	memset (newtext, 0, 1);
 
@@ -371,14 +362,14 @@ char * WrapText (char * text, int width) {
 		while (1) {
 			savepos = chapter;
 			chunk = strsep (&chapter, " ");
-			
+
 			/* Last chunk. */
 			if (chunk == NULL) {
 				if (line != NULL) {
 					newtext = realloc (newtext, strlen(newtext)+strlen(line)+2);
 					strcat (newtext, line);
 					strcat (newtext, "\n");
-					
+
 					/* Faster replacement with memcpy.
 					 * Overkill, overcomplicated and smelling of bugs all over.
 					 */
@@ -393,22 +384,22 @@ char * WrapText (char * text, int width) {
 					p++;
 					*p=0;
 					*/
-					
+
 					line[0] = '\0';
 				}
 				break;
 			}
-			
+
 			if (strlen(chunk) > width) {
 				/* First copy remaining stuff in line to newtext. */
 				newtext = realloc (newtext, strlen(newtext)+strlen(line)+2);
 				strcat (newtext, line);
 				strcat (newtext, "\n");
-				
+
 				free (line);
 				line = malloc (1);
 				line[0] = '\0';
-				
+
 				/* Then copy chunk with max length of line to newtext. */
 				line = realloc (line, width+1);
 				strncat (line, chunk, width-5);
@@ -442,10 +433,10 @@ char * WrapText (char * text, int width) {
 			}
 		}
 	}
-	
-	free (line);	
-	free (start);	
-	
+
+	free (line);
+	free (start);
+
 	return newtext;
 }
 
@@ -458,14 +449,14 @@ char *base64encode(char const *inbuf, unsigned int inbuf_size) {
 	unsigned int outbuf_size = 0;
 	int bits = 0;
 	int char_count = 0;
-	
+
 	outbuf = malloc(1);
-	
+
 	while (inbuf_pos < inbuf_size) {
-	
+
 		bits |= *inbuf;
 		char_count++;
-		
+
 		if (char_count == 3) {
 			outbuf = realloc(outbuf, outbuf_size+4);
 			outbuf_size += 4;
@@ -477,12 +468,12 @@ char *base64encode(char const *inbuf, unsigned int inbuf_size) {
 			bits = 0;
 			char_count = 0;
 		}
-		
+
 		inbuf++;
 		inbuf_pos++;
 		bits <<= 8;
 	}
-	
+
 	if (char_count > 0) {
 		bits <<= 16 - (8 * char_count);
 		outbuf = realloc(outbuf, outbuf_size+4);
@@ -498,10 +489,10 @@ char *base64encode(char const *inbuf, unsigned int inbuf_size) {
 		}
 		outbuf_pos += 4;
 	}
-	
+
 	outbuf = realloc(outbuf, outbuf_size+1);
 	outbuf[outbuf_pos] = 0;
-	
+
 	return outbuf;
 }
 
@@ -531,7 +522,7 @@ char* decodechunked(char * chunked, unsigned int *inputlen) {
 	}
 	*dest = '\0';
 	*inputlen = dest - chunked;
-	
+
 	return chunked;
 }
 #endif
@@ -543,13 +534,13 @@ char* decodechunked(char * chunked, unsigned int *inputlen) {
  */
 void CleanupString (char * string, int tidyness) {
 	int len, i;
-	
+
 	/* If we are passed a NULL pointer, leave it alone and return. */
 	if (string == NULL)
 		return;
-	
+
 	len = strlen(string);
-	
+
 	while ((string[0] == '\n' || string [0] == ' ' || string [0] == '\t') &&
 			(len > 0)) {
 		/* len=strlen(string) does not include \0 of string.
@@ -558,13 +549,13 @@ void CleanupString (char * string, int tidyness) {
 		memmove (string, string+1, len);
 		len--;
 	}
-	
+
 	/* Remove trailing spaces. */
 	while ((len > 1) && (string[len-1] == ' ')) {
 		string[len-1] = 0;
 		len--;
 	}
-	
+
 	len = strlen(string);
 	/* Eat newlines and tabs along the whole string. */
 	for (i = 0; i < len; i++) {
@@ -574,18 +565,18 @@ void CleanupString (char * string, int tidyness) {
 		if (tidyness == 1 && string[i] == '\n') {
 			string[i] = ' ';
 		}
-	}	
+	}
 }
 
 /* http://foo.bar/address.rdf -> http:__foo.bar_address.rdf */
 char * Hashify (const char * url) {
 	int i, len;
 	char *hashed_url;
-	
+
 	hashed_url = strdup(url);
-	
+
 	len = strlen(hashed_url);
-	
+
 	/* Don't allow filenames > 128 chars for teeny weeny
 	 * operating systems.
 	 */
@@ -593,7 +584,7 @@ char * Hashify (const char * url) {
 		len = 128;
 		hashed_url[128] = '\0';
 	}
-	
+
 	for (i = 0; i < len; i++) {
 		if (((hashed_url[i] < 32) || (hashed_url[i] > 38)) &&
 			((hashed_url[i] < 43) || (hashed_url[i] > 46)) &&
@@ -601,7 +592,7 @@ char * Hashify (const char * url) {
 			((hashed_url[i] < 97) || (hashed_url[i] > 122)) &&
 			(hashed_url[i] != 0))
 			hashed_url[i] = '_';
-		
+
 		/* Cygwin doesn't seem to like anything besides a-z0-9 in filenames.
 		   Zap'em! */
 #ifdef __CYGWIN__
@@ -612,31 +603,26 @@ char * Hashify (const char * url) {
 			hashed_url[i] = '_';
 #endif
 	}
-	
+
 	return hashed_url;
 }
 
-char * genItemHash (char ** hashitems, int items) {
-	int i;
-	EVP_MD_CTX mdctx;
-	unsigned char md_value[EVP_MAX_MD_SIZE];
-	unsigned int md_len;
-	char md5_hex[33];
+char * genItemHash (const char* const* hashitems, int items) {
+	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
+	EVP_DigestInit(mdctx, EVP_md5());
 
-	EVP_DigestInit(&mdctx, EVP_md5());
-	
-	for (i = 0; i < items; i++) {
-		if (hashitems[i] != NULL)
-			EVP_DigestUpdate(&mdctx, hashitems[i], (size_t) strlen(hashitems[i]));
-	}
-	
-	EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
-	EVP_MD_CTX_cleanup(&mdctx);
-	
-	for (i = 0; i < md_len; i++) {
-		sprintf(&md5_hex[2*i], "%02x", md_value[i]);
-	}
-	
+	for (int i = 0; i < items; ++i)
+		if (hashitems[i])
+			EVP_DigestUpdate (mdctx, hashitems[i], strlen(hashitems[i]));
+
+	unsigned char md_value [EVP_MAX_MD_SIZE];
+	unsigned md_len = 0;
+	EVP_DigestFinal_ex (mdctx, md_value, &md_len);
+	EVP_MD_CTX_free (mdctx);
+
+	char md5_hex [MD5_DIGEST_LENGTH*2+1];
+	for (unsigned i = 0; i < md_len; ++i)
+		sprintf (&md5_hex[2*i], "%02x", md_value[i]);
 	return strdup(md5_hex);
 }
 
@@ -646,14 +632,14 @@ int ISODateToUnix (char const * const ISODate) {
 	struct tm *t;
 	time_t tt = 0;
 	int time_unix = 0;
-	
+
 	/* Do not crash with an empty tag */
 	if (ISODate == NULL)
 		return 0;
-	
+
 	t = malloc(sizeof(struct tm));
 	gmtime_r(&tt, t);
-	
+
 	/* OpenBSD does not know %F == %Y-%m-%d
 	 * <insert inflamatory comment here> */
 	if (strptime(ISODate, "%Y-%m-%dT%T", t)) {
@@ -669,7 +655,7 @@ int ISODateToUnix (char const * const ISODate) {
 		time_unix = timegm(t);
 #endif
 	}
-	
+
 	free (t);
 	return time_unix;
 }
@@ -680,17 +666,17 @@ int pubDateToUnix (char const * const pubDate) {
 	time_t tt = 0;
 	int time_unix = 0;
 	char *oldlocale;
-	
+
 	/* Do not crash with an empty Tag */
 	if (pubDate == NULL)
 		return 0;
-	
+
 	start_here = pubDate;
 	start_here += 5;
-	
+
 	t = malloc(sizeof(struct tm));
 	gmtime_r(&tt, t);
-	
+
 #ifdef LOCALEPATH
 	/* Cruft!
 	 * Save old locale so we can parse the stupid pubDate format.
@@ -708,7 +694,7 @@ int pubDateToUnix (char const * const pubDate) {
 		setlocale(LC_TIME, "C");
 	}
 #endif
-	
+
 	if (strptime(start_here, "%d %b %Y %T", t)) {
 #ifdef __CYGWIN__
 		time_unix = mktime(t);
@@ -723,7 +709,7 @@ int pubDateToUnix (char const * const pubDate) {
 		free (oldlocale);
 	}
 #endif
-	
+
 	free (t);
 	return time_unix;
 }
@@ -736,21 +722,21 @@ char * unixToPostDateString (int unixDate) {
 	int strfstr_len = 32;
 	char tmpstr[32];
 	int age;
-	
+
 	time_str = malloc(len);
 	time_strfstr = malloc(strfstr_len);
-	
+
 	unix_t = unixDate;
 	gmtime_r(&unix_t, &t);
-	
+
 	age = calcAgeInDays(&t);
-	
+
 	strftime(time_strfstr, strfstr_len, _(", %H:%M"), &t);
 	strcpy(time_str, _("Posted "));
 	len -= strlen(_("Posted "));
 	if (len <= 0)
 		return NULL;
-	
+
 	if (age == 0) {
 		strncat(time_str, _("today"), len-1);
 		len -= strlen(_("today"));
@@ -796,15 +782,13 @@ char * unixToPostDateString (int unixDate) {
 		strncat(time_str, time_strfstr, len-1);
 	}
 	free (time_strfstr);
-	
+
 	return time_str;
 }
 
-int calcAgeInDays (struct tm * t) {
-	time_t unix_t;
+static int calcAgeInDays (const struct tm* t) {
+	time_t unix_t = time(NULL);
 	struct tm current_t;
-	
-	unix_t = time(NULL);
 	gmtime_r(&unix_t, &current_t);
 
 	/* (((current year - passed year) * 365) + current year day) - passed year day */

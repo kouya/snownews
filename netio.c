@@ -129,7 +129,7 @@ int NetPoll (struct feed * cur_ptr, int * my_socket, int rw) {
  *	0	Connected
  *	-1	Error occured (netio_error is set)
  */
-int NetConnect (int * my_socket, char * host, struct feed * cur_ptr, int httpproto, int suppressoutput) {
+int NetConnect (int * my_socket, char * host, struct feed * cur_ptr, int httpproto __attribute__((unused)), int suppressoutput) {
 	char tmp[512];
 	struct sockaddr_in address;	
 	struct hostent *remotehost;
