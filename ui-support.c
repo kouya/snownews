@@ -30,21 +30,21 @@ extern struct color color;
 extern char *browser;
 extern int cursor_always_visible;
 
-/* Init the ncurses library. */
+// Init the ncurses library.
 void InitCurses (void) {
 	initscr();
 	
-	keypad (stdscr, TRUE);	/* Activate keypad so we can read function keys with getch. */
+	keypad (stdscr, TRUE);	// Activate keypad so we can read function keys with getch.
 	
-	cbreak();				/* No buffering. */
-	noecho();				/* Do not echo typed chars onto the screen. */
+	cbreak();				// No buffering.
+	noecho();				// Do not echo typed chars onto the screen.
 	clear();
 	if (!cursor_always_visible)
-		curs_set(0);			/* Hide cursor. */
+		curs_set(0);			// Hide cursor.
 	refresh();
 }
 
-/* Print text in statusbar. */
+// Print text in statusbar.
 void UIStatus (const char * text, int delay, int warning) {
 	if (warning)
 		attron (COLOR_PAIR(10));
@@ -53,8 +53,8 @@ void UIStatus (const char * text, int delay, int warning) {
 	attron (WA_REVERSE);
 	mvaddnstr (LINES-1, 1, text, COLS-2);
 	
-	/* attroff is called here. If the calling function had it switched on,
-	   switch it on again there! */
+	// attroff is called here. If the calling function had it switched on,
+	// switch it on again there!
 	if (warning)
 		attroff (COLOR_PAIR(10));
 	attroff (WA_REVERSE);
@@ -65,8 +65,8 @@ void UIStatus (const char * text, int delay, int warning) {
 		sleep (delay);
 }
 
-/* Swap all pointers inside a feed struct.
-   Should only swap next and prev pointers of two structs! */
+// Swap all pointers inside a feed struct.
+// Should only swap next and prev pointers of two structs!
 void SwapPointers (struct feed * one, struct feed * two) {
 	struct feed *tmp;
 
@@ -138,7 +138,7 @@ void SwapPointers (struct feed * one, struct feed * two) {
 	free (tmp);
 }
 
-/* Ignore "A", "The", etc. prefixes when sorting feeds. */
+// Ignore "A", "The", etc. prefixes when sorting feeds.
 const char * SnowSortIgnore (const char * title) {
 	if (strncasecmp (title, "a ", 2) == 0)
 		return title+2;
@@ -148,15 +148,15 @@ const char * SnowSortIgnore (const char * title) {
 		return title;
 }
 
-/* Sort the struct list alphabetically.
-   Sorting criteria is struct feed->title */
+// Sort the struct list alphabetically.
+// Sorting criteria is struct feed->title
 void SnowSort (void) {
 	int elements = 0;
 	int i;
 	const char *one, *two;
 	struct feed * cur_ptr;
 	
-	/* If there is no element do not run sort or it'll crash! */
+	// If there is no element do not run sort or it'll crash!
 	if (first_ptr == NULL)
 		return;
 
@@ -176,14 +176,14 @@ void SnowSort (void) {
 	}
 }
 
-/* Draw a box with WA_REVERSE at coordinates x1y1/x2y2 */
+// Draw a box with WA_REVERSE at coordinates x1y1/x2y2
 void UISupportDrawBox (int x1, int y1, int x2, int y2) {
 	int i, j;
 	
 	attron (WA_REVERSE);
 	for (i = y1; i <= y2; i++) {
 		for (j = x1; j <= x2; j++) {
-/* Pretty borders. Well, they just sucked. ;)
+			// Pretty borders. Well, they just sucked. ;)
 			if (i == y1) {
 				if (j == x1)
 					mvaddch (i, j, ACS_ULCORNER);
@@ -201,14 +201,13 @@ void UISupportDrawBox (int x1, int y1, int x2, int y2) {
 			} else if (j == x1 || j == x2) {
 				mvaddch (i, j, ACS_VLINE);
 			} else
-*/
 			mvaddch (i, j, ' ');
 		}	
 	}
 	attroff (WA_REVERSE);
 }
 
-/* Draw main program header. */
+// Draw main program header.
 void UISupportDrawHeader (const char * headerstring) {
 	clearLine (0, INVERSE);
 	
@@ -224,27 +223,27 @@ void UISupportDrawHeader (const char * headerstring) {
 	attroff (WA_REVERSE);
 }
 
-/* Take a URL and execute in default browser.
-   Apply all security restrictions before running system()! */
+// Take a URL and execute in default browser.
+// Apply all security restrictions before running system()!
 void UISupportURLJump (const char * url) {
 	int len;
 	char *tmp;
 	char *escapetext = NULL;
 	char *syscall = NULL;
 	
-	/* Should not happen. Nope, really should not happen. */
+	// Should not happen. Nope, really should not happen.
 	if (url == NULL)
 		return;
 	
-	/* Smartfeeds cannot be opened (for now). */
+	// Smartfeeds cannot be opened (for now).
 	if (strncmp(url, "smartfeed", 9) == 0)
 		return;
 	
-	/* Complain loudly if browser string contains a single quote. */
+	// Complain loudly if browser string contains a single quote.
 	if (strstr(browser, "'") != NULL)
 		UIStatus (_("Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"), 5, 1);
 	
-	/* Discard url if it contains a single quote! */
+	// Discard url if it contains a single quote!
 	if ((strstr(url, "'")) == NULL) {
 		len = strlen(url) + 3;
 		escapetext = malloc (len);
@@ -269,7 +268,7 @@ void UISupportURLJump (const char * url) {
 	tmp = malloc (len);
 	snprintf (tmp, len, "%s 2>/dev/null", syscall);
 
-	/* Switch on the cursor. */
+	// Switch on the cursor.
 	curs_set(1);
 
 	endwin();
@@ -278,7 +277,7 @@ void UISupportURLJump (const char * url) {
 
 	InitCurses();
 
-	/* Hide cursor again. */
+	// Hide cursor again.
 	if (!cursor_always_visible)
 		curs_set(0);
 
@@ -289,7 +288,7 @@ void UISupportURLJump (const char * url) {
 void SmartFeedsUpdate (void) {
 	struct feed *cur_ptr;
 	
-	/* Find our smart feed. */
+	// Find our smart feed.
 	for (cur_ptr = first_ptr; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
 		if (cur_ptr->smartfeed == 1)
 			SmartFeedNewitems (cur_ptr);
@@ -301,9 +300,9 @@ void SmartFeedNewitems (struct feed * smart_feed) {
 	struct newsitem *new_item;
 	struct newsitem *cur_item;
 	
-	/* Be smart and don't leak the smart feed.
-	   The items->data structures must not be freed, since a smart feed is only
-	   a pointer collection and does not contain allocated memory. */
+	// Be smart and don't leak the smart feed.
+	// The items->data structures must not be freed, since a smart feed is only
+	// a pointer collection and does not contain allocated memory.
 	if (smart_feed->items != NULL) {
 		while (smart_feed->items->next_ptr != NULL) {
 			smart_feed->items = smart_feed->items->next_ptr;
@@ -312,19 +311,19 @@ void SmartFeedNewitems (struct feed * smart_feed) {
 		free (smart_feed->items);
 	}
 
-	/* This must be NULL if there are no items. */
+	// This must be NULL if there are no items.
 	smart_feed->items = NULL;
 	
 	for (cur_feed = first_ptr; cur_feed != NULL; cur_feed = cur_feed->next_ptr) {
-		/* Do not add the smart feed recursively. 8) */
+		// Do not add the smart feed recursively. 8)
 		if (cur_feed != smart_feed) {
 			for (cur_item = cur_feed->items; cur_item != NULL; cur_item = cur_item->next_ptr) {
-				/* If item is unread, add to smart feed. */
+				// If item is unread, add to smart feed.
 				if (cur_item->data->readstatus == 0) {					
 					new_item = malloc (sizeof (struct newsitem));
 					new_item->data = cur_item->data;
 					
-					/* Add to data structure. */
+					// Add to data structure.
 					new_item->next_ptr = NULL;
 					if (smart_feed->items == NULL) {
 						new_item->prev_ptr = NULL;
@@ -340,7 +339,7 @@ void SmartFeedNewitems (struct feed * smart_feed) {
 		}
 	}
 	
-	/* Only fill out once. */
+	// Only fill out once.
 	if (smart_feed->title == NULL)
 		smart_feed->title = strdup (_("(New headlines)"));
 	if (smart_feed->link == NULL)
@@ -350,7 +349,7 @@ void SmartFeedNewitems (struct feed * smart_feed) {
 int SmartFeedExists (const char * smartfeed) {
 	struct feed *cur_ptr;
 	
-	/* Find our smart feed. */
+	// Find our smart feed.
 	for (cur_ptr = first_ptr; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
 		if (strcmp(smartfeed, "newitems") == 0) {
 			if (cur_ptr->smartfeed == 1)
@@ -378,7 +377,7 @@ void displayErrorLog (void) {
 	char *pager = NULL;
 	char *env;
 	
-	/* Get the user's pager or default to less. */
+	// Get the user's pager or default to less.
 	env = getenv("PAGER");
 	if (env)
 		pager = strdup(env);
@@ -390,7 +389,7 @@ void displayErrorLog (void) {
 	
 	snprintf (command, sizeof(command), "%s %s", pager, errorlog);
 
-	/* Call as few as possible functions once we've left ncurses. */
+	// Call as few as possible functions once we've left ncurses.
 	endwin();
 	system(command);
 	InitCurses();

@@ -28,7 +28,7 @@ int easterEgg (void) {
 	char file[256];
 	struct stat filetest;
 	
-	/* Get current time. */
+	// Get current time.
 	tunix = time(0);
 	t = localtime(&tunix);
 	

@@ -30,19 +30,19 @@ char * ConstructBasicAuth (const char * username, const char * password) {
 	char * authstring;
 	char * tmpstr;
 
-	/* Create base64 authinfo.
+	// Create base64 authinfo.
 
-	RFC 2617. Basic HTTP authentication.
-	Authorization: Basic username:password[base64 encoded] */
+	// RFC 2617. Basic HTTP authentication.
+	// Authorization: Basic username:password[base64 encoded]
 
-	/* Construct the cleartext authstring. */
+	// Construct the cleartext authstring.
 	len = strlen(username) + 1 + strlen(password) + 1;
 	authstring = malloc (len);
 	snprintf (authstring, len, "%s:%s", username, password);
 
 	tmpstr = base64encode (authstring, len-1);
 
-	/* "Authorization: Basic " + base64str + \r\n\0 */
+	// "Authorization: Basic " + base64str + \r\n\0
 	len = 21 + strlen(tmpstr) + 3;
 	authinfo = malloc (len);
 	snprintf (authinfo, len, "Authorization: Basic %s\r\n", tmpstr);
@@ -61,7 +61,7 @@ char * GetRandomBytes (void) {
 	
 	devrandom = fopen ("/dev/random", "r");
 	if (devrandom == NULL) {
-		/* Use rand() if we don't have access to /dev/random. */
+		// Use rand() if we don't have access to /dev/random.
 		for (i = 0; i <= 7; i++) {
 			raw[i] = 1+(float)rand() / (float)RAND_MAX * 255;
 		}
@@ -78,15 +78,15 @@ char * GetRandomBytes (void) {
 }
 
 char * ConstructDigestAuth (char * username, char * password, char * url, char * authdata) {
-	char * authinfo;		/* Authorization header as sent to the server. */
+	char * authinfo;	// Authorization header as sent to the server.
 	char * token;
 	int len;
-	char * realm = NULL;	/* Variables for the overcomplicated and annoying HTTP digest algo. */
+	char * realm = NULL;	// Variables for the overcomplicated and annoying HTTP digest algo.
 	char * qop = NULL;
 	char * nonce = NULL;
 	char * opaque = NULL;
 	char * cnonce;
-	char szNonceCount[9] = "00000001";	/* Can be always 1 if we never use the same cnonce twice. */
+	char szNonceCount[9] = "00000001";	// Can be always 1 if we never use the same cnonce twice.
 	HASHHEX HA1;
 	HASHHEX HA2 = "";
 	HASHHEX Response;
@@ -125,12 +125,12 @@ char * ConstructDigestAuth (char * username, char * password, char * url, char *
 	DigestCalcHA1 ("md5", username, realm, password, nonce, cnonce, HA1);
 	DigestCalcResponse(HA1, nonce, szNonceCount, cnonce, "auth", "GET", url, HA2, Response);
 
-	/* Determine length of Authorize header.
-	 *
-	 * Authorization: Digest username="(username)", realm="(realm)",
-	 * nonce="(nonce)", uri="(url)", algorithm=MD5, response="(Response)",
-	 * qop=(auth), nc=(szNonceCount), cnonce="deadbeef"
-	 */
+	// Determine length of Authorize header.
+	//
+	// Authorization: Digest username="(username)", realm="(realm)",
+	// nonce="(nonce)", uri="(url)", algorithm=MD5, response="(Response)",
+	// qop=(auth), nc=(szNonceCount), cnonce="deadbeef"
+	//
 	if (opaque == NULL)
 		len = 32 + strlen(username) + 10 + strlen(realm) + 10 + strlen(nonce) + 8 + strlen(url) + 28 + strlen(Response) + 16 + strlen(szNonceCount) + 10 + strlen(cnonce) + 4 ;
 	else
@@ -156,11 +156,9 @@ char * ConstructDigestAuth (char * username, char * password, char * url, char *
 }
 
 
-/*
-Authorization: Digest username="(username)", realm="(realm)",
-nonce="(nonce)", uri="(url)", algorithm=MD5, response="(Response)",
-qop=(auth), nc=(szNonceCount), cnonce="deadbeef"
-*/
+// Authorization: Digest username="(username)", realm="(realm)",
+// nonce="(nonce)", uri="(url)", algorithm=MD5, response="(Response)",
+// qop=(auth), nc=(szNonceCount), cnonce="deadbeef"
 int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, const char * netbuf) {
 	char * header;
 	char * tmpstr;
@@ -169,15 +167,15 @@ int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, co
 	char * password = NULL;
 	char * authtype = NULL;
 	
-	/* Reset cur_ptr->authinfo. */
+	// Reset cur_ptr->authinfo.
 	free (cur_ptr->authinfo);
 	cur_ptr->authinfo = NULL;
 	
-	/* Catch invalid authdata. */
+	// Catch invalid authdata.
 	if (authdata == NULL) {
 		return 1;
 	} else if (strchr (authdata, ':') == NULL){
-		/* No authinfo found in URL. This should not happen. */
+		// No authinfo found in URL. This should not happen.
 		return 1;
 	}
 	
@@ -188,16 +186,16 @@ int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, co
 	username = strdup (freeme);
 	password = strdup (tmpstr);
 	
-	/* Free allocated string in tmpstr. */
+	// Free allocated string in tmpstr.
 	free (freeme);
 	
-	/* Extract requested auth type from webserver reply. */
+	// Extract requested auth type from webserver reply.
 	header = strdup (netbuf);
 	freeme = header;
 	strsep (&header, " ");
 	authtype = header;
 	
-	/* Catch invalid server replies. authtype should contain at least _something_. */
+	// Catch invalid server replies. authtype should contain at least _something_.
 	if (authtype == NULL) {
 		free (freeme);
 		free (username);
@@ -206,19 +204,19 @@ int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, co
 	}
 	
 	strsep (&header, " ");
-	/* header now contains:
-	   Basic auth:  realm
-	   Digest auth: realm + a lot of other stuff somehow needed by digest auth. */
+	// header now contains:
+	// Basic auth:  realm
+	// Digest auth: realm + a lot of other stuff somehow needed by digest auth.
 	
-	/* Determine auth type the server requests. */
+	// Determine auth type the server requests.
 	if (strncasecmp (authtype, "Basic", 5) == 0) {
-		/* Basic auth. */
+		// Basic auth.
 		cur_ptr->authinfo = ConstructBasicAuth (username, password);
 	} else if (strncasecmp (authtype, "Digest", 6) == 0) {
-		/* Digest auth. */
+		// Digest auth.
 		cur_ptr->authinfo = ConstructDigestAuth (username, password, url, header);
 	} else {
-		/* Unkown auth type. */
+		// Unkown auth type.
 		free (freeme);
 		free (username);
 		free (password);
@@ -236,14 +234,13 @@ int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, co
 	return 0;
 }
 
-/* HTTP token may only contain ASCII characters.
- *
- * Ensure that we don't hit the terminating \0 in a string
- * with the for loop.
- * The function also ensures that there is no NULL byte in the string.
- * If given binary data return at once if we read beyond
- * the boundary of sizeof(header).
- */
+// HTTP token may only contain ASCII characters.
+//
+// Ensure that we don't hit the terminating \0 in a string
+// with the for loop.
+// The function also ensures that there is no NULL byte in the string.
+// If given binary data return at once if we read beyond
+// the boundary of sizeof(header).
 int checkValidHTTPHeader (const unsigned char * header, int size) {
 	int i, len;
 	
@@ -276,4 +273,3 @@ int checkValidHTTPURL (const unsigned char * url) {
 	
 	return 0;
 }
-

@@ -45,15 +45,15 @@ char * UIOneLineEntryField (int x, int y) {
 
 	text = malloc(512);
         
-	/* UIStatus switches off attron! */
+	// UIStatus switches off attron!
 	attron (WA_REVERSE);
 	echo();
 	curs_set(1);
 
 	move (y, x);
-	/* Beware of hardcoded textlength size!
-	   getnstr size does NOT include \0. This is really stupid and causes
-	   1-byte overflows. Always size=len-1! */
+	// Beware of hardcoded textlength size!
+	// getnstr size does NOT include \0. This is really stupid and causes
+	// 1-byte overflows. Always size=len-1!
 	getnstr (text, 511);
 
 	noecho();
@@ -61,7 +61,7 @@ char * UIOneLineEntryField (int x, int y) {
 		curs_set(0);
 	attroff (WA_REVERSE);
 
-	/* This memory needs to be freed in the calling function! */
+	// This memory needs to be freed in the calling function!
 	return text;
 }
 
@@ -72,14 +72,14 @@ void UIChangeBrowser (void) {
 	
 	repeat:
 	
-	/* malloc = 17 (strlen("Current setting: ") + browser
-	   We will malloc a bigger junk, because other languages
-	   might need longer strings and crash! */
+	// malloc = 17 (strlen("Current setting: ") + browser
+	// We will malloc a bigger junk, because other languages
+	// might need longer strings and crash!
 	len = strlen(_("Current setting: %s")) + strlen(browser) + 1;
 	browserstring = malloc (len);
 	snprintf (browserstring, len, _("Current setting: %s"), browser);
 
-	/* Clear screen area we want to "draw" to. */
+	// Clear screen area we want to "draw" to.
 	attron (WA_REVERSE);
 	UISupportDrawBox (3, 5, COLS-4, 7);
 		
@@ -110,15 +110,14 @@ void UIChangeBrowser (void) {
 	free (browserstring);
 }
 
-/* Dialog to change feedname.
-   Return: 0	on success
-           1	on user abort
-		   2	original title restored
-*/
+// Dialog to change feedname.
+// Return: 0	on success
+//	   1	on user abort
+//	   2	original title restored
 void UIChangeFeedName (struct feed *cur_ptr) {
 	char *newname;
 
-	/* Clear screen area we want to "draw" to. */
+	// Clear screen area we want to "draw" to.
 	attron (WA_REVERSE);
 	UISupportDrawBox (3, 5, COLS-4, 7);
 
@@ -126,27 +125,27 @@ void UIChangeFeedName (struct feed *cur_ptr) {
 	
 	newname = UIOneLineEntryField (5, 6);
 	
-	/* If strlen is zero, return 1. */
+	// If strlen is zero, return 1.
 	if (strlen(newname) == 0) {
 		free (newname);
 		return;
 	}
 	
-	/* If newname contains "|", abort since this is used as a delimiter for the config file. */
+	// If newname contains "|", abort since this is used as a delimiter for the config file.
 	if (strstr (newname, "|") != NULL) {
 		free (newname);
 		UIStatus (_("The new title must not contain a \"|\" character!"), 2, 0);
 		return ;
 	}
 	
-	/* Restor original title. */
+	// Restor original title.
 	if ((newname != NULL) && (cur_ptr->override != NULL)) {
 		if (strcmp(newname, "-") == 0) {
 			if (cur_ptr->title != NULL)
 				free (cur_ptr->title);
 			cur_ptr->title = strdup(cur_ptr->original);
 			free (cur_ptr->original);
-			/* Set back original to NULL pointer. */
+			// Set back original to NULL pointer.
 			cur_ptr->original = NULL;
 			free (cur_ptr->override);
 			cur_ptr->override = NULL;
@@ -155,15 +154,15 @@ void UIChangeFeedName (struct feed *cur_ptr) {
 		}
 	}
 	
-	/* Copy new name into ->override. */
+	// Copy new name into ->override.
 	free (cur_ptr->override);
 	cur_ptr->override = strdup (newname);
 	
-	/* Save original. */
+	// Save original.
 	free (cur_ptr->original);
 	cur_ptr->original = strdup (cur_ptr->title);
 	
-	/* Set new title. */
+	// Set new title.
 	free (cur_ptr->title);
 	cur_ptr->title = strdup (newname);
 		
@@ -171,15 +170,15 @@ void UIChangeFeedName (struct feed *cur_ptr) {
 	return;
 }
 
-/* Popup window to add new RSS feed. Passing an URL will
-   automatically add it, no questions asked. */
+// Popup window to add new RSS feed. Passing an URL will
+// automatically add it, no questions asked.
 int UIAddFeed (char * newurl) {
 	char tmp[512];
 	char *url;
 	struct feed *new_ptr;
 
 	if (newurl == NULL) {
-		/* Clear screen area we want to "draw" to. */
+		// Clear screen area we want to "draw" to.
 		attron (WA_REVERSE);
 		UISupportDrawBox (3, 5, COLS-4, 7);
 
@@ -187,8 +186,8 @@ int UIAddFeed (char * newurl) {
 
 		url = UIOneLineEntryField (5, 6);
 
-		/* If read stringlength is ZARO (abort of action requested) return 1
-		and confuse the calling function. */
+		// If read stringlength is ZARO (abort of action requested) return 1
+		// and confuse the calling function.
 		if (strlen(url) == 0) {
 			free (url);
 			return 1;
@@ -196,13 +195,13 @@ int UIAddFeed (char * newurl) {
 		
 		CleanupString(url, 0);
 		
-		/* Support that stupid feed:// "protocol" */
+		// Support that stupid feed:// "protocol"
 		if (strncasecmp (url, "feed://", 7) == 0)
 			memcpy (url, "http", 4);
 		
-		/* If URL does not start with the procotol specification,
-		assume http://
-		-> tmp[512] -> we can "only" use max 504 chars from url ("http://" == 7). */
+		// If URL does not start with the procotol specification,
+		// assume http://
+		// -> tmp[512] -> we can "only" use max 504 chars from url ("http://" == 7).
 		if ((strncasecmp (url, "http://", 7) != 0) &&
 			(strncasecmp (url, "https://", 8) != 0) &&
 			(strncasecmp (url, "exec:", 5) != 0)) {
@@ -221,10 +220,10 @@ int UIAddFeed (char * newurl) {
 
 	new_ptr = newFeedStruct();
 	
-	/* getnstr does not return newline... says the docs. */
+	// getnstr does not return newline... says the docs.
 	new_ptr->feedurl = malloc (strlen(url)+1);
 	
-	/* Attach to feed pointer chain. */
+	// Attach to feed pointer chain.
 	strncpy (new_ptr->feedurl, url, strlen(url)+1);
 	new_ptr->next_ptr = first_ptr;
 	if (first_ptr != NULL)
@@ -232,17 +231,17 @@ int UIAddFeed (char * newurl) {
 	new_ptr->prev_ptr = NULL;
 	first_ptr = new_ptr;
 	
-	/* Tag execurl. */
+	// Tag execurl.
 	if (strncasecmp (url, "exec:", 5) == 0)
 		new_ptr->execurl = 1;
 	
 	if (strncasecmp (url, "smartfeed:", 10) == 0)
 		new_ptr->smartfeed = 1;
 		
-	/* Don't need url text anymore. */
+	// Don't need url text anymore.
 	free (url);
 
-	/* Download new feed and DeXMLize it. */	
+	// Download new feed and DeXMLize it. */	
 	if ((UpdateFeed (new_ptr)) != 0) {
 		UIStatus (_("The feed could not be parsed. Do you need a filter script for this feed? (y/n)"), 0, 0);
 		
@@ -259,23 +258,22 @@ int UIAddFeed (char * newurl) {
 			}
 		}
 	}
-
 	return 0;
 }
 
 void FeedInfo (struct feed * current_feed) {
 	int centerx, len;
-	char *hashme;						/* Hashed filename. */
+	char *hashme;	// Hashed filename.
 	char *file;
 	char *categories = NULL;
-	char *url;							/* feedurl - authinfo. */
+	char *url;	// feedurl - authinfo.
 	char *tmp = NULL;
 	char *tmp2;
 	struct stat filetest;
 	
 	url = strdup (current_feed->feedurl);
 	
-	/* Remove authinfo from URL. */
+	// Remove authinfo from URL.
 	tmp = strstr (url, "@");
 	if (tmp != NULL) {
 		tmp2 = strstr (url, "://");
@@ -305,7 +303,7 @@ void FeedInfo (struct feed * current_feed) {
 	} else
 		mvaddstr (9, centerx-(COLS/2-7), _("Not in disk cache."));
 		
-	/* Print category info */
+	// Print category info
 	mvaddstr (10, centerx-(COLS/2-7), _("Categories:"));
 	if (current_feed->feedcategories == NULL)
 		mvaddstr (10, centerx-(COLS/2-7)+strlen(_("Categories:"))+1, _("none"));
@@ -315,21 +313,21 @@ void FeedInfo (struct feed * current_feed) {
 		free (categories);
 	}
 	
-	/* Tell user if feed uses auth, but don't display the string. */
+	// Tell user if feed uses auth, but don't display the string.
 	if (tmp != NULL)
 		mvaddstr (11, centerx-(COLS/2-7), _("Feed uses authentication."));
 	else
 		mvaddstr (11, centerx-(COLS/2-7), _("Feed does not use authentication."));
 	
-	/* Add a smiley indicator to the http status telling the overall status
-	   so you don't have to know what the HTTP return codes mean.
-	   Yes I think I got the idea from cdparanoia. :) */
+	// Add a smiley indicator to the http status telling the overall status
+	// so you don't have to know what the HTTP return codes mean.
+	// Yes I think I got the idea from cdparanoia. :)
 	if (current_feed->lasthttpstatus != 0) {
 		if (current_feed->content_type == NULL) {
 			len = strlen(_("Last webserver status: %d"));
 			mvprintw (12, centerx-(COLS/2-7), _("Last webserver status: %d"), current_feed->lasthttpstatus);
 		} else {
-			len = strlen(_("Last webserver status: (%s) %d")) + strlen(current_feed->content_type) - 2; /* -2 == %s */
+			len = strlen(_("Last webserver status: (%s) %d")) + strlen(current_feed->content_type) - 2; // -2 == %s
 			mvprintw (12, centerx-(COLS/2-7), _("Last webserver status: (%s) %d"),
 				current_feed->content_type, current_feed->lasthttpstatus);
 		}
@@ -355,7 +353,7 @@ void FeedInfo (struct feed * current_feed) {
 		}
 	}
 	
-	/* Display filter script if any. */
+	// Display filter script if any.
 	if (current_feed->perfeedfilter != NULL) {
 		UISupportDrawBox (5, 13, COLS-6, 14);
 		attron (WA_REVERSE);
@@ -369,7 +367,7 @@ void FeedInfo (struct feed * current_feed) {
 	free (hashme);
 	free (url);
 
-	/* Wait for the any key. */
+	// Wait for the any key.
 	getch();
 }
 
@@ -390,7 +388,7 @@ int UIDeleteFeed (char * feedname) {
 }
 
 void UIHelpScreen (void) {
-	int centerx, centery;				/* Screen center x/y coordinate. */
+	int centerx, centery;				// Screen center x/y coordinate.
 	int userinput;
 	int offset = 18;
 	int offsetstr = 12;
@@ -401,7 +399,7 @@ void UIHelpScreen (void) {
 	UISupportDrawBox ((COLS/2)-20, (LINES/2)-10, (COLS/2)+24, (LINES/2)+10);
 	
 	attron (WA_REVERSE);
-	/* Keys */
+	// Keys
 	mvprintw (centery-9, centerx-offset, "%c:", keybindings.addfeed);	
 	mvprintw (centery-8, centerx-offset, "%c:", keybindings.deletefeed);
 	mvprintw (centery-7, centerx-offset, "%c:", keybindings.changefeedname);
@@ -421,7 +419,7 @@ void UIHelpScreen (void) {
 	mvprintw (centery+7, centerx-offset, "%c:", keybindings.about);
 	mvprintw (centery+8, centerx-offset, "%c:", 'E');
 	mvprintw (centery+9, centerx-offset, "%c:", keybindings.quit);
-	/* Descriptions */
+	// Descriptions
 	mvaddstr (centery-9, centerx-offsetstr, _("Add RSS feed..."));
 	mvaddstr (centery-8, centerx-offsetstr, _("Delete highlighted RSS feed..."));
 	mvaddstr (centery-7, centerx-offsetstr, _("Rename feed..."));
@@ -446,14 +444,13 @@ void UIHelpScreen (void) {
 	UIStatus (_("Press the any(tm) key to exit help screen."), 0, 0);
 	userinput = getch();
 	
-	/* Return input back into input queue so it gets automatically
-	   executed. */
+	// Return input back into input queue so it gets automatically executed.
 	if ((userinput != '\n') && (userinput != 'h') && (userinput != 'q'))
 		ungetch(userinput);
 }
 
 void UIDisplayFeedHelp (void) {
-	int centerx, centery;				/* Screen center x/y coordinate. */
+	int centerx, centery;				// Screen center x/y coordinate.
 	int userinput;
 	int offset = 18;
 	int offsetstr = 7;
@@ -464,7 +461,7 @@ void UIDisplayFeedHelp (void) {
 	UISupportDrawBox ((COLS/2)-20, (LINES/2)-6, (COLS/2)+24, (LINES/2)+7);
 	
 	attron (WA_REVERSE);
-	/* Keys */
+	// Keys
 	mvprintw (centery-5, centerx-offset, _("%c, up:"), keybindings.prev);	
 	mvprintw (centery-4, centerx-offset, _("%c, down:"), keybindings.next);
 	mvaddstr (centery-3, centerx-offset, _("enter:"));
@@ -477,7 +474,7 @@ void UIDisplayFeedHelp (void) {
 	mvprintw (centery+4, centerx-offset, "%c:", keybindings.feedinfo);
 	mvaddstr (centery+5, centerx-offset, _("tab:"));
 	mvprintw (centery+6, centerx-offset, "%c:", keybindings.prevmenu);
-	/* Descriptions */
+	// Descriptions
 	mvprintw (centery-5, centerx-offsetstr, _("Previous item"));	
 	mvprintw (centery-4, centerx-offsetstr, _("Next item"));
 	mvaddstr (centery-3, centerx-offsetstr, _("View item"));
@@ -499,7 +496,7 @@ void UIDisplayFeedHelp (void) {
 }
 
 void UIDisplayItemHelp (void) {
-	int centerx, centery;				/* Screen center x/y coordinate. */
+	int centerx, centery;				// Screen center x/y coordinate.
 	int userinput;
 	int offset = 16;
 	int offsetstr = 6;
@@ -510,12 +507,12 @@ void UIDisplayItemHelp (void) {
 	UISupportDrawBox ((COLS/2)-18, (LINES/2)-2, (COLS/2)+18, (LINES/2)+3);
 	
 	attron (WA_REVERSE);
-	/* Keys */
+	// Keys
 	mvprintw (centery-1, centerx-offset, "%c, <-:", keybindings.prev);	
 	mvprintw (centery,   centerx-offset, "%c, ->:", keybindings.next);
 	mvprintw (centery+1, centerx-offset, "%c:", keybindings.urljump);
 	mvprintw (centery+2, centerx-offset, _("%c, enter:"), keybindings.prevmenu);
-	/* Descriptions */
+	// Descriptions
 	mvaddstr (centery-1, centerx-offsetstr, _("Previous item"));	
 	mvaddstr (centery,   centerx-offsetstr, _("Next item"));
 	mvaddstr (centery+1, centerx-offsetstr, _("Open link"));
@@ -529,7 +526,7 @@ void UIDisplayItemHelp (void) {
 }
 
 
-/* Add/remove categories for given feed. This takes over the main interface while running. */
+// Add/remove categories for given feed. This takes over the main interface while running.
 void CategorizeFeed (struct feed * current_feed) {
 	int i, n, nglobal, y;
 	int uiinput;
@@ -538,19 +535,19 @@ void CategorizeFeed (struct feed * current_feed) {
 	struct feedcategories *category;
 	struct categories *cur_ptr;
 	
-	/* Return if we got passed a NULL pointer (no feeds added to main program). */
+	// Return if we got passed a NULL pointer (no feeds added to main program).
 	if (current_feed == NULL)
 		return;
 		
-	/* Determine number of global categories. */
+	// Determine number of global categories.
 	nglobal = 0;
 	for (cur_ptr = first_category; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
 		nglobal++;
 	}
 
-	/* We're taking over the program! */
+	// We're taking over the program!
 	while (1) {
-		/* Determine number of categories for current_feed. */
+		// Determine number of categories for current_feed.
 		n = 0;
 		for (category = current_feed->feedcategories; category != NULL; category = category->next_ptr) {
 			n++;
@@ -563,7 +560,7 @@ void CategorizeFeed (struct feed * current_feed) {
 			_("Category configuration for %s"), current_feed->title);
 		
 
-		/* No category defined yet */
+		// No category defined yet
 		if (current_feed->feedcategories == NULL) {
 			i = 49;
 			y = 5;
@@ -572,7 +569,7 @@ void CategorizeFeed (struct feed * current_feed) {
 				mvprintw (y+1, (COLS/2)-33, "%c. %s", i, cur_ptr->name);
 				y++;
 				i++;
-				/* Fast forward to 'a' if we hit ASCII 58 ':' */
+				// Fast forward to 'a' if we hit ASCII 58 ':'
 				if (i == 58)
 					i += 39;
 			}
@@ -586,7 +583,7 @@ void CategorizeFeed (struct feed * current_feed) {
 				mvprintw (y+1, (COLS/2)-33, "%c. %s", i, category->name);
 				y++;
 				i++;
-				/* Fast forward to 'a' if we hit ASCII 58 ':' */
+				// Fast forward to 'a' if we hit ASCII 58 ':'
 				if (i == 58)
 					i += 39;
 			}
@@ -601,7 +598,7 @@ void CategorizeFeed (struct feed * current_feed) {
 			return;
 		if (uiinput == 'A') {
 			if ((n > 0) && (nglobal > 0)) {
-				/* Clear screen area we want to "draw" to. */
+				// Clear screen area we want to "draw" to.
 				UISupportDrawBox ((COLS/2)-37, 5, (COLS/2)+37, 2+3+nglobal+1);
 			
 				attron (WA_REVERSE);
@@ -612,7 +609,7 @@ void CategorizeFeed (struct feed * current_feed) {
 					mvprintw (y+1, (COLS/2)-33, "%c. %s", i, cur_ptr->name);
 					y++;
 					i++;
-					/* Fast forward to 'a' if we hit ASCII 58 ':' */
+					// Fast forward to 'a' if we hit ASCII 58 ':'
 					if (i == 58)
 						i += 39;
 				}
@@ -624,7 +621,7 @@ void CategorizeFeed (struct feed * current_feed) {
 			}
 			
 			if (uiinput == 'A') {
-				/* Clear screen area we want to "draw" to. */
+				// Clear screen area we want to "draw" to.
 				UISupportDrawBox ((COLS/2)-37, 5, (COLS/2)+37, 2+3+nglobal+1);
 
 				attron (WA_REVERSE);
@@ -640,12 +637,12 @@ void CategorizeFeed (struct feed * current_feed) {
 				}
 				free (newcategory);
 			} else {
-				/* To add category below. */
+				// To add category below.
 				n = 0;
 			}
 		}
-		/* If uiinput is 1-9,a-z
-		   If uiinput < i (ASCII of max selectable element) ignore event. */
+		// If uiinput is 1-9,a-z
+		// If uiinput < i (ASCII of max selectable element) ignore event.
 		if ((((uiinput >= 49) && (uiinput <= 57)) ||
 			((uiinput >= 97) && (uiinput <= 122))) &&
 			(uiinput < i)) {
@@ -656,43 +653,42 @@ void CategorizeFeed (struct feed * current_feed) {
 				i = uiinput - 87;
 			
 			if (n > 0) {
-				/* Delete category code for n (number of categories defined for current feed) > 0 */
-
-				/* Decrease i by one while walking the category linked list.
-				   If we hit 0, break. category->name will now contain the category we want to remove. */
+				// Delete category code for n (number of categories defined for current feed) > 0
+				// Decrease i by one while walking the category linked list.
+				// If we hit 0, break. category->name will now contain the category we want to remove.
 				for (category = current_feed->feedcategories; category != NULL; category = category->next_ptr) {
 					if (i == 1)
 						break;
 					i--;
 				}
 			
-				/* Delete entry from feed categories. */
+				// Delete entry from feed categories.
 				FeedCategoryDelete (current_feed, category->name);
 			} else {
-				/* If n == 0 add category with number i to feed. */
+				// If n == 0 add category with number i to feed.
 				for (cur_ptr = first_category; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
 					if (i == 1)
 						break;
 					i--;
 				}
 				
-				/* Add category to current feed */
+				// Add category to current feed
 				FeedCategoryAdd (current_feed, cur_ptr->name);
 			}
 		}
 	}
 }
 
-/* Allocates and returns a filter string the user has chosen from the list of
-   available categories.
-   If no filter is chosen a NULL pointer is returned. */
+// Allocates and returns a filter string the user has chosen from the list of
+// available categories.
+// If no filter is chosen a NULL pointer is returned.
 char * DialogGetCategoryFilter (void) {
 	int i, nglobal, y;
 	char *filterstring = NULL;
 	int uiinput;
 	struct categories *cur_ptr;
 	
-	/* Determine number of global categories. */
+	// Determine number of global categories.
 	nglobal = 0;
 	for (cur_ptr = first_category; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
 		nglobal++;
@@ -709,7 +705,7 @@ char * DialogGetCategoryFilter (void) {
 		mvprintw (y+1, (COLS/2)-33, "%c. %s", i, cur_ptr->name);
 		y++;
 		i++;
-		/* Fast forward to 'a' if we hit ASCII 58 ':' */
+		// Fast forward to 'a' if we hit ASCII 58 ':'
 		if (i == 58)
 			i += 39;
 	}
@@ -720,8 +716,8 @@ char * DialogGetCategoryFilter (void) {
 		
 	uiinput = getch();
 
-	/* If uiinput is 1-9,a-z
-	   If uiinput < i (ASCII of max selectable element) ignore event. */
+	// If uiinput is 1-9,a-z
+	// If uiinput < i (ASCII of max selectable element) ignore event.
 	if ((((uiinput >= 49) && (uiinput <= 57)) ||
 		((uiinput >= 97) && (uiinput <= 123))) &&
 		(uiinput < i)) {
@@ -748,7 +744,7 @@ int UIPerFeedFilter (struct feed * current_feed) {
 	if (current_feed->smartfeed != 0)
 		return -1;
 
-	/* Clear screen area we want to "draw" to. */
+	// Clear screen area we want to "draw" to.
 	attron (WA_REVERSE);
 	UISupportDrawBox (3, 5, COLS-4, 7);
 
@@ -756,13 +752,13 @@ int UIPerFeedFilter (struct feed * current_feed) {
 	
 	newstring = UIOneLineEntryField (5, 6);
 	
-	/* If strlen is zero, return 1. */
+	// If strlen is zero, return 1.
 	if (strlen(newstring) == 0) {
 		free (newstring);
 		return 1;
 	}
 	
-	/* If newname contains "|", abort since this is used as a delimiter for the config file. */
+	// If newname contains "|", abort since this is used as a delimiter for the config file.
 	if (strstr (newstring, "|") != NULL) {
 		free (newstring);
 		return 3;

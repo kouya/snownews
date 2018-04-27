@@ -23,16 +23,16 @@ char * DownloadFeed (char * url, struct feed * cur_ptr, int suppressoutput);
 
 typedef enum {
 	NET_ERR_OK,
-	/* Init errors */
+	// Init errors
 	NET_ERR_URL_INVALID,
-	/* Connect errors */
+	// Connect errors
 	NET_ERR_SOCK_ERR,
 	NET_ERR_HOST_NOT_FOUND,
 	NET_ERR_CONN_REFUSED,
 	NET_ERR_CONN_FAILED,
 	NET_ERR_TIMEOUT,
 	NET_ERR_UNKNOWN,
-	/* Transfer errors */
+	// Transfer errors
 	NET_ERR_REDIRECT_COUNT_ERR,
 	NET_ERR_REDIRECT_ERR,
 	NET_ERR_HTTP_410,

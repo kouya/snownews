@@ -30,7 +30,7 @@ void AutoVersionCheck (void) {
 	struct feed *update;
 	FILE *lastupdated;
 	char file[512];
-	char timestring[21];	/* Should be enough for 64bit systems. */
+	char timestring[21];	// Should be enough for 64bit systems.
 	char oldtimestring[21];
 	int oldtime;
 	char *versionstring = NULL;
@@ -38,7 +38,7 @@ void AutoVersionCheck (void) {
 	
 	update = newFeedStruct();
 	
-	/* We check once a week. */
+	// We check once a week.
 	snprintf (timestring, sizeof(timestring), "%d", (int) time(NULL));
 	snprintf (file, sizeof(file), "%s/.snownews/updatecheck", getenv("HOME"));
 	lastupdated = fopen (file, "r+");
@@ -50,10 +50,10 @@ void AutoVersionCheck (void) {
 		fgets (oldtimestring, sizeof(oldtimestring), lastupdated);
 		oldtime = atoi(oldtimestring);
 		
-		/* If -1 is given in updatecheck or last check is <1 week, skip the check. */
+		// If -1 is given in updatecheck or last check is <1 week, skip the check.
 		if (((((int) time(NULL))-oldtime) < 604800) ||
 			(oldtime == -1)) {
-			/* Less than one week. */
+			// Less than one week.
 			fclose (lastupdated);
 			free (update);
 			return;

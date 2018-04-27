@@ -48,7 +48,7 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 	int result;
 	int new_bytes;
 
-	/* Prepare the stream structure. */
+	// Prepare the stream structure.
 	stream.zalloc = NULL;
 	stream.zfree = NULL;
 	stream.opaque = NULL;
@@ -61,7 +61,7 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 		*out_size = 0;
 
 	if (gzip)
-		result = inflateInit2(&stream, MAX_WBITS + 32); /* UNTESTED */
+		result = inflateInit2(&stream, MAX_WBITS + 32); // UNTESTED
 	else
 		result = inflateInit2(&stream, -MAX_WBITS);
 
@@ -72,13 +72,13 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 	}
 
 	do {
-		/* Should be Z_FINISH? */
+		// Should be Z_FINISH?
 		result = inflate(&stream, Z_NO_FLUSH);
 		switch (result) {
 			case Z_BUF_ERROR:
 				if (stream.avail_in == 0)
-					goto DONE; /* zlib bug */
-				/* fallthrough */
+					goto DONE; // zlib bug
+				// fallthrough
 			case Z_ERRNO:
 			case Z_NEED_DICT:
 			case Z_MEM_ERROR:
@@ -93,7 +93,7 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 				return JG_ZLIB_ERROR_UNCOMPRESS;
 		}
 		if (stream.avail_out < sizeof tmp_buf) {
-			/* Add the new uncompressed data to our output buffer. */
+			// Add the new uncompressed data to our output buffer.
 			new_bytes = sizeof tmp_buf - stream.avail_out;
 			out_buf = realloc(out_buf, out_buf_bytes + new_bytes);
 			memcpy(out_buf + out_buf_bytes, tmp_buf, new_bytes);
@@ -101,7 +101,7 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 			stream.next_out = tmp_buf;
 			stream.avail_out = sizeof tmp_buf;
 		} else {
-			/* For some reason, inflate() didn't write out a single byte. */
+			// For some reason, inflate() didn't write out a single byte.
 			inflateEnd(&stream);
 			free(out_buf);
 			if (JG_ZLIB_DEBUG)
@@ -114,11 +114,11 @@ DONE:
 
 	inflateEnd(&stream);
 
-	/* Null-terminate the output buffer so it can be handled like a string. */
+	// Null-terminate the output buffer so it can be handled like a string.
 	out_buf = realloc(out_buf, out_buf_bytes + 1);
 	out_buf[out_buf_bytes] = 0;
 
-	/* The returned size does NOT include the additionall null byte! */
+	// The returned size does NOT include the additionall null byte!
 	if (out_size != NULL)
 		*out_size = out_buf_bytes;
 
@@ -127,10 +127,8 @@ DONE:
 	return 0;
 }
 
-/* Decompressed gzip,deflate compressed data. This is what the webservers usually send. */
-
-int jg_gzip_uncompress(void const *in_buf, int in_size, 
-					   void **out_buf_ptr, int *out_size) 
+// Decompressed gzip,deflate compressed data. This is what the webservers usually send.
+int jg_gzip_uncompress(void const *in_buf, int in_size, void **out_buf_ptr, int *out_size)
 {
 	char tmpstring[1024];
 	struct gzip_header const *header;
@@ -163,7 +161,7 @@ int jg_gzip_uncompress(void const *in_buf, int in_size,
 	}
 
 	if (header->flags & 8) {
-		/* skip the file name */
+		// skip the file name
 		while (offset < in_size) {
 			if (((char *)in_buf)[offset] == 0) {
 				offset++;
@@ -175,6 +173,5 @@ int jg_gzip_uncompress(void const *in_buf, int in_size,
 
 	data_start = (char *)in_buf + offset;
 
-	return jg_zlib_uncompress(data_start, in_size - offset - 8, 
-							  out_buf_ptr, out_size, 0);
+	return jg_zlib_uncompress(data_start, in_size - offset - 8, out_buf_ptr, out_size, 0);
 }

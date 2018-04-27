@@ -22,20 +22,19 @@
 
 #include "main.h"
 
-/******************************************************************************
- * This is a replacement for strsep which is not portable (missing on Solaris).
- *
- * http://www.winehq.com/hypermail/wine-patches/2001/11/0024.html
- *
- * The following function was written by François Gouget.
- */
+//-----------------------------------------------------------------------------
+// This is a replacement for strsep which is not portable (missing on Solaris).
+//
+// http://www.winehq.com/hypermail/wine-patches/2001/11/0024.html
+//
+// The following function was written by Francois Gouget.
 #ifdef SUN
 char* strsep (char** str, const char* delims)
 {
     char* token;
 
     if (*str==NULL) {
-        /* No more tokens */
+        // No more tokens
         return NULL;
     }
 
@@ -48,12 +47,12 @@ char* strsep (char** str, const char* delims)
         }
         (*str)++;
     }
-    /* There is no other token */
+    // There is no other token
     *str=NULL;
    return token;
 }
 
-/* timegm() is not available on Solaris */
+// timegm() is not available on Solaris
 time_t timegm(struct tm *t)
 {
 	time_t tl, tb;
@@ -65,7 +64,7 @@ time_t timegm(struct tm *t)
 		t->tm_hour--;
 		tl = mktime (t);
 		if (tl == -1)
-			return -1; /* can't deal with output from strptime */
+			return -1; // can't deal with output from strptime
 		tl += 3600;
 	}
 	tg = gmtime (&tl);
@@ -76,14 +75,14 @@ time_t timegm(struct tm *t)
 		tg->tm_hour--;
 		tb = mktime (tg);
 		if (tb == -1)
-			return -1; /* can't deal with output from gmtime */
+			return -1; // can't deal with output from gmtime
 		tb += 3600;
 	}
 	return (tl - (tb - tl));
 }
 #endif
 
-/* strcasestr stolen from: http://www.unixpapa.com/incnote/string.html */
+// strcasestr stolen from: http://www.unixpapa.com/incnote/string.html
 const char* s_strcasestr (const char* a, const char* b) {
 	const size_t lena = strlen(a), lenb = strlen(b);
 	char f[3];
@@ -95,7 +94,7 @@ const char* s_strcasestr (const char* a, const char* b) {
 }
 
 
-/* Private malloc wrapper. Aborts program execution if malloc fails. */
+// Private malloc wrapper. Aborts program execution if malloc fails.
 void* s_malloc (size_t size) {
 	void* newmem = malloc (size);
 	if (!newmem)

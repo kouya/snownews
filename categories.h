@@ -23,17 +23,17 @@ int FeedCategoryExists (struct feed * cur_ptr, char * categoryname);
 char *GetCategoryList (struct feed * feed);
 void ResetFilters (char **filters);
 
-/* A feeds categories */
+// A feeds categories
 struct feedcategories {
-	char * name;						/* Category name */
+	char* name;	// Category name
 	struct feedcategories * next_ptr;
 };
 
-/* Global list of all defined categories, their refcounts and color labels. */
+// Global list of all defined categories, their refcounts and color labels.
 struct categories {
-	char * name;						/* Category name */
-	int refcount;						/* Number of feeds using this category. */
-	int label;							/* Color label of this category. */
+	char* name;	// Category name
+	int refcount;	// Number of feeds using this category.
+	int label;	// Color label of this category.
 	int labelbold;
 	struct categories * next_ptr;
 };

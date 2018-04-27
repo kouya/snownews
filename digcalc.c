@@ -22,7 +22,7 @@
 #include "digcalc.h"
 #include <openssl/evp.h>
 
-/* calculate H(A1) as per spec */
+// calculate H(A1) as per spec
 void DigestCalcHA1 (const char* pszAlg, const char* pszUserName, const char* pszRealm,
 	const char* pszPassword, const char* pszNonce, const char* pszCNonce,
 	HASHHEX SessionKey)
@@ -54,20 +54,20 @@ void DigestCalcHA1 (const char* pszAlg, const char* pszUserName, const char* psz
 		sprintf (&SessionKey[2*i], "%02x", md_value[i]);
 };
 
-/* calculate request-digest/response-digest as per HTTP Digest spec */
+// calculate request-digest/response-digest as per HTTP Digest spec
 void DigestCalcResponse(
-    const HASHHEX HA1,		/* H(A1) */
-    const char* pszNonce,	/* nonce from server */
-    const char* pszNonceCount,	/* 8 hex digits */
-    const char* pszCNonce,	/* client nonce */
-    const char* pszQop,		/* qop-value: "", "auth", "auth-int" */
-    const char* pszMethod,	/* method from the request */
-    const char* pszDigestUri,	/* requested URL */
-    const HASHHEX HEntity,	/* H(entity body) if qop="auth-int" */
-    HASHHEX Response		/* request-digest or response-digest */
+    const HASHHEX HA1,		// H(A1)
+    const char* pszNonce,	// nonce from server
+    const char* pszNonceCount,	// 8 hex digits
+    const char* pszCNonce,	// client nonce
+    const char* pszQop,		// qop-value: "", "auth", "auth-int"
+    const char* pszMethod,	// method from the request
+    const char* pszDigestUri,	// requested URL
+    const HASHHEX HEntity,	// H(entity body) if qop="auth-int"
+    HASHHEX Response		// request-digest or response-digest
     )
 {
-	/* calculate H(A2) */
+	// calculate H(A2)
 	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
 	EVP_DigestInit (mdctx, EVP_md5());
 	EVP_DigestUpdate (mdctx, pszMethod, strlen(pszMethod));
@@ -85,7 +85,7 @@ void DigestCalcResponse(
 	for (unsigned i = 0; i < md_len; ++i)
 		sprintf (&HA2Hex[2*i], "%02x", md_value[i]);
 
-	/* calculate response */
+	// calculate response
 	EVP_DigestInit (mdctx, EVP_md5());
 	EVP_DigestUpdate (mdctx, HA1, HASHHEXLEN);
 	EVP_DigestUpdate (mdctx, ":", 1);

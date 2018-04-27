@@ -39,13 +39,13 @@ struct entity *first_entity = NULL;
 struct keybindings keybindings;
 struct color color;
 
-char *browser;						/* Browser command. lynx is standard. */
-char *proxyname;					/* Hostname of proxyserver. */
-char *useragent;					/* Snownews User-Agent string. */
-unsigned short proxyport = 0;		/* Port on proxyserver to use. */
-int use_colors = 1;					/* Default to enabled. */
+char *browser;			// Browser command. lynx is standard.
+char *proxyname;		// Hostname of proxyserver.
+char *useragent;		// Snownews User-Agent string.
+unsigned short proxyport = 0;	// Port on proxyserver to use.
+int use_colors = 1;		// Default to enabled.
 
-/* Load browser command from ~./snownews/browser. */
+// Load browser command from ~./snownews/browser.
 void SetupBrowser (const char * file) {
 	char filebuf[256];
 	FILE *configfile;
@@ -55,32 +55,32 @@ void SetupBrowser (const char * file) {
 		UIStatus (_("Creating new config \"browser\"..."), 0, 0);
 		configfile = fopen (file, "w+");
 		if (configfile == NULL)
-			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); /* Still didn't work? */
+			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); // Still didn't work?
 		browser = strdup("lynx %s");
 		fputs (browser, configfile);
 		fclose (configfile);
 	} else {
-		/* Careful not to overflow char browser! */
+		// Careful not to overflow char browser!
 		fgets (filebuf, sizeof(filebuf), configfile);
 		browser = strdup(filebuf);
 		fclose (configfile);
-		/* Die newline, die! */
+		// Die newline, die!
 		if (browser[strlen(browser)-1] == '\n')
 			browser[strlen(browser)-1] = '\0';
 	}
 }
 
 
-/* Parse http_proxy environment variable and define proxyname and proxyport. */
+// Parse http_proxy environment variable and define proxyname and proxyport.
 void SetupProxy (void) {
 	char *freeme;
 	char *proxystring;
 	char *tmp;
 	
-	/* Check for proxy environment variable. */
+	// Check for proxy environment variable.
 	if (getenv("http_proxy") != NULL) {
-		/* The pointer returned by getenv must not be altered.
-		   What about mentioning this in the manpage of getenv? */
+		// The pointer returned by getenv must not be altered.
+		// What about mentioning this in the manpage of getenv?
 		proxystring = strdup(getenv("http_proxy"));
 		freeme = proxystring;
 		strsep (&proxystring, "/");
@@ -108,8 +108,8 @@ void SetupProxy (void) {
 }
 
 
-/* Construct the user agent string that snownews sends to the webserver.
-   This includes Snownews/VERSION, OS name and language setting. */
+// Construct the user agent string that snownews sends to the webserver.
+// This includes Snownews/VERSION, OS name and language setting.
 void SetupUserAgent (void) {
 	char *lang;
 	char url[] = "http://snownews.kcore.de/";
@@ -117,32 +117,32 @@ void SetupUserAgent (void) {
 
 	urllen = strlen(url);
 	
-	/* Constuct the User-Agent string of snownews. This is done here in program init,
-	   because we need to do it exactly once and it will never change while the program
-	   is running. */
+	// Constuct the User-Agent string of snownews. This is done here in program init,
+	// because we need to do it exactly once and it will never change while the program
+	// is running.
 	if (getenv("LANG") != NULL) {
 		lang = getenv("LANG");
-		/* Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/) */
+		// Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/)
 		ualen = strlen("Snownews/") + strlen(VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
 		useragent = malloc(ualen);
 		snprintf (useragent, ualen, "Snownews/%s (%s; %s; %s)", VERSION, OS, lang, url);
 	} else {
-		/* "Snownews/" + VERSION + "(http://kiza.kcore.de/software/snownews/)" */
+		// "Snownews/" + VERSION + "(http://kiza.kcore.de/software/snownews/)"
 		ualen = strlen("Snownews/") + strlen(VERSION) + 2 + strlen(OS) + 2 + urllen + 2;
 		useragent = malloc(ualen);
 		snprintf (useragent, ualen, "Snownews/%s (%s; %s)", VERSION, OS, url);
 	}
 }
 
-/* Define global keybindings and load user customized bindings. */
+// Define global keybindings and load user customized bindings.
 void SetupKeybindings (const char * file) {
 	char filebuf[128];
 	char *freeme, *tmpbuf;
 	FILE *configfile;
 
-	/* Define default values for keybindings. If some are defined differently
-	   in the keybindings file they will be overwritten. If some are missing or broken/wrong
-	   these are sane defaults. */
+	// Define default values for keybindings. If some are defined differently
+	// in the keybindings file they will be overwritten. If some are missing or broken/wrong
+	// these are sane defaults.
 	keybindings.next = 'n';
 	keybindings.prev = 'p';
 	keybindings.prevmenu = 'q';
@@ -182,17 +182,17 @@ void SetupKeybindings (const char * file) {
 	configfile = fopen (file, "r");
 
 	if (configfile != NULL) {
-		/* Read keybindings and populate keybindings struct. */
+		// Read keybindings and populate keybindings struct.
 		while (!feof(configfile)) {
 			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
 				break;
 			if (strstr(filebuf, "#") != NULL)
 				continue;
-			tmpbuf = strdup(filebuf);	/* strsep only works on *ptr */
-			freeme = tmpbuf;			/* Save start pos. This is also the string we need to compare. strsep will \0 the delimiter. */
+			tmpbuf = strdup(filebuf);	// strsep only works on *ptr
+			freeme = tmpbuf;		// Save start pos. This is also the string we need to compare. strsep will \0 the delimiter.
 			strsep (&tmpbuf, ":");
 
-			/* Munch trailing newline and avoid \n being bound to a function if no key is defined. */
+			// Munch trailing newline and avoid \n being bound to a function if no key is defined.
 			if (tmpbuf != NULL)
 				tmpbuf[strlen(tmpbuf)-1] = 0;
 
@@ -270,8 +270,8 @@ void SetupKeybindings (const char * file) {
 			free (freeme);
 		}
 		
-		/* Override old default settings and make sure there is no clash. */
-		/* Default browser is now B; b moved to page up. */
+		// Override old default settings and make sure there is no clash.
+		// Default browser is now B; b moved to page up.
 		if (keybindings.dfltbrowser == 'b') {
 			keybindings.dfltbrowser = 'B';
 		}
@@ -321,7 +321,7 @@ void SetupKeybindings (const char * file) {
 	fclose (configfile);
 }
 
-/* Set up colors and load user customized colors. */
+// Set up colors and load user customized colors.
 void SetupColors (const char * file) {
 	char filebuf[128];
 	char *freeme, *tmpbuf;
@@ -336,18 +336,18 @@ void SetupColors (const char * file) {
 	
 	configfile = fopen (file, "r");
 	
-	/* If there is a config file, read it. */
+	// If there is a config file, read it.
 	if (configfile != NULL) {
 		while (!feof(configfile)) {
 			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
 				break;
 			if (strstr(filebuf, "#") != NULL)
 				continue;
-			tmpbuf = strdup(filebuf);	/* strsep only works on *ptr */
-			freeme = tmpbuf;			/* Save start pos. This is also the string we need to compare. strsep will \0 the delimiter. */
+			tmpbuf = strdup(filebuf);	// strsep only works on *ptr
+			freeme = tmpbuf;		// Save start pos. This is also the string we need to compare. strsep will \0 the delimiter.
 			strsep (&tmpbuf, ":");
 
-			/* Munch trailing newline. */
+			// Munch trailing newline.
 			if (tmpbuf != NULL)
 				tmpbuf[strlen(tmpbuf)-1] = 0;
 				
@@ -380,8 +380,8 @@ void SetupColors (const char * file) {
 		fclose (configfile);
 	}
 	
-	/* Write the file. This will write all setting with their
-	   values read before and new ones with the defaults. */
+	// Write the file. This will write all setting with their
+	// values read before and new ones with the defaults.
 	configfile = fopen (file, "w+");
 	fputs ("# Snownews color definitons\n", configfile);
 	fputs ("# black:0\n", configfile);
@@ -409,37 +409,37 @@ void SetupColors (const char * file) {
 	if (use_colors) {
 		start_color();
 		
-		/* The following call will automagically implement -1 as the terminal's
-		   default color for fg/bg in init_pair. */
+		// The following call will automagically implement -1 as the terminal's
+		// default color for fg/bg in init_pair.
 		use_default_colors();
 		
-		/* Internally used color pairs.
-		   Use with WA_BOLD to get bright color (orange->yellow, gray->white, etc). */
-		init_pair (10, 1, -1);		/* red */
-		init_pair (11, 2, -1);		/* green */
-		init_pair (12, 3, -1);		/* orange */
-		init_pair (13, 4, -1);		/* blue */
-		init_pair (14, 5, -1);		/* magenta */
-		init_pair (15, 6, -1);		/* cyan */
-		init_pair (16, 7, -1);		/* gray */
+		// Internally used color pairs.
+		// Use with WA_BOLD to get bright color (orange->yellow, gray->white, etc).
+		init_pair (10, 1, -1);		// red
+		init_pair (11, 2, -1);		// green
+		init_pair (12, 3, -1);		// orange
+		init_pair (13, 4, -1);		// blue
+		init_pair (14, 5, -1);		// magenta
+		init_pair (15, 6, -1);		// cyan
+		init_pair (16, 7, -1);		// gray
 		
-		/* Default terminal color color pair */
+		// Default terminal color color pair
 		init_pair (63, -1, -1);
 		
-		/* Initialize all color pairs we're gonna use. */
-		/* New item. */
+		// Initialize all color pairs we're gonna use.
+		// New item.
 		if (color.newitemsbold == 1)
 			init_pair (2, color.newitems-8, -1);
 		else
 			init_pair (2, color.newitems, -1);
 			
-		/* Goto url line */
+		// Goto url line
 		if (color.urljumpbold == 1)
 			init_pair (3, color.urljump-8, -1);
 		else
 			init_pair (3, color.urljump, -1);
 		
-		/* Feed title header */
+		// Feed title header
 		if (color.feedtitlebold == 1)
 			init_pair (4, color.feedtitle-8, -1);
 		else
@@ -449,7 +449,7 @@ void SetupColors (const char * file) {
 
 }
 
-/* Load user customized entity conversion table. */
+// Load user customized entity conversion table.
 void SetupEntities (const char * file) {
 	char filebuf[128];
 	char *freeme, *tmpbuf, *tmppos;
@@ -469,9 +469,10 @@ void SetupEntities (const char * file) {
 		fputs ("# \n", configfile);
 		fputs ("# XML defined entities are converted by default. These are:\n# &amp;, &lt;, &gt;, &apos;, &quot;\n", configfile);
 		fputs ("# \n", configfile);
-		fputs ("&auml;ä\n&ouml;ö\n&uuml;ü\n", configfile);
-		fputs ("&Auml;Ä\n&Ouml;Ö\n&Uuml;Ü\n", configfile);
-		fputs ("&szlig;ß\n&nbsp; \n&mdash;--\n&hellip;...\n&#8220;\"\n&#8221;\"\n", configfile);
+		fprintf (configfile, "&auml;%c\n&ouml;%c\n&uuml;%c\n", 0xe4, 0xf6, 0xfc);	// umlauted a,o,u
+		fprintf (configfile, "&Auml;%c\n&Ouml;%c\n&Uuml;%c\n", 0xc4, 0xd6, 0xdc);	// umlauted A,O,U
+		fprintf (configfile, "&szlig;%c\n", 0xdf);	// german b
+		fputs ("&nbsp; \n&mdash;--\n&hellip;...\n&#8220;\"\n&#8221;\"\n", configfile);
 		fputs ("&raquo;\"\n&laquo;\"\n", configfile);
 		
 		fclose (configfile);
@@ -482,22 +483,22 @@ void SetupEntities (const char * file) {
 		if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
 			break;
 		
-		/* Discard comment lines. */
+		// Discard comment lines.
 		if (filebuf[0] == '#')
 			continue;
 		
-		/* Entities must start with '&', otherwise discard. */
+		// Entities must start with '&', otherwise discard.
 		if (filebuf[0] == '&') {
 			entity = malloc (sizeof (struct entity));
 			
 			tmpbuf = strdup (filebuf);
 			freeme = tmpbuf;
 			
-			/* Munch trailing newline. */
+			// Munch trailing newline.
 			if (tmpbuf[strlen(tmpbuf)-1] == '\n')
 				tmpbuf[strlen(tmpbuf)-1] = '\0';
 			
-			/* Delete starting '&' and set pointer to beginning of entity. */
+			// Delete starting '&' and set pointer to beginning of entity.
 			tmpbuf[0] = '\0';
 			tmpbuf++;
 			tmppos = tmpbuf;
@@ -511,7 +512,7 @@ void SetupEntities (const char * file) {
 			
 			free (freeme);
 			
-			/* Add entity to linked list structure. */
+			// Add entity to linked list structure.
 			if (first_entity == NULL)
 				first_entity = entity;
 			else {
@@ -524,38 +525,37 @@ void SetupEntities (const char * file) {
 	}
 }
 
-/* Create snownews' config directories if they do not exist yet,
-   load global configuration settings and caches.
-   
-   Returns number of feeds successfully loaded. */
+// Create snownews' config directories if they do not exist yet,
+// load global configuration settings and caches.
+//
+// Returns number of feeds successfully loaded.
+//
 int Config (void) {
-	char file[512];					/* File locations. */
+	char file[512];			// File locations.
 	char filebuf[2048];
 	char *freeme, *tmpbuf, *tmppos, *tmpstr;
-	char *categories = NULL;		/* Holds comma seperated category string. */
+	char *categories = NULL;	// Holds comma seperated category string.
 	FILE *configfile;
 	FILE *errorlog;
 	struct feed *new_ptr;
 	struct stat dirtest;
-	int numfeeds = 0;				/* Number of feeds we have. */
+	int numfeeds = 0;		// Number of feeds we have.
 	
 	SetupProxy();
 	
 	SetupUserAgent();	
 		
-	/* Set umask to 077 for all created files. */
+	// Set umask to 077 for all created files.
 	umask(63);
 	
-	/* 
-	 * Setup config directories.
-	 */
+	// Setup config directories.
 	snprintf (file, sizeof(file), "%s/.snownews", getenv("HOME"));
 	if ((stat (file, &dirtest)) == -1 ) {
-		/* Create directory. */
+		// Create directory.
 		if (mkdir (file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
 			MainQuit ("Creating config directory ~/.snownews/", strerror(errno));
 	} else {
-		/* Something with the name .snownews exists, let's see what it is. */
+		// Something with the name .snownews exists, let's see what it is.
 		if ((dirtest.st_mode & S_IFDIR) != S_IFDIR) {
 			MainQuit ("Creating config directory ~/.snownews/",
 				"A file with the name \"~/.snownews/\" exists!");
@@ -564,7 +564,7 @@ int Config (void) {
 	
 	snprintf (file, sizeof(file), "%s/.snownews/cache", getenv("HOME"));
 	if ((stat (file, &dirtest)) == -1) {
-		/* Create directory. */
+		// Create directory.
 		if (mkdir (file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
 			MainQuit (_("Creating config directory ~/.snownews/cache/"), strerror(errno));
 	} else {
@@ -574,8 +574,8 @@ int Config (void) {
 		}
 	}
 	
-	/* Redirect stderr to ~/.snownews/error.log
-	   Be sure to call _after_ the directory checks above! */
+	// Redirect stderr to ~/.snownews/error.log
+	// Be sure to call _after_ the directory checks above!
 	snprintf (file, sizeof(file), "%s/.snownews/error.log", getenv("HOME"));
 	errorlog = fopen (file, "w+");
 	dup2 (fileno(errorlog), STDERR_FILENO);
@@ -585,9 +585,9 @@ int Config (void) {
 	snprintf (file, sizeof(file), "%s/.snownews/browser", getenv("HOME"));
 	SetupBrowser (file);
 
-	/*************
-	 * Feed list *
-	 *************/
+	//------------
+	// Feed list
+	//------------
 	
 	snprintf (file, sizeof(file), "%s/.snownews/urls", getenv("HOME"));
 	configfile = fopen (file, "r");
@@ -595,7 +595,7 @@ int Config (void) {
 		UIStatus (_("Creating new configfile."), 0, 0);
 		configfile = fopen (file, "w+");
 		if (configfile == NULL)
-			MainQuit (_("Create initial configfile \"urls\""), strerror(errno));	/* Still didn't work? */
+			MainQuit (_("Create initial configfile \"urls\""), strerror(errno));	// Still didn't work?
 	} else {
 		while (!feof(configfile)) {
 			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
@@ -606,20 +606,20 @@ int Config (void) {
 			numfeeds++;
 			new_ptr = newFeedStruct();
 
-			/* Reset to NULL on every loop run! */
+			// Reset to NULL on every loop run!
 			categories = NULL;
 			
-			/* File format is url|custom name|comma seperated categories */
+			// File format is url|custom name|comma seperated categories
 			tmpbuf = strdup (filebuf);
 			
-			/* Munch trailing newline. */
+			// Munch trailing newline.
 			if (tmpbuf[strlen(tmpbuf)-1] == '\n')
 				tmpbuf[strlen(tmpbuf)-1] = '\0';
 				
 			freeme = tmpbuf;
 			tmpstr = strsep (&tmpbuf, "|");
 			
-			/* The first | was squished with \0 so we can strdup the first part. */
+			// The first | was squished with \0 so we can strdup the first part.
 			new_ptr->feedurl = strdup (freeme);
 			
 			if (strncasecmp (new_ptr->feedurl, "exec:", 5) == 0) {
@@ -628,7 +628,7 @@ int Config (void) {
 				new_ptr->smartfeed = 1;
 			}
 			
-			/* Save start position of override string */
+			// Save start position of override string
 			tmpstr = strsep (&tmpbuf, "|");
 			if (tmpstr != NULL) {
 				if (*tmpstr != '\0')
@@ -646,10 +646,10 @@ int Config (void) {
 					new_ptr->perfeedfilter = strdup (tmpstr);
 			}
 			
-			/* We don't need freeme anymore. */
+			// We don't need freeme anymore.
 			free (freeme);
 			
-			/* Put categories into cat struct. */
+			// Put categories into cat struct.
 			if (categories != NULL) {
 				freeme = categories;
 				
@@ -664,12 +664,12 @@ int Config (void) {
 			} else
 				new_ptr->feedcategories = NULL;
 			
-			/* Load cookies for this feed.
-			   But skip loading cookies for execurls. */
+			// Load cookies for this feed.
+			// But skip loading cookies for execurls.
 			if (new_ptr->execurl != 1)
 				LoadCookies (new_ptr);
 			
-			/* Add to bottom of pointer chain. */
+			// Add to bottom of pointer chain.
 			new_ptr->next_ptr = NULL;
 			if (first_ptr == NULL) {
 				new_ptr->prev_ptr = NULL;

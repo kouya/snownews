@@ -167,16 +167,15 @@ void PrintUpdateError (int suppressoutput, struct feed * cur_ptr) {
 				snprintf(errstr, sizeof(errstr), _("%s: Some error occured for which no specific error message was written."), cur_ptr->title);
 				break;
 		}
-		/* Must be inside if(!suppressoutput) statement! */
+		// Must be inside if(!suppressoutput) statement!
 		UIStatus(errstr, 2, 1);
 	}
 	printlog(cur_ptr, errstr);
 }
 
 
-/* Update given feed from server.
- * Reload XML document and replace in memory cur_ptr->feed with it.
- */
+// Update given feed from server.
+// Reload XML document and replace in memory cur_ptr->feed with it.
 int UpdateFeed (struct feed * cur_ptr) {
 	char *tmpname;
 	char *freeme;
@@ -184,20 +183,17 @@ int UpdateFeed (struct feed * cur_ptr) {
 	if (cur_ptr == NULL)
 		return 1;
 	
-	/* Smart feeds are generated in the fly. */
+	// Smart feeds are generated in the fly.
 	if (cur_ptr->smartfeed == 1)
 		return 0;
 		
-	/* If current feed is an exec URL, run that command, otherwise fetch
-	   resource from network. */
+	// If current feed is an exec URL, run that command, otherwise fetch resource from network.
 	if (cur_ptr->execurl) {
 		FilterExecURL (cur_ptr);
 	} else {
-		/* Need to work on a copy of ->feedurl, because DownloadFeed()
-		   changes the pointer. */
+		// Need to work on a copy of ->feedurl, because DownloadFeed() changes the pointer.
 		tmpname = strdup (cur_ptr->feedurl);
-		freeme = tmpname;		/* Need to make a copy, otherwise we cannot free
-								   all RAM. */
+		freeme = tmpname;		// Need to make a copy, otherwise we cannot free all RAM.
 	
 		free (cur_ptr->feed);
 
@@ -205,15 +201,15 @@ int UpdateFeed (struct feed * cur_ptr) {
 
 		free (freeme);
 
-		/* Set title and link structure to something.
-		 * To the feedurl in this case so the program show something
-		 * as placeholder instead of crash. */
+		// Set title and link structure to something.
+		// To the feedurl in this case so the program show something
+		// as placeholder instead of crash.
 		if (cur_ptr->title == NULL)
 			cur_ptr->title = strdup (cur_ptr->feedurl);
 		if (cur_ptr->link == NULL)
 			cur_ptr->link = strdup (cur_ptr->feedurl);
 
-		/* If the download function returns a NULL pointer return from here. */
+		// If the download function returns a NULL pointer return from here.
 		if (cur_ptr->feed == NULL) {
 			if (cur_ptr->problem == 1)
 				PrintUpdateError (0, cur_ptr);
@@ -221,22 +217,22 @@ int UpdateFeed (struct feed * cur_ptr) {
 		}
 	}
 	
-	/* Feed downloaded content through the defined filter. */
+	// Feed downloaded content through the defined filter.
 	if (cur_ptr->perfeedfilter != NULL)
 		FilterPipeNG (cur_ptr);
 	
-	/* If there is no feed, return. */
+	// If there is no feed, return.
 	if (cur_ptr->feed == NULL)
 		return 1;
 	
 	if ((DeXML (cur_ptr)) != 0) {
 		UIStatus (_("Invalid XML! Cannot parse this feed!"), 2, 1);
-		/* Activate feed problem flag. */
+		// Activate feed problem flag.
 		cur_ptr->problem = 1;
 		return 1;
 	}
 	
-	/* We don't need these anymore. Free the raw XML to save some memory. */
+	// We don't need these anymore. Free the raw XML to save some memory.
 	free (cur_ptr->feed);
 	cur_ptr->feed = NULL;
 		
@@ -254,17 +250,17 @@ int UpdateAllFeeds (void) {
 	return 0;
 }
 
-/* Load feed from disk. And call UpdateFeed if neccessary. */
+// Load feed from disk. And call UpdateFeed if neccessary.
 int LoadFeed (struct feed * cur_ptr) {
-	int len = 0;				/* Internal usage for realloc. */
+	int len = 0;				// Internal usage for realloc.
 	int retval;
-	char filebuf[4096];			/* File I/O block buffer. */
+	char filebuf[4096];			// File I/O block buffer.
 	char file[512];
- 	char *hashme;				/* Hashed filename. */
- 	char tmp[1024];
+	char *hashme;				// Hashed filename.
+	char tmp[1024];
 	FILE *cache;
 	
-	/* Smart feeds are generated in the fly. */
+	// Smart feeds are generated in the fly.
 	if (cur_ptr->smartfeed == 1)
 		return 0;
 	
@@ -282,9 +278,9 @@ int LoadFeed (struct feed * cur_ptr) {
 		return 0;
 	}
 
-	/* Read complete cachefile. */
+	// Read complete cachefile.
 	while (!feof(cache)) {
-		/* Use binary read, UTF-8 data! */
+		// Use binary read, UTF-8 data!
 		retval = fread (filebuf, 1, sizeof(filebuf), cache);
 		if (retval == 0)
 			break;
@@ -304,11 +300,11 @@ int LoadFeed (struct feed * cur_ptr) {
 	
 	fclose (cache);
 	
-	/* After loading DeXMLize the mess. */
+	// After loading DeXMLize the mess.
 	if ((DeXML (cur_ptr)) != 0) {
-		/* If loading the feed from the disk fails, try downloading from the net. */
+		// If loading the feed from the disk fails, try downloading from the net.
 		if ((UpdateFeed (cur_ptr)) != 0) {
-			/* And if that fails as well, just continue without this feed. */
+			// And if that fails as well, just continue without this feed.
 			snprintf (tmp, sizeof(tmp), _("Could not load %s!"), cur_ptr->feedurl);
 			UIStatus (tmp, 2, 1);
 		}
@@ -322,7 +318,7 @@ int LoadFeed (struct feed * cur_ptr) {
 
 
 int LoadAllFeeds (int numfeeds) {
-	float numobjperfeed = 0;				/* Number of "progress bar" objects to draw per feed. */
+	float numobjperfeed = 0;				// Number of "progress bar" objects to draw per feed.
 	int count = 1;
 	int numobjects = 0;
 	int oldnumobjects = 0;
@@ -336,7 +332,7 @@ int LoadAllFeeds (int numfeeds) {
 		numobjperfeed = (COLS-titlestrlen-2)/(double) numfeeds;
 	
 	for (cur_ptr = first_ptr; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
-		/* Progress bar */
+		// Progress bar
 		numobjects = (count * numobjperfeed) - 2;
 		if (numobjects < 1)
 			numobjects = 1;
@@ -355,12 +351,11 @@ int LoadAllFeeds (int numfeeds) {
 }
 
 
-/* Write in memory structures to disk cache.
- * Usually called before program exit.
- */
+// Write in memory structures to disk cache.
+// Usually called before program exit.
 void WriteCache (void) {
-	char file[512];				/* File locations. */
-	char *hashme;				/* Cache file name. */
+	char file[512];		// File locations.
+	char *hashme;		// Cache file name.
 	char readstatus[2];
 	char snowdate[32];
 	char syscall[512];
@@ -371,7 +366,7 @@ void WriteCache (void) {
 	struct stat filetest;
 	struct feedcategories *category;
 	char *encoded;
-	float numobjperfeed = 0;				/* Number of "progress bar" objects to draw per feed. */
+	float numobjperfeed = 0;	// Number of "progress bar" objects to draw per feed.
 	int count = 1;
 	int numobjects = 0;
 	int oldnumobjects = 0;
@@ -391,7 +386,7 @@ void WriteCache (void) {
 	
 	snprintf (file, sizeof(file), "%s/.snownews/urls", getenv("HOME"));
 	
-	/* Make a backup of urls. This approach is really broken! */
+	// Make a backup of urls. This approach is really broken!
 	if ((stat (file, &filetest)) != -1) {
 		if ((filetest.st_mode & S_IFREG) == S_IFREG) {
 			snprintf (syscall, sizeof(file), "mv -f %s/.snownews/urls %s/.snownews/urls.bak", getenv("HOME"), getenv("HOME"));
@@ -405,7 +400,7 @@ void WriteCache (void) {
 		MainQuit (_("Save settings (urls)"), strerror(errno));
 	}
 	
-	/* Unoptimized vs. KISS */
+	// Unoptimized vs. KISS
 	for (cur_ptr = first_ptr; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr)
 		numfeeds++;
 	
@@ -413,7 +408,7 @@ void WriteCache (void) {
 		numobjperfeed = (COLS-titlestrlen-2)/(double) numfeeds;
 	
 	for (cur_ptr = first_ptr; cur_ptr != NULL; cur_ptr = cur_ptr->next_ptr) {
-		/* Progress bar */
+		// Progress bar
 		numobjects = (count * numobjperfeed) - 2;
 		if (numobjects < 1)
 			numobjects = 1;
@@ -434,7 +429,7 @@ void WriteCache (void) {
 		if (cur_ptr->feedcategories != NULL) {
 			for (category = cur_ptr->feedcategories; category != NULL; category = category->next_ptr) {
 				fputs (category->name, configfile);
-				/* Only add a colon of we run the loop again! */
+				// Only add a colon of we run the loop again!
 				if (category->next_ptr != NULL)
 					fputc (',', configfile);
 			}
@@ -444,15 +439,13 @@ void WriteCache (void) {
 		if (cur_ptr->perfeedfilter != NULL)
 			fputs (cur_ptr->perfeedfilter, configfile);
 			
-		fputc ('\n', configfile);		/* Add newline character. */
+		fputc ('\n', configfile);		// Add newline character.
 		
-		/* Discard smart feeds from cache. */
+		// Discard smart feeds from cache.
 		if (cur_ptr->smartfeed)
 			continue;
 		
-		/* 
-		 * Write cache.
-		 */
+		// Write cache.
 		hashme = Hashify(cur_ptr->feedurl);
 		snprintf (file, sizeof(file), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
 		free (hashme);

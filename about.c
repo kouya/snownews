@@ -29,7 +29,7 @@
 extern struct keybindings keybindings;
 extern struct color color;
 
-/* Snowflake for the xmas about box. */
+// Snowflake for the xmas about box.
 struct snowflake {
 	int x;
 	int y;
@@ -37,14 +37,14 @@ struct snowflake {
 	int oldy;
 	char oldchar;
 	char oldchar2;
-	int visible;		/* Don't draw flakes over text. */
-	int vspeed;			/* Vertical speed of the flake */
-	int hspeed;			/* Horizontal speed */
+	int visible;		// Don't draw flakes over text.
+	int vspeed;		// Vertical speed of the flake
+	int hspeed;		// Horizontal speed
 	struct snowflake * next;
 	struct snowflake * prev;
 };
 
-/* Santa Hunta */
+// Santa Hunta
 typedef struct shot {
 	int x;
 	int y;
@@ -69,9 +69,10 @@ typedef struct scoreDisplay {
 	int rounds;
 } scoreDisplay;
 
-/* This draws the colored parts of the christmas tree.
-   Called everytime during SnowFall to avoid to much duplicate code.
-   Use sparsly as snowflakes will vanish behind this elements. */
+// This draws the colored parts of the christmas tree.
+// Called everytime during SnowFall to avoid to much duplicate code.
+// Use sparesly as snowflakes will vanish behind this elements.
+//
 void ChristmasTree (void) {
 	attron (COLOR_PAIR(13));
 	mvaddch (6, 13, '&');
@@ -91,60 +92,63 @@ void ChristmasTree (void) {
 	attroff (COLOR_PAIR(14));
 }
 
-/* This function sometimes deletes characters. Maybe oldchar doesn't
-   get saved correctly everytime... But who cares!? :P */
+// This function sometimes deletes characters. Maybe oldchar doesn't
+// get saved correctly everytime... But who cares!? :P
+//
 void Snowfall (int christmastree) {
 	struct snowflake *cur;
 	struct snowflake *first = NULL;
 	struct snowflake *new;
 	struct snowflake *curnext;
-	/* The idea behind wind:
-	   Determine windtimer and wait that many rounds before we initially
-	   select any windspeed. If we've waited enough rounds (windtimer==0)
-	   select a windspeed and windtimer (which should be much less than
-	   between the storms). Use (slightly randomly offset) windspeed to
-	   blow snowflakes around (to left or right). If windtimer drops to 0
-	   again select new windtimer, wait, repeat. */
+	//
+	// The idea behind wind:
+	//
+	// Determine windtimer and wait that many rounds before we initially
+	// select any windspeed. If we've waited enough rounds (windtimer==0)
+	// select a windspeed and windtimer (which should be much less than
+	// between the storms). Use (slightly randomly offset) windspeed to
+	// blow snowflakes around (to left or right). If windtimer drops to 0
+	// again select new windtimer, wait, repeat.
+	//
 	int windspeed = 0;
 	int windtimer = 0;
-	int wind = 1;			/* 1: wind active, 0: inactive 
-							   set to 1 here so the first loop run clears it. */
-	int newflake = 0;		/* Time until a new flake appears. */
+	int wind = 1;		// 1: wind active, 0: inactive
+				// set to 1 here so the first loop run clears it.
+	int newflake = 0;	// Time until a new flake appears.
 
-	/* Set ncurses halfdelay mode. */
-	halfdelay (3);
+	halfdelay (3);		// Set ncurses halfdelay mode.
 
-	/* White snowflakes! */
-	/* Doesn't work on white terminal background... obviously.
-	attron (COLOR_PAIR(16));
-	attron (WA_BOLD); */
+	// White snowflakes!
+	#if 0
+	    // Doesn't work on white terminal background... obviously.
+	    attron (COLOR_PAIR(16));
+	    attron (WA_BOLD);
+	#endif
 
 	while (1) {
-		/* Set up the storm. */
+		// Set up the storm.
 		if (windtimer == 0) {
-			if (wind) {
-				/* Entering silence */
+			if (wind) {	// Entering silence
 				windtimer = 10 + ((float)rand() / (float)RAND_MAX * 50);
 				wind = 0;
 				windspeed = 0;
-			} else {
-				/* Entering storm. */
+			} else {	// Entering storm.
 				windtimer = 10 + ((float)rand() / (float)RAND_MAX * 20);
 				wind = 1;
 				windspeed = (1+(float)rand() / (float)RAND_MAX * 11)-6;
 			}
 		}
-		/*
-		mvaddstr(2,1,     "                              ");
-		if (wind)
-			mvprintw (2,1,"Windspeed: %d; rounds left: %d",windspeed,windtimer);
-		else
-			mvprintw (2,1,"No wind; rounds left: %d",windtimer);
-		*/
+		#if 0
+			mvaddstr(2,1,     "                              ");
+			if (wind)
+				mvprintw (2,1,"Windspeed: %d; rounds left: %d",windspeed,windtimer);
+			else
+				mvprintw (2,1,"No wind; rounds left: %d",windtimer);
+		#endif
 
-		/* Add new snowflakes. */
+		// Add new snowflakes.
 		if (newflake == 0) {
-			/* Add new flake to pointer chain with random x offset. */
+			// Add new flake to pointer chain with random x offset.
 			new = malloc (sizeof (struct snowflake));
 			new->y = 0;
 			new->x = (float)rand() / (float)RAND_MAX * COLS;
@@ -155,7 +159,7 @@ void Snowfall (int christmastree) {
 			new->vspeed = 1+(float)rand() / (float)RAND_MAX * 2;
 			new->hspeed = (1+(float)rand() / (float)RAND_MAX * 7)-4;
 
-			/* Add our new snowflake to the pointer chain. */
+			// Add our new snowflake to the pointer chain.
 			new->next = NULL;
 			if (first == NULL) {
 				new->prev = NULL;
@@ -167,22 +171,21 @@ void Snowfall (int christmastree) {
 				new->prev->next = new;
 			}
 
-			/* Set new counter until next snowflake. */
+			// Set new counter until next snowflake.
 			newflake = 1+(float)rand() / (float)RAND_MAX * 2;
-			/*
-			mvaddstr (1,1,"      ");
-			mvprintw (1,1,"New flake in %d rounds.", newflake);
-			*/
+			#if 0
+				mvaddstr (1,1,"      ");
+				mvprintw (1,1,"New flake in %d rounds.", newflake);
+			#endif
 		}
 
 		for (cur = first; cur != NULL; cur = curnext) {
 			curnext = cur->next;
-			/* Draw every snowflake at its coordinates to the screen. */
+			// Draw every snowflake at its coordinates to the screen.
 			if (cur->visible) {
-				/* Only draw if y<=LINES. This makes some snow lie on bottom of screen. */
+				// Only draw if y<=LINES. This makes some snow lie on bottom of screen.
 				if (cur->y <= LINES) {
-					/* Restore old char with proper color.
-					   See also ChristmasTree() above. */
+					// Restore old char with proper color. See also ChristmasTree() above.
 					if (((cur->oldx < 25) && (cur->oldy > 5)) ||
 						(cur->oldx < 20))
 						attron (COLOR_PAIR(11));
@@ -205,13 +208,13 @@ void Snowfall (int christmastree) {
 				cur->oldx = cur->x;
 				cur->oldy = cur->y;
 			}
-			/* Set new hspeed for flake */
+			// Set new hspeed for flake
 			cur->hspeed = (1+(float)rand() / (float)RAND_MAX * 7)-4;
 
-			/* Advance every flake downwards by a random amount and to
-			   the left or right.
-			   Check if the next position would obscure a character on the screen
-			   and set visible to 0 in this case. Clear visible flag as needed. */
+			// Advance every flake downwards by a random amount and to
+			// the left or right.
+			// Check if the next position would obscure a character on the screen
+			// and set visible to 0 in this case. Clear visible flag as needed.
 			cur->y += cur->vspeed;
 			if (wind)
 				cur->hspeed += windspeed;
@@ -231,14 +234,14 @@ void Snowfall (int christmastree) {
 				continue;
 			}
 
-			/* Only draw if we're still inside the window. */
+			// Only draw if we're still inside the window.
 			if (cur->y <= LINES) {
-				/*
-				mvaddstr (3,1,"                ");
-				mvprintw (3,1,"Flake hspeed: %d",cur->hspeed);
-				*/
+				#if 0
+					mvaddstr (3,1,"                ");
+					mvprintw (3,1,"Flake hspeed: %d",cur->hspeed);
+				#endif
 				cur->oldchar2 = cur->oldchar;
-				/* Reset to ' ' if we accidently set it to *. */
+				// Reset to ' ' if we accidently set it to *.
 				if (cur->oldchar2 == '*')
 					cur->oldchar2 = ' ';
 				if ((cur->x <= COLS) && (cur->y <= LINES))
@@ -253,21 +256,21 @@ void Snowfall (int christmastree) {
 
 		refresh();
 
-		/* Leave loop if anykey(tm) was pressed. */
+		// Leave loop if anykey(tm) was pressed.
 		if (getch() != ERR)
 			break;
 	}
-	/* Leave halfdelay mode. */
+	// Leave halfdelay mode.
 	cbreak();
 }
 
 void xmasAbout (void) {
-	/* Logo */
+	// Logo
 	mvaddstr (1,  0, "                      _____ _____    ____ _______ _____   ____ _______   _____");
 	mvaddstr (2,  0, "                     /  __/ \\    \\  / __ \\\\ |  | \\\\    \\ /  _/ \\ |  | \\ /  __/");
 	mvaddstr (3,  0, "                     \\___ \\  \\ |  \\ \\ \\/ / \\     / \\ |  \\\\ __\\  \\     / \\___ \\");
 	mvaddstr (4,  0, "                     /____/  /_|__/  \\__/  /__|_/  /_|__/ \\___\\ /__|_/  /____/");
-	/* Christmas tree. */
+	// Christmas tree.
 	attron (COLOR_PAIR(11));
 	mvaddstr (1,  0, "");
 	mvaddstr (2,  0, "");
@@ -299,7 +302,7 @@ void xmasAbout (void) {
 	mvaddstr (23, 10, "####");
 	attroff (COLOR_PAIR(12));
 	ChristmasTree();
-	/* Credits. */
+	// Credits.
 	mvprintw (5, 21, "Version %s", VERSION);
 	mvprintw (8, 29, _("Merry Christmas from the Snownews developers."));
 	mvaddstr (10, 29, _("Main code"));
@@ -316,9 +319,9 @@ void xmasAbout (void) {
 	Snowfall(1);
 }
 
-/***************
- * Santa Hunta *
- ***************/
+//**************
+// Santa Hunta
+//*************
 void SHDrawGun (int gun_pos) {
 	move (LINES-3, 0);
 	clrtoeol();
@@ -419,9 +422,9 @@ void newSanta (santa * santa, int level) {
 	santa->height = 2;
 	santa->length = 27;
 	santa->gfx =          "##___  __-+---+/*__-+---+/*";
-	santa->gfx_line2 =    "_|__|_)   /\\ /\\     /\\ /\\  "; /* Append 2 spaces! */
+	santa->gfx_line2 =    "_|__|_)   /\\ /\\     /\\ /\\  "; // Append 2 spaces!
 	santa->altgfx =       "##___  __-+---+/*__-+---+/*";
-	santa->altgfx_line2 = "_|__|_)   /|  |\\    /|  |\\ ";   /* Append 1 space! */
+	santa->altgfx_line2 = "_|__|_)   /|  |\\    /|  |\\ ";   // Append 1 space!
 }
 
 int SHHit (shot shot, santa santa) {
@@ -451,16 +454,16 @@ void SHDrawHitScore (scoreDisplay score) {
 void printFinalScore (int score) {
 	int i, j, pos, number_count;
 	char *numbers[10][5] = {
-		{"_______","|  _  |","| | | |","| |_| |","|_____|"}, /* 0 */
-	    {"  ____ "," /   | ","/_/| | ","   | | ","   |_| "}, /* 1 */
-	    {"_______","|___  |","| ____|","| |____","|_____|"}, /* 2 */
-	    {"_______","|___  |"," ___  |","___|  |","|_____|"}, /* 3 */
-	    {"___ ___","| |_| |","|____ |","    | |","    |_|"}, /* 4 */
-	    {"_______","|  ___|","|___  |","____| |","|_____|"}, /* 5 */
-	    {"    __ ","   / / "," /    \\","|  O  /"," \\___/ "}, /* 6 */
-	    {"_______","|___  |","    | |","    | |","    |_|"}, /* 7 */
-	    {"_______","|  _  |","| |_| |","| |_| |","|_____|"}, /* 8 */
-	    {"  ___  "," /   \\ ","|  O  |"," \\   / ","  \\__\\ "} /* 9 */
+		{"_______","|  _  |","| | | |","| |_| |","|_____|"}, // 0
+	    {"  ____ "," /   | ","/_/| | ","   | | ","   |_| "}, // 1
+	    {"_______","|___  |","| ____|","| |____","|_____|"}, // 2
+	    {"_______","|___  |"," ___  |","___|  |","|_____|"}, // 3
+	    {"___ ___","| |_| |","|____ |","    | |","    |_|"}, // 4
+	    {"_______","|  ___|","|___  |","____| |","|_____|"}, // 5
+	    {"    __ ","   / / "," /    \\","|  O  /"," \\___/ "}, // 6
+	    {"_______","|___  |","    | |","    | |","    |_|"}, // 7
+	    {"_______","|  _  |","| |_| |","| |_| |","|_____|"}, // 8
+	    {"  ___  "," /   \\ ","|  O  |"," \\   / ","  \\__\\ "} // 9
 	};
 	int y;
 	int divisor;
@@ -537,8 +540,8 @@ void santaHunta (void) {
 
 	scoreDisplay.rounds = 0;
 
-	/* Set ncurses halfdelay mode.
-	 * Max resolution is 1/10sec */
+	// Set ncurses halfdelay mode.
+	// Max resolution is 1/10sec
 	halfdelay (1);
 
 	for (;;) {
@@ -554,7 +557,7 @@ void santaHunta (void) {
 			targets = 1;
 		}
 
-		/* Pad drawing resolution to 1/10sec */
+		// Pad drawing resolution to 1/10sec
 		draw_delay += after.tv_usec - before.tv_usec;
 		if (draw_delay > 100000) {
 			draw_delay = 0;
@@ -637,15 +640,14 @@ void santaHunta (void) {
 		refresh();
 	}
 
-	/* Leave halfdelay mode. */
+	// Leave halfdelay mode.
 	cbreak();
 }
 
 void UIAbout (void) {
 	int xpos;
 
-	clear();				/* Get the crap off the screen to make room
-							   for our wonderful ASCII logo. :) */
+	clear();
 
 	xpos = COLS/2 - 40;
 
@@ -658,8 +660,7 @@ void UIAbout (void) {
 
 	if (easterEgg()) {
 		santaHunta();
-	} else {
-		/* 80 COLS logo */
+	} else { // 80 COLS logo
 		mvaddstr (2,   xpos, "  ________ _______     ____ __________ _______     ______ __________   ________");
 		mvaddstr (3, xpos, " /  _____/ \\      \\   /    \\\\  |    | \\\\      \\   /  ___/ \\  |    | \\ / ______/");
 		mvaddstr (4, xpos, " \\____  \\   \\   |  \\ /  /\\  \\\\   |    / \\   |  \\ /     /   \\   |    / \\____  \\");

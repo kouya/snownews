@@ -17,64 +17,64 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* Define to the one symbol short name of this package */
+// Define to the one symbol short name of this package
 #define @PKG_UNAME@_NAME		"@PKG_NAME@"
-/* Define to the version of this package */
+// Define to the version of this package
 #define @PKG_UNAME@_VERSION	@PKG_VERSION@
-/* Define to the version string of this package */
+// Define to the version string of this package
 #define @PKG_UNAME@_VERSTRING	"@PKG_VERSTR@"
-/* Define to the address where bug reports for this package should be sent */
+// Define to the address where bug reports for this package should be sent
 #define @PKG_UNAME@_BUGREPORT	"@PKG_BUGREPORT@"
 
-/* Define to the value of LOCALEPATH environment variable */
+// Define to the value of LOCALEPATH environment variable
 #define LOCALEPATH	"@localedir@"
 
-/* Define to use experimental code */
+// Define to use experimental code
 #undef USE_UNSUPPORTED_AND_BROKEN_CODE
 
-/* Define to output of uname */
+// Define to output of uname
 #undef OS
 
-/* Define on SunOS and Solaris */
+// Define on SunOS and Solaris
 #undef SUN
 
 #include "version.h"
 #include "netio.h"
 
 struct feed {
-	char *feedurl;							/* Non hashified URL */
-	char *feed;								/* Raw XML */
+	char *feedurl;			// Non hashified URL
+	char *feed;			// Raw XML
 	int content_length;
 	char *title;
 	char *link;
 	char *description;
-	char *lastmodified;						/* Content of header as sent by the server. */
+	char *lastmodified;		// Content of header as sent by the server.
 	int lasthttpstatus;
 	char *content_type;
-	netio_error_type netio_error;			/* See netio.h */
-	int connectresult;						/* Socket errno */
-	char *cookies;							/* Login cookies for this feed. */
-	char *authinfo;							/* HTTP authinfo string. */
-	char *servauth;							/* Server supplied authorization header. */
+	netio_error_type netio_error;	// See netio.h
+	int connectresult;		// Socket errno
+	char *cookies;			// Login cookies for this feed.
+	char *authinfo;			// HTTP authinfo string.
+	char *servauth;			// Server supplied authorization header.
 	struct newsitem * items;
 	struct feed *next_ptr, *prev_ptr;
-	int problem;							/* Set if there was a problem downloading the feed. */
-	char *override;							/* Custom feed title. */
-	char *original;							/* Original feed title. */
-	char *perfeedfilter;					/* Pipe feed through this program before parsing. */
-	int execurl;							/* Execurl? */
-	int smartfeed;							/* 1: new items feed. */
+	int problem;			// Set if there was a problem downloading the feed.
+	char *override;			// Custom feed title.
+	char *original;			// Original feed title.
+	char *perfeedfilter;		// Pipe feed through this program before parsing.
+	int execurl;			// Execurl?
+	int smartfeed;			// 1: new items feed.
 	struct feedcategories * feedcategories;
 };
 
 struct newsitem {
 	struct newsdata *data;
-	struct newsitem *next_ptr, *prev_ptr;	/* Pointer to next/prev item in double linked list */
+	struct newsitem *next_ptr, *prev_ptr;	// Pointer to next/prev item in double linked list
 };
 
 struct newsdata {
 	struct feed *parent;
-	int readstatus;							/* 0: unread, 1: read */
+	int readstatus;			// 0: unread, 1: read
 	char *title;
 	char *link;
 	char *description;
@@ -82,7 +82,7 @@ struct newsdata {
 	int date;
 };
 
-/* Global program keybindings. Loaded from setup:Config() */
+// Global program keybindings. Loaded from setup:Config()
 struct keybindings {
 	char next;
 	char prev;
@@ -121,7 +121,7 @@ struct keybindings {
 	char typeahead;
 };
 
-/* Color definitions */
+// Color definitions
 struct color {
 	int newitems;
 	int newitemsbold;
@@ -134,19 +134,19 @@ struct color {
 extern struct feed *first_ptr;
 
 #ifdef LOCALEPATH
-#	include <libintl.h>
-#	include <locale.h>
+	#include <libintl.h>
+	#include <locale.h>
 #endif
 
 #ifdef LOCALEPATH
-#	define _(String) gettext (String)
+	#define _(String) gettext (String)
 #else
-#	define _(String) (String)
-# 	define ngettext(Singular, Plural, n) (Plural)
+	#define _(String) (String)
+	#define ngettext(Singular, Plural, n) (Plural)
 #endif
 
 #ifdef SUN
-#	include "os-support.h"
+	#include "os-support.h"
 #endif
 
 #endif

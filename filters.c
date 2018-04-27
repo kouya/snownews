@@ -33,7 +33,7 @@ int pipe_command_buf(char const *command, char * const argv[],
                      void const *inbuf, int inbuf_size, 
                      void **outbuf, int *outbuf_size);
 
-/* Load output of local script. Must be valid RSS. */
+// Load output of local script. Must be valid RSS.
 int FilterExecURL (struct feed * cur_ptr) {
 	int len = 1;
 	char *command;
@@ -49,7 +49,7 @@ int FilterExecURL (struct feed * cur_ptr) {
 	snprintf (buf, sizeof(buf), _("Loading \"%s\""), command);
 	UIStatus (buf, 0, 0);
 	
-	/* Make room for new stuff. Ah, how I enjoy freeing null pointers! */
+	// Make room for new stuff. Ah, how I enjoy freeing null pointers!
 	free (cur_ptr->feed);
 	
 	cur_ptr->feed = malloc (1);
@@ -67,9 +67,9 @@ int FilterExecURL (struct feed * cur_ptr) {
 		strcat (cur_ptr->feed, buf);
 	}
 
-	/* Set title and link structure to something.
-	   To the feedurl in this case so the program shows something
-	   as placeholder instead of crash. */
+	// Set title and link structure to something.
+	// To the feedurl in this case so the program shows something
+	// as placeholder instead of crash.
 	if (cur_ptr->title == NULL)
 		cur_ptr->title = strdup (cur_ptr->feedurl);
 	if (cur_ptr->link == NULL)
@@ -78,16 +78,15 @@ int FilterExecURL (struct feed * cur_ptr) {
 	pclose (scriptoutput);
 	free (freeme);
 	
-	/* Need to set content length so using a filter on an execurl works. */
+	// Need to set content length so using a filter on an execurl works.
 	cur_ptr->content_length = strlen(cur_ptr->feed);
 	
 	return 0;
 }
 
-/* Replaces content in cur_ptr->feed with output of script in
- * cur_ptr->pipethrough.
- * This should probably use pipes, but I couldn't get it to work.
- */
+// Replaces content in cur_ptr->feed with output of script in
+// cur_ptr->pipethrough.
+// This should probably use pipes, but I couldn't get it to work.
 int FilterPipe (struct feed * cur_ptr) {
 	int len = 0;
 	int retval;
@@ -98,16 +97,16 @@ int FilterPipe (struct feed * cur_ptr) {
 	char tmpfile[] = "/tmp/.snownews.tmp";
 	FILE *file;
 
-	/* Don't call me anymore. */
+	// Don't call me anymore.
 	assert(0);
 
 	snprintf (command, sizeof(command), "%s < %s", cur_ptr->perfeedfilter, tmpfile);
 	
-	/* Make sure there is no file with the name we're going to write to. */
+	// Make sure there is no file with the name we're going to write to.
 	unlink (tmpfile);
 	
-	/* Write contents we're going to process to a temp file.
-	   Now use O_EXCL to avoid any tmpfile/symlink attacks. */
+	// Write contents we're going to process to a temp file.
+	// Now use O_EXCL to avoid any tmpfile/symlink attacks.
 	fd = open (tmpfile, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (fd == -1) {
 		snprintf (tmp, sizeof(tmp), _("Could not write temp file for filter: %s"), strerror(errno));
@@ -124,11 +123,11 @@ int FilterPipe (struct feed * cur_ptr) {
 	cur_ptr->feed = malloc (1);
 	cur_ptr->feed[0] = '\0';
 	
-	/* Pipe temp file contents to process and popen it. */
+	// Pipe temp file contents to process and popen it.
 	file = popen (command, "r");
 	
 	while (!feof(file)) {
-		/* Strange, valgrind blows up if I use the usual fgets() read here. */
+		// Strange, valgrind blows up if I use the usual fgets() read here.
 		retval = fread (buf, 1, sizeof(buf), file);
 		if (retval == 0)
 			break;
@@ -142,7 +141,7 @@ int FilterPipe (struct feed * cur_ptr) {
 	
 	pclose (file);
 	
-	/* Clean up. */
+	// Clean up.
 	unlink (tmpfile);
 	
 	return 0;
@@ -187,7 +186,7 @@ int FilterPipeNG (struct feed * cur_ptr) {
 	
 	free (data);
 	free (command);
-	free (options);			/* options[i] contains only pointers! */
+	free (options);			// options[i] contains only pointers!
 	
 	return rc;
 }
@@ -302,4 +301,3 @@ char *pipe_command_string(char const *command, char * const argv[], char const *
 
         return result;
 }
-
