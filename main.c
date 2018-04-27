@@ -153,7 +153,7 @@ static void sigChildHandler (int sig __attribute__((unused))) {
 }
 
 void printHelp (void) {
-	printf (_("Snownews version %s\n\n"), VERSION);
+	printf (_("Snownews " SNOWNEWS_VERSTRING "\n\n"));
 	printf (_("usage: snownews [-huV] [--help|--update|--version]\n\n"));
 	printf (_("\t--charset|-l\tForce using this charset.\n"));
 	printf (_("\t--cursor-on|-c\tForce cursor always visible.\n"));
@@ -187,7 +187,7 @@ int main (int argc, char *argv[]) {
 		while (i < argc) {
 			arg = argv[i];
 			if (strcmp(arg, "--version") == 0 || strcmp(arg, "-V") == 0) {
-				printf (_("Snownews version %s\n\n"), VERSION);
+				printf (_("Snownews version %s\n\n"), SNOWNEWS_VERSION);
 				return 0;
 			} else if (strcmp(arg, "-u") == 0 || strcmp(arg, "--update") == 0) {
 				autoupdate = 1;

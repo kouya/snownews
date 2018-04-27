@@ -303,8 +303,8 @@ void xmasAbout (void) {
 	attroff (COLOR_PAIR(12));
 	ChristmasTree();
 	// Credits.
-	mvprintw (5, 21, "Version %s", VERSION);
-	mvprintw (8, 29, _("Merry Christmas from the Snownews developers."));
+	mvaddstr (5, 21, "Version " SNOWNEWS_VERSTRING);
+	mvaddstr (8, 29, _("Merry Christmas from the Snownews developers."));
 	mvaddstr (10, 29, _("Main code"));
 	mvaddstr (11, 29, "Oliver Feiler");
 	mvaddstr (13, 29, _("Additional code"));
@@ -667,7 +667,7 @@ void UIAbout (void) {
 		mvaddstr (5, xpos, " /       \\  /   |   \\\\  \\/  / \\  |   /  /   |   \\\\  ___\\    \\  |   /  /       \\");
 		mvaddstr (6, xpos, "/______  / / ___|___/ \\____/  /__|__/  / ___|___/ \\____ \\   /__|__/  /______  /");
 		mvaddstr (7, xpos, "       \\/  \\/                          \\/              \\/                   \\/");
-		mvprintw (9, COLS/2-(strlen("Version")+strlen(VERSION)+1)/2, "Version %s", VERSION);
+		mvaddstr (9, (COLS-strlen("Version " SNOWNEWS_VERSTRING))/2u, "Version " SNOWNEWS_VERSTRING);
 
 		mvaddstr (11, COLS/2-(strlen(_("Brought to you by:")))/2, _("Brought to you by:"));
 		mvaddstr (13, COLS/2-(strlen(_("Main code")))/2, _("Main code"));

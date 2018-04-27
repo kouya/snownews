@@ -22,7 +22,6 @@
 #include <ncurses.h>
 
 #include "config.h"
-#include "version.h"
 #include "ui-support.h"
 #include "io-internal.h"
 
@@ -213,7 +212,7 @@ void UISupportDrawHeader (const char * headerstring) {
 	
 	attron (WA_REVERSE);
 	
-	mvprintw (0, 1, "* Snownews %s", VERSION);
+	mvprintw (0, 1, "* Snownews %s", SNOWNEWS_VERSION);
 	if (headerstring != NULL) {
 		if (strlen(headerstring) > COLS-18u)
 			mvaddnstr (0, 19, headerstring, COLS-20);

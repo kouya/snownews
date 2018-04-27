@@ -21,7 +21,6 @@
 #include <time.h>
 
 #include "config.h"
-#include "version.h"
 #include "netio.h"
 #include "io-internal.h"
 
@@ -73,7 +72,7 @@ void AutoVersionCheck (void) {
 		if (versionstring[strlen(versionstring)-1] == '\n')
 			versionstring[strlen(versionstring)-1] = '\0';
 	
-		if (strcmp(versionstring, VERSION) != 0) {
+		if (strcmp(versionstring, SNOWNEWS_VERSION) != 0) {
 			printf (_("A new version %s of Snownews is available.\n"), versionstring);
 			printf (_("If you want to download it, go to http://snownews.kcore.de/downloading/\n\n"));
 			printf (_("To disable the auto version check see the manpage.\n\n"));

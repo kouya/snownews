@@ -28,7 +28,6 @@
 #include "cookies.h"
 #include "categories.h"
 #include "ui-support.h"
-#include "version.h"
 #include "main.h"
 #include "setup.h"
 #include "io-internal.h"
@@ -123,14 +122,14 @@ void SetupUserAgent (void) {
 	if (getenv("LANG") != NULL) {
 		lang = getenv("LANG");
 		// Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/)
-		ualen = strlen("Snownews/") + strlen(VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
+		ualen = strlen("Snownews/") + strlen(SNOWNEWS_VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
 		useragent = malloc(ualen);
-		snprintf (useragent, ualen, "Snownews/%s (%s; %s; %s)", VERSION, OS, lang, url);
+		snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
 	} else {
 		// "Snownews/" + VERSION + "(http://kiza.kcore.de/software/snownews/)"
-		ualen = strlen("Snownews/") + strlen(VERSION) + 2 + strlen(OS) + 2 + urllen + 2;
+		ualen = strlen("Snownews/") + strlen(SNOWNEWS_VERSION) + 2 + strlen(OS) + 2 + urllen + 2;
 		useragent = malloc(ualen);
-		snprintf (useragent, ualen, "Snownews/%s (%s; %s)", VERSION, OS, url);
+		snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s)", url);
 	}
 }
 
