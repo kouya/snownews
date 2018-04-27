@@ -14,4 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
+#pragma once
 #define VERSION "1.5.13"

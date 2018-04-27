@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef CATEGORIES_H
-#define CATEGORIES_H
+#pragma once
 
 void FeedCategoryAdd (struct feed * cur_ptr, char * categoryname);
 void FeedCategoryDelete (struct feed * cur_ptr, char * categoryname);
@@ -37,5 +36,3 @@ struct categories {
 	int labelbold;
 	struct categories * next_ptr;
 };
-
-#endif

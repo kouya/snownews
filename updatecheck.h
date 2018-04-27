@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef UPDATECHECK_H
-#define UPDATECHECK_H
+#pragma once
 
 void AutoVersionCheck (void);
-
-#endif

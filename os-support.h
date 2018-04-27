@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef OS_SUPPORT_H
-#define OS_SUPPORT_H
+#pragma once
 
 #ifdef SUN
 char* strsep (char** str, const char* delims);
@@ -23,5 +22,3 @@ char* strsep (char** str, const char* delims);
 
 const char* s_strcasestr (const char* a, const char* b);
 void* s_malloc (size_t size);
-
-#endif

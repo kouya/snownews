@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef SETUP_H
-#define SETUP_H
+#pragma once
 
 int Config (void);
 
@@ -25,5 +24,3 @@ struct entity {
 	int entity_length;
 	struct entity * next_ptr;
 };
-
-#endif

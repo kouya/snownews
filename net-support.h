@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef NET_SUPPORT_H
-#define NET_SUPPORT_H
+#pragma once
 
 int NetSupportAuth (struct feed * cur_ptr, const char * authdata, char * url, const char * netbuf);
 int checkValidHTTPHeader (const unsigned char * header, int size);
 int checkValidHTTPURL (const unsigned char * url);
-
-#endif

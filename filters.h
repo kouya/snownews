@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef FILTERS_H
-#define FILTERS_H
+#pragma once
 
 int FilterExecURL (struct feed * cur_ptr);
 //int FilterPipe (struct feed * cur_ptr);
 int FilterPipeNG (struct feed * cur_ptr);
-
-#endif

@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef NETIO_H
-#define NETIO_H
+#pragma once
 
 struct feed;
 
@@ -46,5 +45,3 @@ typedef enum {
 	NET_ERR_GZIP_ERR,
 	NET_ERR_CHUNKED
 } netio_error_type;
-
-#endif

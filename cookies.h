@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef COOKIES_H
-#define COOKIES_H
+#pragma once
 
 void LoadCookies (struct feed * cur_ptr);
-
-#endif

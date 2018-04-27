@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef IO_INTERNAL_H
-#define IO_INTERNAL_H
+#pragma once
 
 struct feed * newFeedStruct (void);
 int UpdateFeed (struct feed * cur_ptr);
@@ -25,5 +24,3 @@ int LoadAllFeeds (int numfeeds);
 void WriteCache (void);
 void printlog (struct feed * feed, const char * text);
 void printlogSimple (const char * text);
-
-#endif

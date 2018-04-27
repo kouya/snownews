@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef DIALOG_H
-#define DIALOG_H
+#pragma once
 
 void UIHelpScreen (void);
 void UIDisplayFeedHelp (void);
@@ -30,5 +29,3 @@ int UIDeleteFeed (char * feedname);
 void CategorizeFeed (struct feed * current_feed);
 char * DialogGetCategoryFilter (void);
 int UIPerFeedFilter (struct feed * current_feed);
-
-#endif

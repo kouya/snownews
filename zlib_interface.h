@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef JG_ZLIB_INTERFACE
-#define JG_ZLIB_INTERFACE
+#pragma once
 
 enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_OLDVERSION = -1,
@@ -32,5 +31,3 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 
 int jg_gzip_uncompress(void const *in_buf, int in_size,
                        void **out_buf_ptr, int *out_size);
-
-#endif

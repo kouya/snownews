@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef INTERFACE_H
-#define INTERFACE_H
+#pragma once
 
 void sig_winch(int p);
 void UIMainInterface (void);
-
-#endif

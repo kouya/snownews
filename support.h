@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef SUPPORT_H
-#define SUPPORT_H
+#pragma once
 
 int easterEgg (void);
-
-#endif

@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef XMLPARSE_H
-#define XMLPARSE_H
-
+#pragma once
 #include <libxml/parser.h>
 
 void parse_rdf10_item(struct feed *feed, xmlDocPtr doc, xmlNodePtr node);
@@ -24,5 +22,3 @@ void parse_rdf10_channel(struct feed * feed, xmlDocPtr doc, xmlNodePtr node);
 void parse_rdf20_channel(struct feed * feed, xmlDocPtr doc, xmlNodePtr node);
 int DeXML (struct feed * cur_ptr);
 void print_feed(struct feed * feed);
-
-#endif

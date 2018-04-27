@@ -18,8 +18,7 @@
 // The code has been modified to work with Colin Plumb's
 // MD5 implementation rather than using RSA's.
 
-#ifndef DIGCALC_H
-#define DIGCALC_H
+#pragma once
 
 #define HASHLEN 16
 typedef char HASH[HASHLEN];
@@ -43,5 +42,3 @@ void DigestCalcResponse (
     const HASHHEX HEntity,	// H(entity body) if qop="auth-int"
     HASHHEX Response		// request-digest or response-digest
     );
-
-#endif

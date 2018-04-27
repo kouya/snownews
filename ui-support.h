@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef UI_SUPPORT_H
-#define UI_SUPPORT_H
+#pragma once
 
 typedef enum {
 	NORMAL,
@@ -35,5 +34,3 @@ int SmartFeedExists (const char * smartfeed);
 void DrawProgressBar (int numobjects, int titlestrlen);
 void displayErrorLog (void);
 void clearLine (int line, clear_line how);
-
-#endif

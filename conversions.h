@@ -15,8 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef CONVERSIONS_H
-#define CONVERSIONS_H
+#pragma once
 
 #ifdef STATIC_CONST_ICONV
 char * iconvert (const char * inbuf);
@@ -35,6 +34,4 @@ char * unixToPostDateString (int unixDate);
 
 #ifdef USE_UNSUPPORTED_AND_BROKEN_CODE
 char* decodechunked(char * chunked, unsigned int *inputlen);
-#endif
-
 #endif
