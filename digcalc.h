@@ -1,15 +1,22 @@
-/* Snownews - A lightweight console RSS newsreader
- * $Id: digcalc.h 348 2004-11-09 14:48:27Z kiza $
- * 
- * Copyright 2003-2004 Oliver Feiler <kiza@kcore.de>
- * http://kiza.kcore.de/software/snownews/
- *
- * digcalc.h
- * 
- * This is the sample implementation from RFC 2617.
- * The code has been modified to work with Colin Plumb's
- * MD5 implementation rather than using RSA's.
- */
+// This file is part of Snownews - A lightweight console RSS newsreader
+//
+// Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+//
+// Snownews is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// Snownews is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Snownews. If not, see http://www.gnu.org/licenses/.
+
+// This is the sample implementation from RFC 2617.
+// The code has been modified to work with Colin Plumb's
+// MD5 implementation rather than using RSA's.
 
 #ifndef DIGCALC_H
 #define DIGCALC_H

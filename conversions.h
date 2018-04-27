@@ -1,25 +1,19 @@
-/* Snownews - A lightweight console RSS newsreader
- * $Id: conversions.h 910 2005-03-19 17:48:09Z kiza $
- * 
- * Copyright 2003-2004 Oliver Feiler <kiza@kcore.de> and
- *                     Rene Puls <rpuls@gmx.net>
- *
- * conversions.h
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+// This file is part of Snownews - A lightweight console RSS newsreader
+//
+// Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+// Copyright (c) 2003-2004 Rene Puls <rpuls@gmx.net>
+//
+// Snownews is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// Snownews is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
