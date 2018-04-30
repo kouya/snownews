@@ -118,7 +118,7 @@ static void PrintUpdateError (const struct feed* cur_ptr) {
 }
 
 // Update given feed from server.
-// Reload XML document and replace in memory cur_ptr->feed with it.
+// Reload XML document and replace in memory cur_ptr->xmltext with it.
 int UpdateFeed (struct feed * cur_ptr) {
 	if (cur_ptr == NULL)
 		return 1;
@@ -133,9 +133,9 @@ int UpdateFeed (struct feed * cur_ptr) {
 	else {
 		// Need to work on a copy of ->feedurl, because DownloadFeed() changes the pointer.
 		char* feedurl = strdup (cur_ptr->feedurl);
-		free (cur_ptr->feed);
+		free (cur_ptr->xmltext);
 
-		cur_ptr->feed = DownloadFeed (feedurl, cur_ptr, 0);
+		cur_ptr->xmltext = DownloadFeed (feedurl, cur_ptr, 0);
 
 		free (feedurl);
 
@@ -148,8 +148,8 @@ int UpdateFeed (struct feed * cur_ptr) {
 			cur_ptr->link = strdup (cur_ptr->feedurl);
 
 		// If the download function returns a NULL pointer return from here.
-		if (cur_ptr->feed == NULL) {
-			if (cur_ptr->problem == 1)
+		if (!cur_ptr->xmltext) {
+			if (cur_ptr->problem)
 				PrintUpdateError (cur_ptr);
 			return 1;
 		}
@@ -160,24 +160,24 @@ int UpdateFeed (struct feed * cur_ptr) {
 		FilterPipeNG (cur_ptr);
 
 	// If there is no feed, return.
-	if (cur_ptr->feed == NULL)
+	if (!cur_ptr->xmltext)
 		return 1;
 
 	if (DeXML(cur_ptr)) {
 		UIStatus (_("Invalid XML! Cannot parse this feed!"), 2, 1);
 		// Activate feed problem flag.
-		cur_ptr->problem = 1;
+		cur_ptr->problem = true;
 		return 1;
 	}
 
 	// We don't need these anymore. Free the raw XML to save some memory.
-	free (cur_ptr->feed);
-	cur_ptr->feed = NULL;
+	free (cur_ptr->xmltext);
+	cur_ptr->xmltext = NULL;
 	return 0;
 }
 
 int UpdateAllFeeds (void) {
-	for (struct feed* f = _feed_list; f; f = f->next_ptr)
+	for (struct feed* f = _feed_list; f; f = f->next)
 		if (0 != UpdateFeed (f))
 			continue;
 	return 0;
@@ -212,17 +212,17 @@ int LoadFeed (struct feed * cur_ptr) {
 		size_t retval = fread (filebuf, 1, sizeof(filebuf), cache);
 		if (retval == 0)
 			break;
-		cur_ptr->feed = realloc (cur_ptr->feed, len+retval + 1);
-		memcpy (cur_ptr->feed+len, filebuf, retval);
+		cur_ptr->xmltext = realloc (cur_ptr->xmltext, len+retval + 1);
+		memcpy (cur_ptr->xmltext+len, filebuf, retval);
 		len += retval;
 		if (retval != 4096)
 			break;
 	}
 	fclose (cache);
 	cur_ptr->content_length = len;
-	cur_ptr->feed[len] = '\0';
+	cur_ptr->xmltext[len] = '\0';
 
-	if (cur_ptr->feed == NULL)
+	if (!cur_ptr->xmltext)
 		return 1;
 
 	// After loading DeXMLize the mess.
@@ -234,8 +234,8 @@ int LoadFeed (struct feed * cur_ptr) {
 		UIStatus (msgbuf, 2, 1);
 	}
 
-	free (cur_ptr->feed);
-	cur_ptr->feed = NULL;
+	free (cur_ptr->xmltext);
+	cur_ptr->xmltext = NULL;
 	return 0;
 }
 
@@ -246,7 +246,7 @@ int LoadAllFeeds (unsigned numfeeds) {
 	unsigned titlestrlen = strlen (_("Loading cache ["));
 	int oldnumobjects = 0;
 	unsigned count = 1;
-	for (struct feed* f = _feed_list; f; f = f->next_ptr) {
+	for (struct feed* f = _feed_list; f; f = f->next) {
 		// Progress bar
 		int numobjects = count*(COLS-titlestrlen-2)/numfeeds-2;
 		if (numobjects < 1)
@@ -293,12 +293,12 @@ void WriteCache (void) {
 		MainQuit (_("Save settings (urls)"), strerror(errno));
 
 	unsigned numfeeds = 0;
-	for (const struct feed* f = _feed_list; f; f = f->next_ptr)
+	for (const struct feed* f = _feed_list; f; f = f->next)
 		++numfeeds;
 
 	unsigned count = 1;
 	int oldnumobjects = 0;
-	for (const struct feed* cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
+	for (const struct feed* cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next) {
 		// Progress bar
 		int numobjects = count*(COLS-titlestrlen-2)/numfeeds-2;
 		if (numobjects < 1)
@@ -312,14 +312,14 @@ void WriteCache (void) {
 		fputs (cur_ptr->feedurl, urlfile);
 
 		fputc ('|', urlfile);
-		if (cur_ptr->override != NULL)
+		if (cur_ptr->custom_title)
 			fputs (cur_ptr->title, urlfile);
 
 		fputc ('|', urlfile);
 		if (cur_ptr->feedcategories != NULL) {
-			for (const struct feedcategories* c = cur_ptr->feedcategories; c; c = c->next_ptr) {
+			for (const struct feedcategories* c = cur_ptr->feedcategories; c; c = c->next) {
 				fputs (c->name, urlfile);
-				if (c->next_ptr)	// Only add a colon of we run the loop again!
+				if (c->next)	// Only add a colon of we run the loop again!
 					fputc (',', urlfile);
 			}
 		}
@@ -381,7 +381,7 @@ void WriteCache (void) {
 		}
 		fputs ("</description>\n</channel>\n\n", cache);
 
-		for (const struct newsitem* item = cur_ptr->items; item; item = item->next_ptr) {
+		for (const struct newsitem* item = cur_ptr->items; item; item = item->next) {
 			fputs ("<item rdf:about=\"", cache);
 
 			if (item->data->link != NULL) {

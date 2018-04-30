@@ -325,7 +325,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 			case 200:	// OK
 				// Received good status from server, clear problem field.
 				cur_ptr->netio_error = NET_ERR_OK;
-				cur_ptr->problem = 0;
+				cur_ptr->problem = false;
 
 				// Avoid looping on 20x status codes.
 				handled = true;
@@ -378,8 +378,8 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 						// after the word "Location:"
 						strsep (&redirecttarget, " ");
 
-						if (redirecttarget == NULL) {
-							cur_ptr->problem = 1;
+						if (!redirecttarget) {
+							cur_ptr->problem = true;
 							cur_ptr->netio_error = NET_ERR_REDIRECT_ERR;
 							free (redirecttargetbase);
 							fclose (stream);
@@ -414,7 +414,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 						if (cur_ptr->lasthttpstatus == 301) {
 							// Check for valid redirection URL
 							if (checkValidHTTPURL((unsigned char *)newlocation) != 0) {
-								cur_ptr->problem = 1;
+								cur_ptr->problem = true;
 								cur_ptr->netio_error = NET_ERR_REDIRECT_ERR;
 								fclose (stream);
 								return NULL;
@@ -485,7 +485,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 				fclose (stream);
 				// Received good status from server, clear problem field.
 				cur_ptr->netio_error = NET_ERR_OK;
-				cur_ptr->problem = 0;
+				cur_ptr->problem = false;
 
 				// This should be freed everywhere where we return
 				// and current feed uses auth.
@@ -562,7 +562,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 				chunked = true;
 #else
 			cur_ptr->netio_error = NET_ERR_CHUNKED;
-			cur_ptr->problem = 1;
+			cur_ptr->problem = true;
 			fclose (stream);
 			return NULL;
 #endif
@@ -752,7 +752,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 // Set suppressoutput=1 to disable ncurses calls.
 char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput) {
 	if (checkValidHTTPURL((unsigned char *)url) != 0) {
-		cur_ptr->problem = 1;
+		cur_ptr->problem = true;
 		cur_ptr->netio_error = NET_ERR_HTTP_PROTO_ERR;
 		return NULL;
 	}
@@ -798,12 +798,12 @@ char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput) {
 		free (authdata);
 		if (url_fixup)
 			free(url);
-		cur_ptr->problem = 1;
+		cur_ptr->problem = true;
 		return NULL;
 	}
 	char* returndata = NetIO (&my_socket, host, url, cur_ptr, authdata, httpsproto, suppressoutput);
 	if (!returndata && cur_ptr->netio_error != NET_ERR_OK)
-		cur_ptr->problem = 1;
+		cur_ptr->problem = true;
 
 	// url will be freed in the calling function.
 	free (hostbase);	// This is *host.

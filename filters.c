@@ -43,13 +43,13 @@ int FilterExecURL (struct feed * cur_ptr) {
 	    return -1;
 
 	cur_ptr->content_length = 0;
-	cur_ptr->feed = realloc (cur_ptr->feed, cur_ptr->content_length+1);
-	cur_ptr->feed[cur_ptr->content_length] = '\0';
+	cur_ptr->xmltext = realloc (cur_ptr->xmltext, cur_ptr->content_length+1);
+	cur_ptr->xmltext[cur_ptr->content_length] = '\0';
 
 	while (!feof(scriptoutput) && fgets (buf, sizeof(buf), scriptoutput)) {
 		size_t br = strlen(buf);
-		cur_ptr->feed = realloc (cur_ptr->feed, cur_ptr->content_length+br+1);
-		memcpy (&cur_ptr->feed[cur_ptr->content_length], buf, br+1);
+		cur_ptr->xmltext = realloc (cur_ptr->xmltext, cur_ptr->content_length+br+1);
+		memcpy (&cur_ptr->xmltext[cur_ptr->content_length], buf, br+1);
 		cur_ptr->content_length += br;
 	}
 	pclose (scriptoutput);
@@ -69,11 +69,11 @@ int FilterPipeNG (struct feed * cur_ptr) {
 		return -1;
 
 	char* data = malloc (cur_ptr->content_length+1);
-	memcpy (data, cur_ptr->feed, cur_ptr->content_length);
+	memcpy (data, cur_ptr->xmltext, cur_ptr->content_length);
 	data[cur_ptr->content_length] = 0;
 
-	free (cur_ptr->feed);
-	cur_ptr->feed = NULL;
+	free (cur_ptr->xmltext);
+	cur_ptr->xmltext = NULL;
 
 	char* filter = strdup (cur_ptr->perfeedfilter);
 	char* command = strsep (&filter, " ");
@@ -90,7 +90,7 @@ int FilterPipeNG (struct feed * cur_ptr) {
 
 	int rc = pipe_command_buf (command, options,
 	                       data, cur_ptr->content_length,
-	                       &cur_ptr->feed, &cur_ptr->content_length);
+	                       &cur_ptr->xmltext, &cur_ptr->content_length);
 
 	free (data);
 	free (command);

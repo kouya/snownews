@@ -42,14 +42,14 @@ static void free_feed (struct feed* feed)
 	free (feed->link);
 	free (feed->description);
 	if (feed->items) {
-		while (feed->items->next_ptr) {
-			feed->items = feed->items->next_ptr;
-			free (feed->items->prev_ptr->data->title);
-			free (feed->items->prev_ptr->data->link);
-			free (feed->items->prev_ptr->data->description);
-			free (feed->items->prev_ptr->data->hash);
-			free (feed->items->prev_ptr->data);
-			free (feed->items->prev_ptr);
+		while (feed->items->next) {
+			feed->items = feed->items->next;
+			free (feed->items->prev->data->title);
+			free (feed->items->prev->data->link);
+			free (feed->items->prev->data->description);
+			free (feed->items->prev->data->hash);
+			free (feed->items->prev->data);
+			free (feed->items->prev);
 		}
 		free (feed->items->data->title);
 		free (feed->items->data->link);
@@ -212,7 +212,7 @@ static void parse_rdf10_item (struct feed *feed, xmlDocPtr doc, xmlNodePtr node)
 
 	// If saverestore == true, restore readstatus.
 	if (saverestore) {
-		for (struct newsitem* i = firstcopy; i; i = i->next_ptr) {
+		for (struct newsitem* i = firstcopy; i; i = i->next) {
 			if (strcmp(item->data->hash, i->data->hash) == 0) {
 				item->data->readstatus = i->data->readstatus;
 				break;
@@ -223,10 +223,10 @@ static void parse_rdf10_item (struct feed *feed, xmlDocPtr doc, xmlNodePtr node)
 	if (!feed->items)
 		feed->items = item;
 	else {
-		item->prev_ptr = feed->items;
-		while (item->prev_ptr->next_ptr)
-			item->prev_ptr = item->prev_ptr->next_ptr;
-		item->prev_ptr->next_ptr = item;
+		item->prev = feed->items;
+		while (item->prev->next)
+			item->prev = item->prev->next;
+		item->prev->next = item;
 	}
 }
 
@@ -234,7 +234,7 @@ static void parse_rdf10_item (struct feed *feed, xmlDocPtr doc, xmlNodePtr node)
 // rrr
 
 int DeXML (struct feed* cur_ptr) {
-	if (cur_ptr->feed == NULL)
+	if (!cur_ptr->xmltext)
 		return -1;
 
 	saverestore = false;
@@ -244,7 +244,7 @@ int DeXML (struct feed* cur_ptr) {
 		firstcopy = NULL;
 
 		// Copy current newsitem struct. */
-		for (struct newsitem* cur_item = cur_ptr->items; cur_item != NULL; cur_item = cur_item->next_ptr) {
+		for (struct newsitem* cur_item = cur_ptr->items; cur_item != NULL; cur_item = cur_item->next) {
 			copy = malloc (sizeof(struct newsitem));
 			copy->data = malloc (sizeof (struct newsdata));
 			copy->data->title = NULL;
@@ -255,15 +255,15 @@ int DeXML (struct feed* cur_ptr) {
 			if (cur_item->data->hash != NULL)
 				copy->data->hash = strdup (cur_item->data->hash);
 
-			copy->next_ptr = NULL;
+			copy->next = NULL;
 			if (firstcopy == NULL) {
-				copy->prev_ptr = NULL;
+				copy->prev = NULL;
 				firstcopy = copy;
 			} else {
-				copy->prev_ptr = firstcopy;
-				while (copy->prev_ptr->next_ptr != NULL)
-					copy->prev_ptr = copy->prev_ptr->next_ptr;
-				copy->prev_ptr->next_ptr = copy;
+				copy->prev = firstcopy;
+				while (copy->prev->next != NULL)
+					copy->prev = copy->prev->next;
+				copy->prev->next = copy;
 			}
 		}
 	}
@@ -271,7 +271,7 @@ int DeXML (struct feed* cur_ptr) {
 	// xmlRecoverMemory:
 	// parse an XML in-memory document and build a tree.
 	// In case the document is not Well Formed, a tree is built anyway.
-	xmlDocPtr doc = xmlRecoverMemory(cur_ptr->feed, strlen(cur_ptr->feed));
+	xmlDocPtr doc = xmlRecoverMemory(cur_ptr->xmltext, strlen(cur_ptr->xmltext));
 
 	if (doc == NULL)
 		return 2;
@@ -319,11 +319,11 @@ int DeXML (struct feed* cur_ptr) {
 
 	if (saverestore) {
 		// free struct newsitem *copy.
-		while (firstcopy->next_ptr != NULL) {
-			firstcopy = firstcopy->next_ptr;
-			free (firstcopy->prev_ptr->data->hash);
-			free (firstcopy->prev_ptr->data);
-			free (firstcopy->prev_ptr);
+		while (firstcopy->next != NULL) {
+			firstcopy = firstcopy->next;
+			free (firstcopy->prev->data->hash);
+			free (firstcopy->prev->data);
+			free (firstcopy->prev);
 		}
 		free (firstcopy->data->hash);
 		free (firstcopy->data);
@@ -344,9 +344,9 @@ int DeXML (struct feed* cur_ptr) {
 	cur_ptr->original = strdup (cur_ptr->title);
 
 	// Restore custom title.
-	if (cur_ptr->override != NULL) {
+	if (cur_ptr->custom_title) {
 		free (cur_ptr->title);
-		cur_ptr->title = strdup (cur_ptr->override);
+		cur_ptr->title = strdup (cur_ptr->custom_title);
 	}
 	return 0;
 }

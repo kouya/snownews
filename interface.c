@@ -35,8 +35,8 @@
 // Scrollable feed->description.
 struct scrolltext {
 	char * line;
-	struct scrolltext * next_ptr;
-	struct scrolltext * prev_ptr;
+	struct scrolltext * next;
+	struct scrolltext * prev;
 };
 
 //----------------------------------------------------------------------
@@ -162,15 +162,15 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 							textlist->line = strdup(textslice);
 
 							// Gen double list with new items at bottom.
-							textlist->next_ptr = NULL;
+							textlist->next = NULL;
 							if (first_line == NULL) {
-								textlist->prev_ptr = NULL;
+								textlist->prev = NULL;
 								first_line = textlist;
 							} else {
-								textlist->prev_ptr = first_line;
-								while (textlist->prev_ptr->next_ptr != NULL)
-									textlist->prev_ptr = textlist->prev_ptr->next_ptr;
-								textlist->prev_ptr->next_ptr = textlist;
+								textlist->prev = first_line;
+								while (textlist->prev->next != NULL)
+									textlist->prev = textlist->prev->next;
+								textlist->prev->next = textlist;
 							}
 						} else
 							break;
@@ -181,7 +181,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 				// We sould now have the linked list setup'ed... hopefully.
 				unsigned ientry = 0, ypos = 6;
-				for (const struct scrolltext* l = first_line; l; ++ientry, ++ypos, l = l->next_ptr) {
+				for (const struct scrolltext* l = first_line; l; ++ientry, ++ypos, l = l->next) {
 					if (ientry < linenumber)
 						continue;	// Skip lines before linenumber
 					if (ypos > LINES-4u)
@@ -227,7 +227,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			// Free the wrapped text linked list.
 			while (first_line) {
 				struct scrolltext* l = first_line;
-				first_line = first_line->next_ptr;
+				first_line = first_line->next;
 				free (l->line);
 				free (l);
 			}
@@ -235,8 +235,8 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		} else if (uiinput == _settings.keybindings.urljump)
 			UISupportURLJump (current_item->data->link);
 		else if (uiinput == _settings.keybindings.next || uiinput == KEY_RIGHT) {
-			if (current_item->next_ptr != NULL) {
-				current_item = current_item->next_ptr;
+			if (current_item->next != NULL) {
+				current_item = current_item->next;
 				linenumber = 0;
 				rewrap = true;
 				maxlines = 0;
@@ -246,8 +246,8 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 				uiinput = ungetch(_settings.keybindings.prevmenu);
 			}
 		} else if (uiinput == _settings.keybindings.prev || uiinput == KEY_LEFT) {
-			if (current_item->prev_ptr != NULL) {
-				current_item = current_item->prev_ptr;
+			if (current_item->prev != NULL) {
+				current_item = current_item->prev;
 				linenumber = 0;
 				rewrap = true;
 				maxlines = 0;
@@ -288,7 +288,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			// Free the wrapped text linked list.
 			while (first_line) {
 				struct scrolltext* l = first_line;
-				first_line = first_line->next_ptr;
+				first_line = first_line->next;
 				free (l->line);
 				free (l);
 			}
@@ -310,12 +310,12 @@ static int UIDisplayFeed (struct feed* current_feed) {
 
 	// Moves highlight to next unread item.
 	unsigned highlightnum = 1;	// Index of the highlighted item, 1 = first visible
-	while (highlighted && highlighted->next_ptr && highlighted->data->readstatus == 1) {
-		highlighted = highlighted->next_ptr;
+	while (highlighted && highlighted->next && highlighted->data->readstatus == 1) {
+		highlighted = highlighted->next;
 		if (++highlightnum > LINES-7u) {
 			--highlightnum;
-			if (first_scr_ptr->next_ptr)
-				first_scr_ptr = first_scr_ptr->next_ptr;
+			if (first_scr_ptr->next)
+				first_scr_ptr = first_scr_ptr->next;
 		}
 	}
 	// If *highlighted points to a read entry now we have hit the last
@@ -351,12 +351,12 @@ static int UIDisplayFeed (struct feed* current_feed) {
 
 			unsigned count = 0, skipper = 0;	// # of lines already skipped
 			bool found = false;
-			for (const struct newsitem* i = current_feed->items; i; ++count, i = i->next_ptr) {
+			for (const struct newsitem* i = current_feed->items; i; ++count, i = i->next) {
 				// count+1 > LINES-7:
 				// If the _next_ line would go over the boundary.
 				if (count+1 > LINES-7u)
-					if (first_scr_ptr->next_ptr)
-						first_scr_ptr = first_scr_ptr->next_ptr;
+					if (first_scr_ptr->next)
+						first_scr_ptr = first_scr_ptr->next;
 				if (!searchstrlen)
 					continue;
 				// Substring match.
@@ -412,7 +412,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 		unsigned ypos = 4, itemnum = 1;
 
 		// Print unread entries in bold.
-		for (const struct newsitem* item = first_scr_ptr; item; item = item->next_ptr) {
+		for (const struct newsitem* item = first_scr_ptr; item; item = item->next) {
 			// Set cursor to start of current line and clear it.
 			move (ypos, 0);
 			clrtoeol();
@@ -543,36 +543,36 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			else if (uiinput == _settings.keybindings.prevmenu) {
 				free (categories);
 				return reloaded;
-			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev_ptr) {
+			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev) {
 				// Check if we have no items at all!
-				highlighted = highlighted->prev_ptr;
+				highlighted = highlighted->prev;
 				// Adjust first visible entry.
-				if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {
+				if (--highlightnum < 1 && first_scr_ptr->prev) {
 					++highlightnum;
-					first_scr_ptr = first_scr_ptr->prev_ptr;
+					first_scr_ptr = first_scr_ptr->prev;
 				}
-			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next_ptr) {
-				highlighted = highlighted->next_ptr;
+			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next) {
+				highlighted = highlighted->next;
 				// Adjust first visible entry.
-				if (++highlightnum > LINES-7u && first_scr_ptr->next_ptr) {
+				if (++highlightnum > LINES-7u && first_scr_ptr->next) {
 					--highlightnum;
-					first_scr_ptr = first_scr_ptr->next_ptr;
+					first_scr_ptr = first_scr_ptr->next;
 				}
 			} else if ((uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) && highlighted) {
 				// Move highlight one page up/down == LINES-7
-				for (unsigned i = 0; i < LINES-7u && highlighted->next_ptr; ++i) {
-					highlighted = highlighted->next_ptr;
-					if (++highlightnum > LINES-7u && first_scr_ptr->next_ptr) {
+				for (unsigned i = 0; i < LINES-7u && highlighted->next; ++i) {
+					highlighted = highlighted->next;
+					if (++highlightnum > LINES-7u && first_scr_ptr->next) {
 						--highlightnum;
-						first_scr_ptr = first_scr_ptr->next_ptr;
+						first_scr_ptr = first_scr_ptr->next;
 					}
 				}
 			} else if ((uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) && highlighted) {
-				for (unsigned i = 0; i < LINES-7u && highlighted->prev_ptr; ++i) {
-					highlighted = highlighted->prev_ptr;
-					if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {
+				for (unsigned i = 0; i < LINES-7u && highlighted->prev; ++i) {
+					highlighted = highlighted->prev;
+					if (--highlightnum < 1 && first_scr_ptr->prev) {
 						++highlightnum;
-						first_scr_ptr = first_scr_ptr->prev_ptr;
+						first_scr_ptr = first_scr_ptr->prev;
 					}
 				}
 			} else if (uiinput == KEY_HOME || uiinput == _settings.keybindings.home) {
@@ -581,11 +581,11 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			} else if (uiinput == KEY_END || uiinput == _settings.keybindings.end) {
 				highlighted = first_scr_ptr = current_feed->items;
 				highlightnum = 0;
-				while (highlighted && highlighted->next_ptr) {
-					highlighted = highlighted->next_ptr;
-					if (++highlightnum >= LINES-7u && first_scr_ptr->next_ptr) {
+				while (highlighted && highlighted->next) {
+					highlighted = highlighted->next;
+					if (++highlightnum >= LINES-7u && first_scr_ptr->next) {
 						--highlightnum;
-						first_scr_ptr = first_scr_ptr->next_ptr;
+						first_scr_ptr = first_scr_ptr->next;
 					}
 				}
 			} else if (uiinput == _settings.keybindings.reload || uiinput == _settings.keybindings.forcereload) {
@@ -611,7 +611,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			else if (uiinput == _settings.keybindings.urljump2 && highlighted)
 				UISupportURLJump (highlighted->data->link);
 			else if (uiinput == _settings.keybindings.markread) {	// Mark everything read.
-				for (struct newsitem* i = current_feed->items; i; i = i->next_ptr)
+				for (struct newsitem* i = current_feed->items; i; i = i->next)
 					i->data->readstatus = 1;
 			} else if (uiinput == _settings.keybindings.markunread && highlighted) {
 				highlighted->data->readstatus = !highlighted->data->readstatus;
@@ -645,11 +645,11 @@ static int UIDisplayFeed (struct feed* current_feed) {
 
 				// highlighted = first_scr_ptr;
 				// Moves highlight to next unread item.
-				while (highlighted->next_ptr && highlighted->data->readstatus == 1) {
-					highlighted = highlighted->next_ptr;
-					if (++highlightnum > LINES-7u && first_scr_ptr->next_ptr) {
+				while (highlighted->next && highlighted->data->readstatus == 1) {
+					highlighted = highlighted->next;
+					if (++highlightnum > LINES-7u && first_scr_ptr->next) {
 						--highlightnum;
-						first_scr_ptr = first_scr_ptr->next_ptr;
+						first_scr_ptr = first_scr_ptr->next;
 					}
 				}
 
@@ -677,7 +677,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 					first_scr_ptr = savestart_first;
 				} else {
 					unsigned found = 0;
-					for (const struct newsitem* i = current_feed->items; i; i = i->next_ptr)
+					for (const struct newsitem* i = current_feed->items; i; i = i->next)
 						if (i->data->title && s_strcasestr (i->data->title, searchstr))
 							++found;	// Substring match.
 					if (typeaheadskip == found-1)
@@ -777,11 +777,11 @@ void UIMainInterface (void) {
 			if (!_unfiltered_feed_list)
 				_unfiltered_feed_list = _feed_list;
 			_feed_list = NULL;
-			for (const struct feed* cur_ptr = _unfiltered_feed_list; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
+			for (const struct feed* cur_ptr = _unfiltered_feed_list; cur_ptr; cur_ptr = cur_ptr->next) {
 				unsigned found = 0;
 				if (!cur_ptr->feedcategories)
 					continue;
-				for (const struct feedcategories* c = cur_ptr->feedcategories; c; c = c->next_ptr)
+				for (const struct feedcategories* c = cur_ptr->feedcategories; c; c = c->next)
 					for (unsigned i = 0; i < 8 && filters[i]; ++i)
 						if (strcasecmp (c->name, filters[i]) == 0) // Match found
 							++found;
@@ -803,7 +803,7 @@ void UIMainInterface (void) {
 
 					// Duplicate pointers
 					new_feed->feedurl = cur_ptr->feedurl;
-					new_feed->feed = cur_ptr->feed;
+					new_feed->xmltext = cur_ptr->xmltext;
 					new_feed->title = cur_ptr->title;
 					new_feed->link = cur_ptr->link;
 					new_feed->description = cur_ptr->description;
@@ -814,7 +814,7 @@ void UIMainInterface (void) {
 					new_feed->servauth = cur_ptr->servauth;
 					new_feed->items = cur_ptr->items;
 					new_feed->problem = cur_ptr->problem;
-					new_feed->override = cur_ptr->override;
+					new_feed->custom_title = cur_ptr->custom_title;
 					new_feed->original = cur_ptr->original;
 					new_feed->perfeedfilter = cur_ptr->perfeedfilter;
 					new_feed->execurl = cur_ptr->execurl;
@@ -822,10 +822,10 @@ void UIMainInterface (void) {
 
 					// Add to bottom of pointer chain.
 					struct feed** prev_feed = &_feed_list;
-					while (*prev_feed && (*prev_feed)->next_ptr)
-					    *prev_feed = (*prev_feed)->next_ptr;
-					new_feed->prev_ptr = *prev_feed;
-					(*prev_feed)->next_ptr = new_feed;
+					while (*prev_feed && (*prev_feed)->next)
+					    *prev_feed = (*prev_feed)->next;
+					new_feed->prev = *prev_feed;
+					(*prev_feed)->next = new_feed;
 				}
 			}
 			first_scr_ptr = _feed_list;
@@ -841,10 +841,10 @@ void UIMainInterface (void) {
 
 			unsigned count = 0, skipper = 0;
 			bool found = false;
-			for (struct feed* cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next_ptr) {
+			for (struct feed* cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next) {
 				// count+1 >= Lines-4: if the _next_ line would go over the boundary.
-				if (count+1 > LINES-4u && first_scr_ptr->next_ptr)
-					first_scr_ptr = first_scr_ptr->next_ptr;
+				if (count+1 > LINES-4u && first_scr_ptr->next)
+					first_scr_ptr = first_scr_ptr->next;
 				// Exact match from beginning of line.
 				if (searchlen > 0 && s_strcasestr (cur_ptr->title, search)) {
 					found = true;
@@ -861,14 +861,14 @@ void UIMainInterface (void) {
 			}
 		}
 
-		for (struct feed* cur_ptr = first_scr_ptr; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
+		for (struct feed* cur_ptr = first_scr_ptr; cur_ptr; cur_ptr = cur_ptr->next) {
 			// Set cursor to start of current line and clear it.
 			move (ypos, 0);
 			clrtoeol();
 
 			// Determine number of new items in feed.
 			unsigned newcount = 0;
-			for (const struct newsitem* i = cur_ptr->items; i; i = i->next_ptr)
+			for (const struct newsitem* i = cur_ptr->items; i; i = i->next)
 				if (!i->data->readstatus)
 					++newcount;
 
@@ -1018,35 +1018,35 @@ void UIMainInterface (void) {
 						// Unlink pointer from chain.
 						if (highlighted == _feed_list) {
 							// first element
-							if (_feed_list->next_ptr != NULL) {
-								_feed_list = _feed_list->next_ptr;
+							if (_feed_list->next != NULL) {
+								_feed_list = _feed_list->next;
 								first_scr_ptr = _feed_list;
-								highlighted->next_ptr->prev_ptr = NULL;
+								highlighted->next->prev = NULL;
 							} else {
 								_feed_list = NULL;
 								first_scr_ptr = NULL;
 							}
 							// Set new highlighted to _feed_list again.
 							saved_highlighted = _feed_list;
-						} else if (highlighted->next_ptr == NULL) {
+						} else if (highlighted->next == NULL) {
 							// last element
 							// Set new highlighted to element before deleted one.
-							saved_highlighted = highlighted->prev_ptr;
+							saved_highlighted = highlighted->prev;
 							// If highlighted was first line move first line upward in pointer chain.
 							if (highlighted == first_scr_ptr)
-								first_scr_ptr = first_scr_ptr->prev_ptr;
+								first_scr_ptr = first_scr_ptr->prev;
 
-							highlighted->prev_ptr->next_ptr = NULL;
+							highlighted->prev->next = NULL;
 						} else {
 							// element inside list */
 							// Set new highlighted to element after deleted one.
-							saved_highlighted = highlighted->next_ptr;
+							saved_highlighted = highlighted->next;
 							// If highlighted was last line, move first line downward in pointer chain.
 							if (highlighted == first_scr_ptr)
-								first_scr_ptr = first_scr_ptr->next_ptr;
+								first_scr_ptr = first_scr_ptr->next;
 
-							highlighted->prev_ptr->next_ptr = highlighted->next_ptr;
-							highlighted->next_ptr->prev_ptr = highlighted->prev_ptr;
+							highlighted->prev->next = highlighted->next;
+							highlighted->next->prev = highlighted->prev;
 						}
 						// Put highlight to new highlight position.
 						highlighted = saved_highlighted;
@@ -1054,12 +1054,12 @@ void UIMainInterface (void) {
 						// free (removed) pointer
 						if (removed->smartfeed == 0) {
 							if (removed->items) {
-								while (removed->items->next_ptr) {
-									removed->items = removed->items->next_ptr;
-									free (removed->items->prev_ptr->data->title);
-									free (removed->items->prev_ptr->data->link);
-									free (removed->items->prev_ptr->data->description);
-									free (removed->items->prev_ptr);
+								while (removed->items->next) {
+									removed->items = removed->items->next;
+									free (removed->items->prev->data->title);
+									free (removed->items->prev->data->link);
+									free (removed->items->prev->data->description);
+									free (removed->items->prev);
 								}
 								free (removed->items->data->title);
 								free (removed->items->data->link);
@@ -1067,12 +1067,12 @@ void UIMainInterface (void) {
 								free (removed->items);
 							}
 							free (removed->feedurl);
-							free (removed->feed);
+							free (removed->xmltext);
 							free (removed->title);
 							free (removed->link);
 							free (removed->description);
 							free (removed->lastmodified);
-							free (removed->override);
+							free (removed->custom_title);
 							free (removed->original);
 							free (removed->cookies);
 							free (removed->authinfo);
@@ -1082,33 +1082,33 @@ void UIMainInterface (void) {
 						update_smartfeeds = true;
 					}
 				}
-			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev_ptr) {
-				highlighted = highlighted->prev_ptr;
-				if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {	// Reached first onscreen entry.
+			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev) {
+				highlighted = highlighted->prev;
+				if (--highlightnum < 1 && first_scr_ptr->prev) {	// Reached first onscreen entry.
 					++highlightnum;
-					first_scr_ptr = first_scr_ptr->prev_ptr;
+					first_scr_ptr = first_scr_ptr->prev;
 				}
-			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next_ptr) {
-				highlighted = highlighted->next_ptr;
-				if (++highlightnum >= LINES-5u && first_scr_ptr->next_ptr) {	// If we fall off the screen, advance first_scr_ptr to next entry.
+			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next) {
+				highlighted = highlighted->next;
+				if (++highlightnum >= LINES-5u && first_scr_ptr->next) {	// If we fall off the screen, advance first_scr_ptr to next entry.
 					--highlightnum;
-					first_scr_ptr = first_scr_ptr->next_ptr;
+					first_scr_ptr = first_scr_ptr->next;
 				}
 			} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) {
 				// Move highlight one page up/down == LINES-6
-				for (unsigned i = 0; i < LINES-6u && highlighted->next_ptr; ++i) {
-					highlighted = highlighted->next_ptr;
-					if (++highlightnum > LINES-6u && first_scr_ptr->next_ptr) {
+				for (unsigned i = 0; i < LINES-6u && highlighted->next; ++i) {
+					highlighted = highlighted->next;
+					if (++highlightnum > LINES-6u && first_scr_ptr->next) {
 						--highlightnum;
-						first_scr_ptr = first_scr_ptr->next_ptr;
+						first_scr_ptr = first_scr_ptr->next;
 					}
 				}
 			} else if (uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) {
-				for (unsigned i = 0; i < LINES-6u && highlighted->prev_ptr; ++i) {
-					highlighted = highlighted->prev_ptr;
-					if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {
+				for (unsigned i = 0; i < LINES-6u && highlighted->prev; ++i) {
+					highlighted = highlighted->prev;
+					if (--highlightnum < 1 && first_scr_ptr->prev) {
 						++highlightnum;
-						first_scr_ptr = first_scr_ptr->prev_ptr;
+						first_scr_ptr = first_scr_ptr->prev;
 					}
 				}
 			} else if (uiinput == KEY_HOME || uiinput == _settings.keybindings.home) {
@@ -1117,11 +1117,11 @@ void UIMainInterface (void) {
 			} else if (uiinput == KEY_END || uiinput == _settings.keybindings.end) {
 				highlighted = first_scr_ptr = _feed_list;
 				highlightnum = 0;
-				while (highlighted && highlighted->next_ptr) {
-					highlighted = highlighted->next_ptr;
-					if (++highlightnum >= LINES-6u && first_scr_ptr->next_ptr) {
+				while (highlighted && highlighted->next) {
+					highlighted = highlighted->next;
+					if (++highlightnum >= LINES-6u && first_scr_ptr->next) {
 						--highlightnum;
-						first_scr_ptr = first_scr_ptr->next_ptr;
+						first_scr_ptr = first_scr_ptr->next;
 					}
 				}
 			} else if (uiinput == _settings.keybindings.moveup) {
@@ -1132,11 +1132,11 @@ void UIMainInterface (void) {
 				}
 				// Move item up.
 				if (highlighted) {
-					if (highlighted->prev_ptr != NULL) {
-						SwapPointers (highlighted, highlighted->prev_ptr);
-						highlighted = highlighted->prev_ptr;
-						if (highlightnum-1 < 1 && first_scr_ptr->prev_ptr)
-							first_scr_ptr = first_scr_ptr->prev_ptr;
+					if (highlighted->prev != NULL) {
+						SwapPointers (highlighted, highlighted->prev);
+						highlighted = highlighted->prev;
+						if (highlightnum-1 < 1 && first_scr_ptr->prev)
+							first_scr_ptr = first_scr_ptr->prev;
 					}
 					update_smartfeeds = true;
 				}
@@ -1148,12 +1148,12 @@ void UIMainInterface (void) {
 				}
 				// Move item down.
 				if (highlighted) {
-					if (highlighted->next_ptr) {
-						SwapPointers (highlighted, highlighted->next_ptr);
-						highlighted = highlighted->next_ptr;
-						if (++highlightnum >= LINES-6u && first_scr_ptr->next_ptr) {
+					if (highlighted->next) {
+						SwapPointers (highlighted, highlighted->next);
+						highlighted = highlighted->next;
+						if (++highlightnum >= LINES-6u && first_scr_ptr->next) {
 							--highlightnum;
-							first_scr_ptr = first_scr_ptr->next_ptr;
+							first_scr_ptr = first_scr_ptr->next;
 						}
 					}
 					update_smartfeeds = true;
@@ -1164,8 +1164,8 @@ void UIMainInterface (void) {
 				// This function is safe for using in filter mode, because it only
 				// changes int values. It automatically marks the correct ones read
 				// if a filter is applied since we are using a copy of the main data.
-				for (const struct feed* f = _feed_list; f; f = f->next_ptr)
-					for (struct newsitem* i = f->items; i; i = i->next_ptr)
+				for (const struct feed* f = _feed_list; f; f = f->next)
+					for (struct newsitem* i = f->items; i; i = i->next)
 						i->data->readstatus = 1;
 			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
@@ -1295,7 +1295,7 @@ void UIMainInterface (void) {
 					first_scr_ptr = savestart_first;
 				} else {
 					unsigned found = 0;
-					for (const struct feed* f = _feed_list; f; f = f->next_ptr)
+					for (const struct feed* f = _feed_list; f; f = f->next)
 						if (s_strcasestr (f->title, search)) // Substring match.
 							++found;
 					if (typeaheadskip == found-1)	// found-1 to avoid empty tab cycle.

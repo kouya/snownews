@@ -366,7 +366,7 @@ static void SetupEntities (const char * file) {
 		if (!_settings.html_entities)
 			_settings.html_entities = entity;
 		else {
-			entity->next_ptr = _settings.html_entities;
+			entity->next = _settings.html_entities;
 			_settings.html_entities = entity;
 		}
 	}
@@ -404,7 +404,7 @@ static unsigned SetupFeedList (const char* filename)
 		else if (strncasecmp (new_ptr->feedurl, "smartfeed:", strlen("smartfeed:")) == 0)
 			new_ptr->smartfeed = true;
 		if (cname && cname[0])
-			new_ptr->override = strdup (cname);
+			new_ptr->custom_title = strdup (cname);
 		if (filters && filters[0])
 			new_ptr->perfeedfilter = strdup (filters);
 		if (categories && categories[0])	// Put categories into cat struct.
@@ -420,10 +420,10 @@ static unsigned SetupFeedList (const char* filename)
 		if (!_feed_list)
 			_feed_list = new_ptr;
 		else {
-			new_ptr->prev_ptr = _feed_list;
-			while (new_ptr->prev_ptr->next_ptr)
-				new_ptr->prev_ptr = new_ptr->prev_ptr->next_ptr;
-			new_ptr->prev_ptr->next_ptr = new_ptr;
+			new_ptr->prev = _feed_list;
+			while (new_ptr->prev->next)
+				new_ptr->prev = new_ptr->prev->next;
+			new_ptr->prev->next = new_ptr;
 		}
 	}
 	fclose (configfile);

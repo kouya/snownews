@@ -194,7 +194,7 @@ char* UIDejunk (const char* feed_description) {
 
 				// Decode user defined entities.
 				bool found = false;
-				for (const struct entity* cur_entity = _settings.html_entities; cur_entity; cur_entity = cur_entity->next_ptr) {
+				for (const struct entity* cur_entity = _settings.html_entities; cur_entity; cur_entity = cur_entity->next) {
 					if (strcmp (entity, cur_entity->entity) == 0) {
 						// We have found a matching entity.
 

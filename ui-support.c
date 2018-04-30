@@ -45,14 +45,14 @@ void UIStatus (const char* text, int delay, int warning) {
 
 // Swap all pointers inside a feed struct except next and prev
 void SwapPointers (struct feed* one, struct feed* two) {
-	struct feed *two_next = two->next_ptr, *two_prev = two->prev_ptr;
+	struct feed *two_next = two->next, *two_prev = two->prev;
 	struct feed tmp = *one;
 	*one = *two;
 	*two = tmp;
-	one->next_ptr = two->next_ptr;
-	one->prev_ptr = two->prev_ptr;
-	two->next_ptr = two_next;
-	two->prev_ptr = two_prev;
+	one->next = two->next;
+	one->prev = two->prev;
+	two->next = two_next;
+	two->prev = two_prev;
 }
 
 // Ignore "A", "The", etc. prefixes when sorting feeds.
@@ -73,14 +73,14 @@ void SnowSort (void) {
 	UIStatus(_("Sorting, please wait..."), 0, 0);
 
 	unsigned elements = 0;
-	for (const struct feed* f = _feed_list; f; f = f->next_ptr)
+	for (const struct feed* f = _feed_list; f; f = f->next)
 		elements++;
 	for (unsigned i = 0; i <= elements; ++i) {
-		for (struct feed* f = _feed_list; f->next_ptr; f = f->next_ptr) {
+		for (struct feed* f = _feed_list; f->next; f = f->next) {
 			const char* one = SnowSortIgnore (f->title);
-			const char* two = SnowSortIgnore (f->next_ptr->title);
+			const char* two = SnowSortIgnore (f->next->title);
 			if (strcasecmp (one, two) > 0)
-				SwapPointers (f, f->next_ptr);
+				SwapPointers (f, f->next);
 		}
 	}
 }
@@ -150,7 +150,7 @@ void UISupportURLJump (const char* url) {
 }
 
 void SmartFeedsUpdate (void) {
-	for (struct feed* f = _feed_list; f; f = f->next_ptr)
+	for (struct feed* f = _feed_list; f; f = f->next)
 		if (f->smartfeed)
 			SmartFeedNewitems (f);
 }
@@ -160,18 +160,18 @@ void SmartFeedNewitems (struct feed* smart_feed) {
 	// The items->data structures must not be freed, since a smart feed is only
 	// a pointer collection and does not contain allocated memory.
 	if (smart_feed->items) {
-		while (smart_feed->items->next_ptr) {
-			smart_feed->items = smart_feed->items->next_ptr;
-			free (smart_feed->items->prev_ptr);
+		while (smart_feed->items->next) {
+			smart_feed->items = smart_feed->items->next;
+			free (smart_feed->items->prev);
 		}
 		free (smart_feed->items);
 		smart_feed->items = NULL;
 	}
-	for (struct feed* f = _feed_list; f; f = f->next_ptr) {
+	for (struct feed* f = _feed_list; f; f = f->next) {
 		// Do not add the smart feed recursively. 8)
 		if (f == smart_feed)
 			continue;
-		for (struct newsitem* item = f->items; item; item = item->next_ptr) {
+		for (struct newsitem* item = f->items; item; item = item->next) {
 			// If item is unread, add to smart feed.
 			if (item->data->readstatus)
 				continue;
@@ -182,10 +182,10 @@ void SmartFeedNewitems (struct feed* smart_feed) {
 			if (!smart_feed->items)
 				smart_feed->items = new_item;
 			else {
-				new_item->prev_ptr = smart_feed->items;
-				while (new_item->prev_ptr->next_ptr)
-					new_item->prev_ptr = new_item->prev_ptr->next_ptr;
-				new_item->prev_ptr->next_ptr = new_item;
+				new_item->prev = smart_feed->items;
+				while (new_item->prev->next)
+					new_item->prev = new_item->prev->next;
+				new_item->prev->next = new_item;
 			}
 		}
 	}
@@ -199,7 +199,7 @@ void SmartFeedNewitems (struct feed* smart_feed) {
 bool SmartFeedExists (const char * smartfeed) {
 	// Find our smart feed.
 	if (strcmp (smartfeed, "newitems") == 0)
-		for (const struct feed* f = _feed_list; f; f = f->next_ptr)
+		for (const struct feed* f = _feed_list; f; f = f->next)
 			if (f->smartfeed == 1)
 				return true;
 	return false;

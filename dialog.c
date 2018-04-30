@@ -110,23 +110,23 @@ void UIChangeFeedName (struct feed *cur_ptr) {
 	}
 
 	// Restore original title.
-	if (newname && cur_ptr->override) {
+	if (newname && cur_ptr->custom_title) {
 		if (strcmp(newname, "-") == 0) {
 			if (cur_ptr->title != NULL)
 				free (cur_ptr->title);
 			cur_ptr->title = cur_ptr->original;
 			// Set back original to NULL pointer.
 			cur_ptr->original = NULL;
-			free (cur_ptr->override);
-			cur_ptr->override = NULL;
+			free (cur_ptr->custom_title);
+			cur_ptr->custom_title = NULL;
 			free (newname);
 			return;
 		}
 	}
 
-	// Copy new name into ->override.
-	free (cur_ptr->override);
-	cur_ptr->override = strdup (newname);
+	// Copy new name into ->custom_title.
+	free (cur_ptr->custom_title);
+	cur_ptr->custom_title = strdup (newname);
 
 	// Save original.
 	free (cur_ptr->original);
@@ -182,10 +182,10 @@ int UIAddFeed (char * newurl) {
 
 	// Attach to feed pointer chain.
 	strncpy (new_ptr->feedurl, url, strlen(url)+1);
-	new_ptr->next_ptr = _feed_list;
+	new_ptr->next = _feed_list;
 	if (_feed_list != NULL)
-		_feed_list->prev_ptr = new_ptr;
-	new_ptr->prev_ptr = NULL;
+		_feed_list->prev = new_ptr;
+	new_ptr->prev = NULL;
 	_feed_list = new_ptr;
 
 	// Tag execurl.
@@ -210,7 +210,7 @@ int UIAddFeed (char * newurl) {
 			if ((DeXML (new_ptr)) != 0)
 				return -1;
 			else {
-				new_ptr->problem = 0;
+				new_ptr->problem = false;
 				return 0;
 			}
 		}
@@ -447,14 +447,14 @@ void CategorizeFeed (struct feed * current_feed) {
 
 	// Determine number of global categories.
 	unsigned nglobalcat = 0;
-	for (const struct categories* c = _settings.global_categories; c; c = c->next_ptr)
+	for (const struct categories* c = _settings.global_categories; c; c = c->next)
 		++nglobalcat;
 
 	// We're taking over the program!
 	while (1) {
 		// Determine number of categories for current_feed.
 		unsigned nfeedcat = 0;
-		for (const struct feedcategories* c = current_feed->feedcategories; c; c = c->next_ptr)
+		for (const struct feedcategories* c = current_feed->feedcategories; c; c = c->next)
 			++nfeedcat;
 
 		UISupportDrawBox ((COLS/2)-37, 2, (COLS/2)+37, 2+3+nglobalcat+1);
@@ -468,7 +468,7 @@ void CategorizeFeed (struct feed * current_feed) {
 		if (current_feed->feedcategories == NULL) {
 			unsigned y = 5;
 			mvaddstr (y, (COLS/2)-33, _("No category defined. Select one or add a new category:"));
-			for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
+			for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next) {
 				mvprintw (y+1, COLS/2-33, "%c. %s", catletter, c->name);
 				if (++catletter == '9'+1)
 					catletter = 'a';	// Fast forward to 'a' after the digits
@@ -479,7 +479,7 @@ void CategorizeFeed (struct feed * current_feed) {
 		} else {
 			unsigned y = 5;
 			mvaddstr (y, (COLS/2)-33, _("Categories defined for this feed:"));
-			for (const struct feedcategories* c = current_feed->feedcategories; c; ++y, c = c->next_ptr) {
+			for (const struct feedcategories* c = current_feed->feedcategories; c; ++y, c = c->next) {
 				mvprintw (y+1, COLS/2-33, "%c. %s", catletter, c->name);
 				if (++catletter == '9'+1)
 					catletter = 'a';	// Fast forward to 'a' after the digits
@@ -502,7 +502,7 @@ void CategorizeFeed (struct feed * current_feed) {
 				catletter = '1';
 				unsigned y = 5;
 				mvaddstr (y, (COLS/2)-33, _("Select a new category or add a new one:"));
-				for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
+				for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next) {
 					mvprintw (y+1, COLS/2-33, "%c. %s", catletter, c->name);
 					if (++catletter == '9'+1)
 						catletter = 'a';	// Fast forward to 'a' after the digits
@@ -539,11 +539,11 @@ void CategorizeFeed (struct feed * current_feed) {
 				selcat = uiinput - ('a'-10);
 			if (nfeedcat) {	// feed categories are only deleted in this dialog
 				const struct feedcategories* c = current_feed->feedcategories;
-				for (; c && selcat > 1; --selcat, c = c->next_ptr) {}
+				for (; c && selcat > 1; --selcat, c = c->next) {}
 				FeedCategoryDelete (current_feed, c->name);
 			} else {	// global categories are only added
 				const struct categories* c = _settings.global_categories;
-				for (; c && selcat > 1; --selcat, c = c->next_ptr) {}
+				for (; c && selcat > 1; --selcat, c = c->next) {}
 				FeedCategoryAdd (current_feed, c->name);
 			}
 		}
@@ -556,7 +556,7 @@ void CategorizeFeed (struct feed * current_feed) {
 char * DialogGetCategoryFilter (void) {
 	// Determine number of global categories.
 	unsigned nglobalcat = 0;
-	for (const struct categories* c = _settings.global_categories; c; c = c->next_ptr)
+	for (const struct categories* c = _settings.global_categories; c; c = c->next)
 		++nglobalcat;
 
 	UISupportDrawBox ((COLS/2)-35, 2, (COLS/2)+35, nglobalcat+4);
@@ -566,7 +566,7 @@ char * DialogGetCategoryFilter (void) {
 
 	char catletter = '1';
 	unsigned y = 3;
-	for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
+	for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next) {
 		mvprintw (y+1, (COLS/2)-33, "%c. %s", catletter, c->name);
 		if (++catletter == '9'+1)
 			catletter = 'a';	// Fast forward to 'a' after the digits
@@ -586,7 +586,7 @@ char * DialogGetCategoryFilter (void) {
 	else
 		sel = uiinput - ('a'-10);
 	const struct categories* c = _settings.global_categories;
-	for (; c && sel > 1; --sel, c = c->next_ptr) {}
+	for (; c && sel > 1; --sel, c = c->next) {}
 	return strdup (c->name);
 }
 
