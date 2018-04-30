@@ -199,22 +199,20 @@ int UIAddFeed (char * newurl) {
 	free (url);
 
 	// Download new feed and DeXMLize it. */
-	if ((UpdateFeed (new_ptr)) != 0) {
+	if (UpdateFeed (new_ptr) != 0) {
 		UIStatus (_("The feed could not be parsed. Do you need a filter script for this feed? (y/n)"), 0, 0);
-
 		if (getch() == 'n')
 			return -1;
 		else {
 			UIPerFeedFilter (new_ptr);
 			FilterPipeNG (new_ptr);
-			if ((DeXML (new_ptr)) != 0)
+			if (DeXML (new_ptr) != 0)
 				return -1;
-			else {
+			else
 				new_ptr->problem = false;
-				return 0;
-			}
 		}
 	}
+	new_ptr->mtime = time(NULL);
 	return 0;
 }
 

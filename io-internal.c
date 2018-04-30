@@ -174,6 +174,9 @@ int UpdateFeed (struct feed * cur_ptr) {
 	// We don't need these anymore. Free the raw XML to save some memory.
 	free (cur_ptr->xmltext);
 	cur_ptr->xmltext = NULL;
+
+	// Mark the time to detect modifications
+	cur_ptr->mtime = time(NULL);
 	return 0;
 }
 
@@ -205,9 +208,12 @@ int LoadFeed (struct feed * cur_ptr) {
 		return 0;
 	}
 
+	struct stat cachest;
+	fstat (fileno(cache), &cachest);
+
 	// Read complete cachefile.
 	int len = 0;		// Internal usage for realloc.
-	char filebuf[4096];	// File I/O block buffer.
+	char filebuf[BUFSIZ];	// File I/O block buffer.
 	while (!feof(cache)) {
 		// Use binary read, UTF-8 data!
 		size_t retval = fread (filebuf, 1, sizeof(filebuf), cache);
@@ -216,7 +222,7 @@ int LoadFeed (struct feed * cur_ptr) {
 		cur_ptr->xmltext = realloc (cur_ptr->xmltext, len+retval + 1);
 		memcpy (cur_ptr->xmltext+len, filebuf, retval);
 		len += retval;
-		if (retval != 4096)
+		if (retval != sizeof(filebuf))
 			break;
 	}
 	fclose (cache);
@@ -237,6 +243,7 @@ int LoadFeed (struct feed * cur_ptr) {
 
 	free (cur_ptr->xmltext);
 	cur_ptr->xmltext = NULL;
+	cur_ptr->mtime = cachest.st_mtime;
 	return 0;
 }
 
@@ -263,42 +270,153 @@ int LoadAllFeeds (unsigned numfeeds) {
 	return 0;
 }
 
-// Write in memory structures to disk cache.
-// Usually called before program exit.
-void WriteCache (void) {
-	UIStatus (_("Saving settings ["), 0, 0);
-	unsigned titlestrlen = strlen (_("Saving settings ["));
-
-	// Save browser setting
-	char browserfilename [PATH_MAX];
-	snprintf (browserfilename, sizeof(browserfilename), "%s/.snownews/browser", getenv("HOME"));
-	FILE* browserfile = fopen (browserfilename, "w");
-	if (!browserfile)
-		MainQuit (_("Save settings (browser)"), strerror(errno));
-	fputs (_settings.browser, browserfile);
-	fclose (browserfile);
+static void WriteFeedUrls (void)
+{
+	if (!_feed_list_changed)
+		return;
 
 	// Make a backup of urls.
 	char urlsfilename [PATH_MAX];
 	snprintf (urlsfilename, sizeof(urlsfilename), "%s/.snownews/urls", getenv("HOME"));
-	struct stat urlst;
-	if (0 == stat (urlsfilename, &urlst) && S_ISREG(urlst.st_mode)) {
-		char urlsbakfilename [PATH_MAX];
-		snprintf (urlsbakfilename, sizeof(urlsfilename), "%s/.snownews/urls.bak", getenv("HOME"));
-		rename (urlsfilename, urlsbakfilename);
-	}
 
 	// Write urls
 	FILE* urlfile = fopen (urlsfilename, "w");
-	if (!urlfile)
-		MainQuit (_("Save settings (urls)"), strerror(errno));
+	if (!urlfile) {
+		syslog (LOG_ERR, "error saving urls: %s", strerror(errno));
+		return;
+	}
+	for (const struct feed* f = _feed_list; f; f = f->next) {
+		fputs (f->feedurl, urlfile);
+		fputc ('|', urlfile);
+		if (f->custom_title)
+			fputs (f->title, urlfile);
+		fputc ('|', urlfile);
+		for (const struct feedcategories* c = f->feedcategories; c; c = c->next) {
+			fputs (c->name, urlfile);
+			if (c->next)	// Only add a colon of we run the loop again!
+				fputc (',', urlfile);
+		}
+		fputc ('|', urlfile);
+		if (f->perfeedfilter != NULL)
+			fputs (f->perfeedfilter, urlfile);
 
+		fputc ('\n', urlfile);		// Add newline character.
+	}
+	fclose (urlfile);
+	_feed_list_changed = false;
+}
+
+static void WriteFeedCache (const struct feed* feed)
+{
+	char* hashme = Hashify(feed->feedurl);
+	char cachefilename [PATH_MAX];
+	snprintf (cachefilename, sizeof(cachefilename), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
+	free (hashme);
+
+	// Check if the feed has been modified since last loaded from this file
+	struct stat cachest;
+	if (0 == stat (cachefilename, &cachest) && cachest.st_mtime >= feed->mtime)
+		return;
+
+	FILE* cache = fopen (cachefilename, "w");
+	if (!cache) {
+		syslog (LOG_ERR, "error writing cache file '%s': %s", cachefilename, strerror(errno));
+		return;
+	}
+
+	fputs ("<?xml version=\"1.0\" ?>\n\n<rdf:RDF\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns=\"http://purl.org/rss/1.0/\"\n  xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
+
+	if (feed->lastmodified != NULL) {
+		fputs ("<snow:lastmodified>", cache);
+		fputs (feed->lastmodified, cache);
+		fputs ("</snow:lastmodified>\n", cache);
+	}
+
+	fputs ("<channel rdf:about=\"", cache);
+
+	char* encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) feed->feedurl);
+	fputs (encoded, cache);
+	free (encoded);
+
+	fputs ("\">\n<title>", cache);
+	if (feed->original != NULL) {
+		encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)feed->original);
+		fputs (encoded, cache);
+		free (encoded);
+	} else if (feed->title != NULL) {
+		encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)feed->title);
+		fputs (encoded, cache);
+		free (encoded);
+	}
+	fputs ("</title>\n<link>", cache);
+	if (feed->link != NULL) {
+		encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)feed->link);
+		fputs (encoded, cache);
+		free (encoded);
+	}
+	fputs ("</link>\n<description>", cache);
+	if (feed->description != NULL) {
+		encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)feed->description);
+		fputs (encoded, cache);
+		free (encoded);
+	}
+	fputs ("</description>\n</channel>\n\n", cache);
+
+	for (const struct newsitem* item = feed->items; item; item = item->next) {
+		fputs ("<item rdf:about=\"", cache);
+
+		if (item->data->link != NULL) {
+			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->link);
+			fputs (encoded, cache);
+			free (encoded);
+		}
+		fputs ("\">\n<title>", cache);
+		if (item->data->title != NULL) {
+			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->title);
+			fputs (encoded, cache);
+			free (encoded);
+		}
+		fputs ("</title>\n<link>", cache);
+		if (item->data->link != NULL) {
+			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->link);
+			fputs (encoded, cache);
+			free (encoded);
+		}
+		fputs ("</link>\n<description>", cache);
+		if (item->data->description != NULL) {
+			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->description);
+			fputs (encoded, cache);
+			free (encoded);
+		}
+		fputs ("</description>\n<snow:readstatus>", cache);
+		putc ('0'+item->data->readstatus, cache);
+		fputs ("</snow:readstatus>\n<snow:hash>", cache);
+		if (item->data->hash)
+			fputs (item->data->hash, cache);
+		fputs ("</snow:hash>\n<snow:date>", cache);
+		fprintf (cache, "%u", item->data->date);
+		fputs ("</snow:date>\n</item>\n\n", cache);
+	}
+	fputs ("</rdf:RDF>", cache);
+	fclose (cache);
+}
+
+// Write in memory structures to disk cache.
+// Usually called before program exit.
+void WriteCache (void) {
+	UIStatus (_("Saving settings ["), 0, 0);
+
+	WriteFeedUrls();
+
+	// Save feed cache
 	unsigned numfeeds = 0;
 	for (const struct feed* f = _feed_list; f; f = f->next)
 		++numfeeds;
 
 	unsigned count = 1;
 	int oldnumobjects = 0;
+	unsigned titlestrlen = strlen (_("Saving settings ["));
+
 	for (const struct feed* cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next) {
 		// Progress bar
 		int numobjects = count*(COLS-titlestrlen-2)/numfeeds-2;
@@ -310,116 +428,12 @@ void WriteCache (void) {
 		}
 		++count;
 
-		fputs (cur_ptr->feedurl, urlfile);
-
-		fputc ('|', urlfile);
-		if (cur_ptr->custom_title)
-			fputs (cur_ptr->title, urlfile);
-
-		fputc ('|', urlfile);
-		if (cur_ptr->feedcategories != NULL) {
-			for (const struct feedcategories* c = cur_ptr->feedcategories; c; c = c->next) {
-				fputs (c->name, urlfile);
-				if (c->next)	// Only add a colon of we run the loop again!
-					fputc (',', urlfile);
-			}
-		}
-
-		fputc ('|', urlfile);
-		if (cur_ptr->perfeedfilter != NULL)
-			fputs (cur_ptr->perfeedfilter, urlfile);
-
-		fputc ('\n', urlfile);		// Add newline character.
-
 		// Discard smart feeds from cache.
 		if (cur_ptr->smartfeed)
 			continue;
 
 		// Write cache.
-		char* hashme = Hashify(cur_ptr->feedurl);
-		char cachefilename [PATH_MAX];
-		snprintf (cachefilename, sizeof(cachefilename), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
-		free (hashme);
-		FILE* cache = fopen (cachefilename, "w");
-		if (!cache)
-			MainQuit (_("Writing cache file"), strerror(errno));
-
-		fputs ("<?xml version=\"1.0\" ?>\n\n<rdf:RDF\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns=\"http://purl.org/rss/1.0/\"\n  xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
-
-		if (cur_ptr->lastmodified != NULL) {
-			fputs ("<snow:lastmodified>", cache);
-			fputs (cur_ptr->lastmodified, cache);
-			fputs ("</snow:lastmodified>\n", cache);
-		}
-
-		fputs ("<channel rdf:about=\"", cache);
-
-		char* encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) cur_ptr->feedurl);
-		fputs (encoded, cache);
-		free (encoded);
-
-		fputs ("\">\n<title>", cache);
-		if (cur_ptr->original != NULL) {
-			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)cur_ptr->original);
-			fputs (encoded, cache);
-			free (encoded);
-		} else if (cur_ptr->title != NULL) {
-			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)cur_ptr->title);
-			fputs (encoded, cache);
-			free (encoded);
-		}
-		fputs ("</title>\n<link>", cache);
-		if (cur_ptr->link != NULL) {
-			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)cur_ptr->link);
-			fputs (encoded, cache);
-			free (encoded);
-		}
-		fputs ("</link>\n<description>", cache);
-		if (cur_ptr->description != NULL) {
-			encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)cur_ptr->description);
-			fputs (encoded, cache);
-			free (encoded);
-		}
-		fputs ("</description>\n</channel>\n\n", cache);
-
-		for (const struct newsitem* item = cur_ptr->items; item; item = item->next) {
-			fputs ("<item rdf:about=\"", cache);
-
-			if (item->data->link != NULL) {
-				encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->link);
-				fputs (encoded, cache);
-				free (encoded);
-			}
-			fputs ("\">\n<title>", cache);
-			if (item->data->title != NULL) {
-				encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->title);
-				fputs (encoded, cache);
-				free (encoded);
-			}
-			fputs ("</title>\n<link>", cache);
-			if (item->data->link != NULL) {
-				encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->link);
-				fputs (encoded, cache);
-				free (encoded);
-			}
-			fputs ("</link>\n<description>", cache);
-			if (item->data->description != NULL) {
-				encoded = (char *)xmlEncodeEntitiesReentrant (NULL, (xmlChar *)item->data->description);
-				fputs (encoded, cache);
-				free (encoded);
-			}
-			fputs ("</description>\n<snow:readstatus>", cache);
-			putc ('0'+item->data->readstatus, cache);
-			fputs ("</snow:readstatus>\n<snow:hash>", cache);
-			if (item->data->hash)
-				fputs (item->data->hash, cache);
-			fputs ("</snow:hash>\n<snow:date>", cache);
-			fprintf (cache, "%u", item->data->date);
-			fputs ("</snow:date>\n</item>\n\n", cache);
-		}
-		fputs ("</rdf:RDF>", cache);
-		fclose (cache);
+		WriteFeedCache (cur_ptr);
 	}
-	fclose (urlfile);
 	return;
 }

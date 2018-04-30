@@ -22,6 +22,7 @@
 #include "dialog.h"
 #include "io-internal.h"
 #include "os-support.h"
+#include "setup.h"
 #include "ui-support.h"
 #include <ncurses.h>
 #include <unistd.h>
@@ -214,7 +215,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			attroff (WA_BOLD);
 
 		// Set current item to read.
-		current_item->data->readstatus = 1;
+		current_item->data->readstatus = true;
 
 		char keyinfostr [128];
 		snprintf (keyinfostr, sizeof(keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), _settings.keybindings.prevmenu, _settings.keybindings.help);
@@ -310,7 +311,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 
 	// Moves highlight to next unread item.
 	unsigned highlightnum = 1;	// Index of the highlighted item, 1 = first visible
-	while (highlighted && highlighted->next && highlighted->data->readstatus == 1) {
+	while (highlighted && highlighted->next && highlighted->data->readstatus) {
 		highlighted = highlighted->next;
 		if (++highlightnum > LINES-7u) {
 			--highlightnum;
@@ -322,7 +323,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 	// entry and there are no unread items anymore. Restore the original
 	// location in this case.
 	// Check if we have no items at all!
-	if (highlighted && highlighted->data->readstatus == 1) {
+	if (highlighted && highlighted->data->readstatus) {
 		highlighted = tmp_highlighted;
 		first_scr_ptr = tmp_first;
 	}
@@ -417,7 +418,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			move (ypos, 0);
 			clrtoeol();
 
-			if (item->data->readstatus != 1) {
+			if (!item->data->readstatus) {
 				// Apply color style.
 				if (!_settings.monochrome) {
 					attron (COLOR_PAIR(2));
@@ -467,7 +468,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			ypos++;
 			if (item == highlighted)
 				attroff (WA_REVERSE);
-			if (item->data->readstatus != 1) {
+			if (!item->data->readstatus) {
 				// Disable color style.
 				if (!_settings.monochrome) {
 					attroff (COLOR_PAIR(2));
@@ -612,9 +613,11 @@ static int UIDisplayFeed (struct feed* current_feed) {
 				UISupportURLJump (highlighted->data->link);
 			else if (uiinput == _settings.keybindings.markread) {	// Mark everything read.
 				for (struct newsitem* i = current_feed->items; i; i = i->next)
-					i->data->readstatus = 1;
+					i->data->readstatus = true;
+				current_feed->mtime = time(NULL);
 			} else if (uiinput == _settings.keybindings.markunread && highlighted) {
 				highlighted->data->readstatus = !highlighted->data->readstatus;
+				current_feed->mtime = time(NULL);
 				reloaded = true;
 			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
@@ -638,14 +641,15 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			}
 			// Check if we have no items at all!
 			// Don't even try to view a non existant item.
-			if (highlighted != NULL) {
+			if (highlighted) {
 				UIDisplayItem (highlighted, current_feed, categories);
+				current_feed->mtime = time(NULL);
 				tmp_highlighted = highlighted;
 				tmp_first = first_scr_ptr;
 
 				// highlighted = first_scr_ptr;
 				// Moves highlight to next unread item.
-				while (highlighted->next && highlighted->data->readstatus == 1) {
+				while (highlighted->next && highlighted->data->readstatus) {
 					highlighted = highlighted->next;
 					if (++highlightnum > LINES-7u && first_scr_ptr->next) {
 						--highlightnum;
@@ -656,7 +660,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 				// If *highlighted points to a read entry now we have hit the last
 				// entry and there are no unread items anymore. Restore the original
 				// location in this case.
-				if (highlighted->data->readstatus == 1) {
+				if (highlighted->data->readstatus) {
 					highlighted = tmp_highlighted;
 					first_scr_ptr = tmp_first;
 				}
@@ -973,7 +977,7 @@ void UIMainInterface (void) {
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else if (uiinput == _settings.keybindings.addfeed) {
 					switch (UIAddFeed(NULL)) {
-						case 0: UIStatus (_("Successfully added new item..."), 1, 0); break;
+						case 0: UIStatus (_("Successfully added new item..."), 1, 0); _feed_list_changed = true; break;
 						case 2: UIStatus (_("Invalid URL! Please add http:// if you forgot this."), 2, 1); break;
 						case -1: UIStatus (_("There was a problem adding the feed!"), 2, 1); break;
 						default: break;
@@ -1078,6 +1082,7 @@ void UIMainInterface (void) {
 							free (removed->authinfo);
 							free (removed->servauth);
 							free (removed);
+							_feed_list_changed = true;
 						}
 						update_smartfeeds = true;
 					}
@@ -1137,6 +1142,7 @@ void UIMainInterface (void) {
 						highlighted = highlighted->prev;
 						if (highlightnum-1 < 1 && first_scr_ptr->prev)
 							first_scr_ptr = first_scr_ptr->prev;
+						_feed_list_changed = true;
 					}
 					update_smartfeeds = true;
 				}
@@ -1155,18 +1161,22 @@ void UIMainInterface (void) {
 							--highlightnum;
 							first_scr_ptr = first_scr_ptr->next;
 						}
+						_feed_list_changed = true;
 					}
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == _settings.keybindings.dfltbrowser)
+			} else if (uiinput == _settings.keybindings.dfltbrowser) {
 				UIChangeBrowser();
-			else if (uiinput == _settings.keybindings.markallread) {
+				SaveBrowserSetting();
+			} else if (uiinput == _settings.keybindings.markallread) {
 				// This function is safe for using in filter mode, because it only
 				// changes int values. It automatically marks the correct ones read
 				// if a filter is applied since we are using a copy of the main data.
-				for (const struct feed* f = _feed_list; f; f = f->next)
+				for (struct feed* f = _feed_list; f; f = f->next) {
 					for (struct newsitem* i = f->items; i; i = i->next)
-						i->data->readstatus = 1;
+						i->data->readstatus = true;
+					f->mtime = time(NULL);
+				}
 			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
 			else if (uiinput == _settings.keybindings.changefeedname && highlighted) {
@@ -1174,25 +1184,31 @@ void UIMainInterface (void) {
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
 					UIChangeFeedName(highlighted);
+					_feed_list_changed = true;
 					update_smartfeeds = true;
 				}
 			} else if (uiinput == _settings.keybindings.perfeedfilter && highlighted) {
 				if (filters[0])
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
-				else
+				else {
 					UIPerFeedFilter (highlighted);
+					_feed_list_changed = true;
+				}
 			} else if (uiinput == _settings.keybindings.sortfeeds && highlighted) {
 				if (filters[0])	// Deactivate sorting function if filter is applied.
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
 					SnowSort();
+					_feed_list_changed = true;
 					update_smartfeeds = true;
 				}
 			} else if (uiinput == _settings.keybindings.categorize && highlighted && highlighted->smartfeed) {
 				if (filters[0])	// This needs to be worked on before it works while a filter is applied!
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
-				else
+				else {
 					CategorizeFeed (highlighted);
+					_feed_list_changed = true;
+				}
 			} else if (uiinput == _settings.keybindings.filter) {
 				// GUI to set a filter
 				char* filterstring = DialogGetCategoryFilter();
@@ -1218,6 +1234,7 @@ void UIMainInterface (void) {
 					}
 				}
 				free (filterstring);
+				_feed_list_changed = true;
 			} else if (uiinput == _settings.keybindings.filtercurrent) {
 				// Set filter to primary filter of this feed.
 				// Free filter if it's not empty to avoid memory leaks!

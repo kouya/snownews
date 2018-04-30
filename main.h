@@ -62,6 +62,7 @@ struct feed {
 	char*		custom_title;	// Custom feed title.
 	char*		original;	// Original feed title.
 	char*		perfeedfilter;	// Pipe feed through this program before parsing.
+	time_t		mtime;		// Last modification time
 	unsigned	content_length;
 	enum netio_error netio_error;	// See netio.h
 	int		connectresult;	// Socket errno
@@ -85,7 +86,7 @@ struct newsdata {
 	char*		description;
 	char*		hash;
 	int		date;
-	int		readstatus;		// 0: unread, 1: read
+	bool		readstatus;
 };
 
 // Global program keybindings. Loaded from setup:Config()
@@ -179,6 +180,7 @@ struct settings {
 extern struct feed*	_feed_list;
 extern struct feed*	_unfiltered_feed_list;
 extern struct settings	_settings;
+extern bool _feed_list_changed;
 
 //----------------------------------------------------------------------
 

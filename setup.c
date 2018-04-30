@@ -28,23 +28,26 @@
 
 // Load browser command from ~./snownews/browser.
 static void SetupBrowser (const char* filename) {
-	FILE* configfile = fopen (filename, "r");
-	if (!configfile) {
-		UIStatus (_("Creating new config \"browser\"..."), 0, 0);
-		configfile = fopen (filename, "w");
-		if (!configfile)
-			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); // Still didn't work?
-		_settings.browser = strdup("lynx %s");
-		fputs (_settings.browser, configfile);
-	} else {
-		char linebuf[256];
-		fgets (linebuf, sizeof(linebuf), configfile);
-		// Die newline, die!
+	char linebuf[128] = "lynx %s";
+	FILE* browserfile = fopen (filename, "r");
+	if (browserfile) {
+		fgets (linebuf, sizeof(linebuf), browserfile);
 		if (linebuf[strlen(linebuf)-1] == '\n')
 			linebuf[strlen(linebuf)-1] = '\0';
-		_settings.browser = strdup (linebuf);
+		fclose (browserfile);
 	}
-	fclose (configfile);
+	_settings.browser = strdup (linebuf);
+}
+
+void SaveBrowserSetting (void)
+{
+	char browserfilename [PATH_MAX];
+	snprintf (browserfilename, sizeof(browserfilename), "%s/.snownews/browser", getenv("HOME"));
+	FILE* browserfile = fopen (browserfilename, "w");
+	if (!browserfile)
+		MainQuit (_("Save settings (browser)"), strerror(errno));
+	fputs (_settings.browser, browserfile);
+	fclose (browserfile);
 }
 
 // Parse http_proxy environment variable and define proxyname and proxyport.
@@ -89,7 +92,7 @@ static void SetupUserAgent (void) {
 // Define global keybindings and load user customized bindings.
 static void SetupKeybindings (const char* filename) {
 	FILE* configfile = fopen (filename, "r");
-	if (configfile != NULL) {
+	if (configfile) {
 		// Read keybindings and populate keybindings struct.
 		while (!feof(configfile)) {
 			char linebuf[128];
@@ -177,49 +180,50 @@ static void SetupKeybindings (const char* filename) {
 		if (_settings.keybindings.dfltbrowser == 'b')
 			_settings.keybindings.dfltbrowser = 'B';
 		fclose (configfile);
+	} else {
+		// Write default bindings if the file is not there
+		configfile = fopen (filename, "w");
+		fputs ("# Snownews keybindings configfile\n", configfile);
+		fputs ("# Main menu bindings\n", configfile);
+		fprintf (configfile, "add feed:%c\n", _settings.keybindings.addfeed);
+		fprintf (configfile, "delete feed:%c\n", _settings.keybindings.deletefeed);
+		fprintf (configfile, "reload all feeds:%c\n", _settings.keybindings.reloadall);
+		fprintf (configfile, "change default browser:%c\n", _settings.keybindings.dfltbrowser);
+		fprintf (configfile, "move item up:%c\n", _settings.keybindings.moveup);
+		fprintf (configfile, "move item down:%c\n", _settings.keybindings.movedown);
+		fprintf (configfile, "change feedname:%c\n", _settings.keybindings.changefeedname);
+		fprintf (configfile, "sort feeds:%c\n", _settings.keybindings.sortfeeds);
+		fprintf (configfile, "categorize feed:%c\n", _settings.keybindings.categorize);
+		fprintf (configfile, "apply filter:%c\n", _settings.keybindings.filter);
+		fprintf (configfile, "only current category:%c\n", _settings.keybindings.filtercurrent);
+		fprintf (configfile, "mark all as read:%c\n", _settings.keybindings.markallread);
+		fprintf (configfile, "remove filter:%c\n", _settings.keybindings.nofilter);
+		fprintf (configfile, "per feed filter:%c\n", _settings.keybindings.perfeedfilter);
+		fprintf (configfile, "toggle AND/OR filtering:%c\n", _settings.keybindings.andxor);
+		fprintf (configfile, "quit:%c\n", _settings.keybindings.quit);
+		fputs ("# Feed display menu bindings\n", configfile);
+		fprintf (configfile, "show feedinfo:%c\n", _settings.keybindings.feedinfo);
+		fprintf (configfile, "mark feed as read:%c\n", _settings.keybindings.markread);
+		fprintf (configfile, "mark item unread:%c\n", _settings.keybindings.markunread);
+		fputs ("# General keybindungs\n", configfile);
+		fprintf (configfile, "next item:%c\n", _settings.keybindings.next);
+		fprintf (configfile, "previous item:%c\n", _settings.keybindings.prev);
+		fprintf (configfile, "return to previous menu:%c\n", _settings.keybindings.prevmenu);
+		fprintf (configfile, "reload feed:%c\n", _settings.keybindings.reload);
+		fprintf (configfile, "force reload feed:%c\n", _settings.keybindings.forcereload);
+		fprintf (configfile, "open url:%c\n", _settings.keybindings.urljump);
+		fprintf (configfile, "open item url in overview:%c\n", _settings.keybindings.urljump2);
+		fprintf (configfile, "page up:%c\n", _settings.keybindings.pup);
+		fprintf (configfile, "page down:%c\n", _settings.keybindings.pdown);
+		fprintf (configfile, "top:%c\n", _settings.keybindings.home);
+		fprintf (configfile, "bottom:%c\n", _settings.keybindings.end);
+		fprintf (configfile, "enter:%c\n", _settings.keybindings.enter);
+		fprintf (configfile, "show new headlines:%c\n", _settings.keybindings.newheadlines);
+		fprintf (configfile, "help menu:%c\n", _settings.keybindings.help);
+		fprintf (configfile, "about:%c\n", _settings.keybindings.about);
+		fprintf (configfile, "type ahead find:%c\n", _settings.keybindings.typeahead);
+		fclose (configfile);
 	}
-
-	configfile = fopen (filename, "w");
-	fputs ("# Snownews keybindings configfile\n", configfile);
-	fputs ("# Main menu bindings\n", configfile);
-	fprintf (configfile, "add feed:%c\n", _settings.keybindings.addfeed);
-	fprintf (configfile, "delete feed:%c\n", _settings.keybindings.deletefeed);
-	fprintf (configfile, "reload all feeds:%c\n", _settings.keybindings.reloadall);
-	fprintf (configfile, "change default browser:%c\n", _settings.keybindings.dfltbrowser);
-	fprintf (configfile, "move item up:%c\n", _settings.keybindings.moveup);
-	fprintf (configfile, "move item down:%c\n", _settings.keybindings.movedown);
-	fprintf (configfile, "change feedname:%c\n", _settings.keybindings.changefeedname);
-	fprintf (configfile, "sort feeds:%c\n", _settings.keybindings.sortfeeds);
-	fprintf (configfile, "categorize feed:%c\n", _settings.keybindings.categorize);
-	fprintf (configfile, "apply filter:%c\n", _settings.keybindings.filter);
-	fprintf (configfile, "only current category:%c\n", _settings.keybindings.filtercurrent);
-	fprintf (configfile, "mark all as read:%c\n", _settings.keybindings.markallread);
-	fprintf (configfile, "remove filter:%c\n", _settings.keybindings.nofilter);
-	fprintf (configfile, "per feed filter:%c\n", _settings.keybindings.perfeedfilter);
-	fprintf (configfile, "toggle AND/OR filtering:%c\n", _settings.keybindings.andxor);
-	fprintf (configfile, "quit:%c\n", _settings.keybindings.quit);
-	fputs ("# Feed display menu bindings\n", configfile);
-	fprintf (configfile, "show feedinfo:%c\n", _settings.keybindings.feedinfo);
-	fprintf (configfile, "mark feed as read:%c\n", _settings.keybindings.markread);
-	fprintf (configfile, "mark item unread:%c\n", _settings.keybindings.markunread);
-	fputs ("# General keybindungs\n", configfile);
-	fprintf (configfile, "next item:%c\n", _settings.keybindings.next);
-	fprintf (configfile, "previous item:%c\n", _settings.keybindings.prev);
-	fprintf (configfile, "return to previous menu:%c\n", _settings.keybindings.prevmenu);
-	fprintf (configfile, "reload feed:%c\n", _settings.keybindings.reload);
-	fprintf (configfile, "force reload feed:%c\n", _settings.keybindings.forcereload);
-	fprintf (configfile, "open url:%c\n", _settings.keybindings.urljump);
-	fprintf (configfile, "open item url in overview:%c\n", _settings.keybindings.urljump2);
-	fprintf (configfile, "page up:%c\n", _settings.keybindings.pup);
-	fprintf (configfile, "page down:%c\n", _settings.keybindings.pdown);
-	fprintf (configfile, "top:%c\n", _settings.keybindings.home);
-	fprintf (configfile, "bottom:%c\n", _settings.keybindings.end);
-	fprintf (configfile, "enter:%c\n", _settings.keybindings.enter);
-	fprintf (configfile, "show new headlines:%c\n", _settings.keybindings.newheadlines);
-	fprintf (configfile, "help menu:%c\n", _settings.keybindings.help);
-	fprintf (configfile, "about:%c\n", _settings.keybindings.about);
-	fprintf (configfile, "type ahead find:%c\n", _settings.keybindings.typeahead);
-	fclose (configfile);
 }
 
 // Set up colors and load user customized colors.
@@ -238,7 +242,7 @@ static void SetupColors (const char* filename) {
 			strsep (&value, ":");
 			unsigned cval = atoi(value);
 			bool cvalbold = (cval > 7);
-			if (strcmp (linebuf, "enabled") == 0) 
+			if (strcmp (linebuf, "enabled") == 0)
 				_settings.monochrome = !cval;
 			else if (strcmp (linebuf, "new item") == 0) {
 				_settings.color.newitems = cval;
@@ -252,34 +256,33 @@ static void SetupColors (const char* filename) {
 			}
 		}
 		fclose (configfile);
+	} else {
+		// Write the file. This will write all setting with their
+		// values read before and new ones with the defaults.
+		configfile = fopen (filename, "w");
+		fputs ("# Snownews color definitons\n", configfile);
+		fputs ("# black:0\n", configfile);
+		fputs ("# red:1\n", configfile);
+		fputs ("# green:2\n", configfile);
+		fputs ("# orange:3\n", configfile);
+		fputs ("# blue:4\n", configfile);
+		fputs ("# magenta(tm):5\n", configfile);
+		fputs ("# cyan:6\n", configfile);
+		fputs ("# gray:7\n", configfile);
+		fputs ("# brightred:9\n", configfile);
+		fputs ("# brightgreen:10\n", configfile);
+		fputs ("# yellow:11\n", configfile);
+		fputs ("# brightblue:12\n", configfile);
+		fputs ("# brightmagenta:13\n", configfile);
+		fputs ("# brightcyan:14\n", configfile);
+		fputs ("# white:15\n", configfile);
+		fputs ("# no color:-1\n", configfile);
+		fprintf (configfile, "enabled:%d\n", !_settings.monochrome);
+		fprintf (configfile, "new item:%d\n", _settings.color.newitems);
+		fprintf (configfile, "goto url:%d\n", _settings.color.urljump);
+		fprintf (configfile, "feedtitle:%d\n", _settings.color.feedtitle);
+		fclose (configfile);
 	}
-
-	// Write the file. This will write all setting with their
-	// values read before and new ones with the defaults.
-	configfile = fopen (filename, "w");
-	fputs ("# Snownews color definitons\n", configfile);
-	fputs ("# black:0\n", configfile);
-	fputs ("# red:1\n", configfile);
-	fputs ("# green:2\n", configfile);
-	fputs ("# orange:3\n", configfile);
-	fputs ("# blue:4\n", configfile);
-	fputs ("# magenta(tm):5\n", configfile);
-	fputs ("# cyan:6\n", configfile);
-	fputs ("# gray:7\n", configfile);
-	fputs ("# brightred:9\n", configfile);
-	fputs ("# brightgreen:10\n", configfile);
-	fputs ("# yellow:11\n", configfile);
-	fputs ("# brightblue:12\n", configfile);
-	fputs ("# brightmagenta:13\n", configfile);
-	fputs ("# brightcyan:14\n", configfile);
-	fputs ("# white:15\n", configfile);
-	fputs ("# no color:-1\n", configfile);
-	fprintf (configfile, "enabled:%d\n", !_settings.monochrome);
-	fprintf (configfile, "new item:%d\n", _settings.color.newitems);
-	fprintf (configfile, "goto url:%d\n", _settings.color.urljump);
-	fprintf (configfile, "feedtitle:%d\n", _settings.color.feedtitle);
-	fclose (configfile);
-
 	if (!_settings.monochrome) {
 		start_color();
 

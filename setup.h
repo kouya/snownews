@@ -18,3 +18,4 @@
 #include "config.h"
 
 unsigned Config (void);
+void SaveBrowserSetting (void);

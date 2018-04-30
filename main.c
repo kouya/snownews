@@ -32,6 +32,7 @@ struct feed* _feed_list = NULL;
 struct feed* _unfiltered_feed_list = NULL;	// Backup first pointer for filter mode.
 				// Needs to be global so it can be used in the signal handler.
 				// Must be set to NULL by default and whenever it's not used anymore!
+bool _feed_list_changed = false;
 
 struct settings _settings = {
 	.keybindings = {
@@ -92,9 +93,18 @@ static int last_signal = 0;
 
 enum EPIDAction { pid_file_delete, pid_file_create };
 
+static void make_pidfile_name (char* fnbuf, size_t fnbufsz)
+{
+	const char* rundir = getenv("XDG_RUNTIME_DIR");
+	if (rundir)
+		snprintf (fnbuf, fnbufsz, "%s/snownews.pid", rundir);
+	else
+		snprintf (fnbuf, fnbufsz, "%s/.snownews/pid", getenv("HOME"));
+}
+
 static void modifyPIDFile (enum EPIDAction action) {
 	char pid_path [PATH_MAX];
-	snprintf(pid_path, sizeof(pid_path), "%s/.snownews/pid", getenv("HOME"));
+	make_pidfile_name (pid_path, sizeof(pid_path));
 	if (action == pid_file_create) {
 		FILE* file = fopen(pid_path, "w");
 		if (!file) {
@@ -109,7 +119,7 @@ static void modifyPIDFile (enum EPIDAction action) {
 
 static void checkPIDFile (void) {
 	char pid_path [PATH_MAX];
-	snprintf (pid_path, sizeof(pid_path), "%s/.snownews/pid", getenv("HOME"));
+	make_pidfile_name (pid_path, sizeof(pid_path));
 
 	FILE* pidfile = fopen(pid_path, "r");
 	if (!pidfile)
