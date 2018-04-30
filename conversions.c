@@ -27,7 +27,6 @@
 #include "setup.h"
 #include "ui-support.h"
 #include <iconv.h>
-#include <time.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
 #include <openssl/evp.h>

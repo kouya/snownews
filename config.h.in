@@ -44,6 +44,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <stdio.h>
+#include <time.h>
 
 enum netio_error {
        NET_ERR_OK,

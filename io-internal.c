@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <ncurses.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 #include <libxml/parser.h>
 

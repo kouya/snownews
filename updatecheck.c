@@ -17,7 +17,6 @@
 #include "updatecheck.h"
 #include "netio.h"
 #include "io-internal.h"
-#include <time.h>
 
 void AutoVersionCheck (void) {
 	// We check once a week.

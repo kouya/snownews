@@ -16,7 +16,6 @@
 
 #include "config.h"
 #include <ctype.h>
-#include <time.h>
 
 //-----------------------------------------------------------------------------
 // This is a replacement for strsep which is not portable (missing on Solaris).

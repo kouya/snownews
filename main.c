@@ -26,7 +26,6 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 
 extern struct feed *first_bak;		// For use with the signal handler.

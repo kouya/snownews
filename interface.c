@@ -24,7 +24,6 @@
 #include "main.h"
 #include "netio.h"
 #include "os-support.h"
-#include "support.h"
 #include "ui-support.h"
 #include "xmlparse.h"
 #include <ncurses.h>

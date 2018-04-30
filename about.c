@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "config.h"
-#include "support.h"
+#include "about.h"
 #include <ncurses.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 //----------------------------------------------------------------------
 
@@ -332,9 +332,8 @@ void UIAbout (void) {
 		getch();
 		return;
 	}
-	if (easterEgg())
-		santaHunta();
-	else { // 80 COLS logo
+	int key = 'S';
+	if (!easterEgg()) {
 		unsigned xpos = COLS/2u - 40;
 
 		erase();
@@ -357,6 +356,14 @@ void UIAbout (void) {
 		mvaddstr (22, COLS/2-26, "Douglas Campos, Ray Iwata, Piotr Ozarowski, Yang Huan");
 		mvaddstr (23, COLS/2-15, "Ihar Hrachyshka, Mats Berglund");
 
-		getch();
+		key = getch();
 	}
+	if (key == 'S')
+		santaHunta();
+}
+
+bool easterEgg (void) {
+	time_t tunix = time(NULL);
+	struct tm* t = localtime(&tunix);
+	return t->tm_mon == 11 && t->tm_mday >= 24 && t->tm_mday <= 26;
 }

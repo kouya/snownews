@@ -21,7 +21,6 @@
 
 #include "config.h"
 #include "ui-support.h"
-#include <time.h>
 
 static void CookieCutter (struct feed* cur_ptr, FILE* cookies) {
 	int len = 0;
