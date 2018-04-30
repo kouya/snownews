@@ -21,7 +21,6 @@ Features
 * Supports HTTP authentication (basic and digest methods).
 * Supports cookies.
 * A help menu available throughout the program.
-* Automatic update checking (can be deactivated).
 * Few dependencies on external libraries; ncurses and libxml2.
 * Import feature for OPML subscription lists.
 * Fully customizable key bindings of all program functions.

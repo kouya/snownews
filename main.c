@@ -19,7 +19,6 @@
 #include "io-internal.h"
 #include "setup.h"
 #include "ui-support.h"
-#include "updatecheck.h"
 #include <ncurses.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -139,21 +138,12 @@ static void checkPIDFile (void) {
 _Noreturn void MainQuit (const char* func, const char* error) {
 	if (!error)	// Only save settings if we didn't exit on error.
 		WriteCache();
-	clear();
-	refresh();
 	endwin();	// Make sure no ncurses function is called after this point!
-
 	modifyPIDFile(pid_file_delete);
 
 	if (last_signal)
 		printf ("Exiting via signal %d.\n", last_signal);
-	if (!error) {
-		// Do this after everything else. If it doesn't work or hang
-		// user can ctrl-c without interfering with the program operation
-		// (like writing caches).
-		AutoVersionCheck();
-		exit (EXIT_SUCCESS);
-	} else {
+	if (error) {
 		printf (_("Aborting program execution!\nAn internal error occured. Snownews has quit, no changes has been saved!\n"));
 		printf (_("Please submit a bugreport at https://github.com/kouya/snownews/issues\n"));
 		printf ("----\n");
@@ -163,10 +153,11 @@ _Noreturn void MainQuit (const char* func, const char* error) {
 		printf ("Error as reported by the system: %s\n\n", error);
 		exit (EXIT_FAILURE);
 	}
+	exit (EXIT_SUCCESS);
 }
 
 // Signal handler function.
-static void MainSignalHandler (int sig) {
+static _Noreturn void MainSignalHandler (int sig) {
 	last_signal = sig;
 
 	// If there is a _unfiltered_feed_list!=NULL a filter is set. Reset _feed_list
