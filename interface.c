@@ -14,18 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "config.h"
+#include "interface.h"
+#include "main.h"
 #include "about.h"
 #include "categories.h"
 #include "conversions.h"
 #include "dialog.h"
-#include "interface.h"
 #include "io-internal.h"
-#include "main.h"
-#include "netio.h"
 #include "os-support.h"
 #include "ui-support.h"
-#include "xmlparse.h"
 #include <ncurses.h>
 #include <unistd.h>
 #include <libxml/parser.h>
@@ -33,16 +30,7 @@
 	#define xmlStrlen(s) xmlUTF8Strlen(s)
 #endif
 
-extern struct keybindings keybindings;
-extern struct color color;
-extern bool use_colors;
-extern bool cursor_always_visible;
-
-static bool resize_dirty = false;
-
-struct feed *first_bak = NULL;	// Backup first pointer for filter mode.
-				// Needs to be global so it can be used in the signal handler.
-				// Must be set to NULL by default and whenever it's not used anymore!
+//----------------------------------------------------------------------
 
 // Scrollable feed->description.
 struct scrolltext {
@@ -50,6 +38,12 @@ struct scrolltext {
 	struct scrolltext * next_ptr;
 	struct scrolltext * prev_ptr;
 };
+
+//----------------------------------------------------------------------
+
+static bool resize_dirty = false;
+
+//----------------------------------------------------------------------
 
 void sig_winch (int p __attribute__((unused)))
 {
@@ -198,9 +192,9 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		}
 
 		// Apply color style.
-		if (use_colors) {
+		if (!_settings.monochrome) {
 			attron (COLOR_PAIR(3));
-			if (color.urljumpbold)
+			if (_settings.color.urljumpbold)
 				attron (WA_BOLD);
 		} else
 			attron (WA_BOLD);
@@ -212,9 +206,9 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			mvprintw (LINES-2, 1, "-> %s", current_item->data->link);
 
 		// Disable color style.
-		if (use_colors) {
+		if (!_settings.monochrome) {
 			attroff (COLOR_PAIR(3));
-			if (color.urljumpbold)
+			if (_settings.color.urljumpbold)
 				attroff (WA_BOLD);
 		} else
 			attroff (WA_BOLD);
@@ -223,13 +217,13 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		current_item->data->readstatus = 1;
 
 		char keyinfostr [128];
-		snprintf (keyinfostr, sizeof(keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), keybindings.prevmenu, keybindings.help);
+		snprintf (keyinfostr, sizeof(keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), _settings.keybindings.prevmenu, _settings.keybindings.help);
 		UIStatus (keyinfostr, 0, 0);
 
 		int uiinput = getch();
-		if (uiinput == keybindings.help || uiinput == '?')
+		if (uiinput == _settings.keybindings.help || uiinput == '?')
 			UIDisplayItemHelp();
-		else if (uiinput == '\n' || uiinput == keybindings.prevmenu || uiinput == keybindings.enter) {
+		else if (uiinput == '\n' || uiinput == _settings.keybindings.prevmenu || uiinput == _settings.keybindings.enter) {
 			// Free the wrapped text linked list.
 			while (first_line) {
 				struct scrolltext* l = first_line;
@@ -238,9 +232,9 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 				free (l);
 			}
 			return;
-		} else if (uiinput == keybindings.urljump)
+		} else if (uiinput == _settings.keybindings.urljump)
 			UISupportURLJump (current_item->data->link);
-		else if (uiinput == keybindings.next || uiinput == KEY_RIGHT) {
+		else if (uiinput == _settings.keybindings.next || uiinput == KEY_RIGHT) {
 			if (current_item->next_ptr != NULL) {
 				current_item = current_item->next_ptr;
 				linenumber = 0;
@@ -249,9 +243,9 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			} else {
 				// Setting rewrap to 1 to get the free block below executed.
 				rewrap = true;
-				uiinput = ungetch(keybindings.prevmenu);
+				uiinput = ungetch(_settings.keybindings.prevmenu);
 			}
-		} else if (uiinput == keybindings.prev || uiinput == KEY_LEFT) {
+		} else if (uiinput == _settings.keybindings.prev || uiinput == KEY_LEFT) {
 			if (current_item->prev_ptr != NULL) {
 				current_item = current_item->prev_ptr;
 				linenumber = 0;
@@ -260,14 +254,14 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			} else {
 				// Setting rewrap to 1 to get the free block below executed.
 				rewrap = true;
-				uiinput = ungetch(keybindings.prevmenu);
+				uiinput = ungetch(_settings.keybindings.prevmenu);
 			}
-		} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == keybindings.pdown) {
+		} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) {
 			// Scroll by one page.
 			for (int i = 0; i < LINES-9; ++i)
 				if (linenumber+(LINES-7) < maxlines)
 					linenumber++;
-		} else if (uiinput == KEY_PPAGE || uiinput == keybindings.pup) {
+		} else if (uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) {
 			for (int i = 0; i < LINES-9; ++i)
 				if (linenumber >= 1)
 					linenumber--;
@@ -283,7 +277,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 			endwin();
 			refresh();
 			resize_dirty = false;
-		} else if (uiinput == keybindings.about)
+		} else if (uiinput == _settings.keybindings.about)
 			UIAbout();
 		// Redraw screen on ^L
 		else if (uiinput == 12)
@@ -303,7 +297,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 }
 
 static int UIDisplayFeed (struct feed* current_feed) {
-	// Set highlighted to first_ptr at the beginning.
+	// Set highlighted to _feed_list at the beginning.
 	// Otherwise bad things (tm) will happen.
 	const struct newsitem* first_scr_ptr = current_feed->items;
 	const struct newsitem* tmp_first = first_scr_ptr;
@@ -383,9 +377,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			}
 		}
 
-		if (color.feedtitle > -1) {
+		if (_settings.color.feedtitle > -1) {
 			attron (COLOR_PAIR(4));
-			if (color.feedtitlebold)
+			if (_settings.color.feedtitlebold)
 				attron (WA_BOLD);
 		} else
 			attron (WA_BOLD);
@@ -407,9 +401,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 		} else
 			mvprintw (2, 1,	"%s", current_feed->title);
 
-		if (color.feedtitle > -1) {
+		if (_settings.color.feedtitle > -1) {
 			attroff (COLOR_PAIR(4));
-			if (color.feedtitlebold)
+			if (_settings.color.feedtitlebold)
 				attroff (WA_BOLD);
 		} else
 			attroff (WA_BOLD);
@@ -425,9 +419,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 
 			if (item->data->readstatus != 1) {
 				// Apply color style.
-				if (use_colors) {
+				if (!_settings.monochrome) {
 					attron (COLOR_PAIR(2));
-					if (color.newitemsbold)
+					if (_settings.color.newitemsbold)
 						attron (WA_BOLD);
 				} else
 					attron (WA_BOLD);
@@ -475,9 +469,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 				attroff (WA_REVERSE);
 			if (item->data->readstatus != 1) {
 				// Disable color style.
-				if (use_colors) {
+				if (!_settings.monochrome) {
 					attroff (COLOR_PAIR(2));
-					if (color.newitemsbold)
+					if (_settings.color.newitemsbold)
 						attroff (WA_BOLD);
 				} else
 					attroff (WA_BOLD);
@@ -489,9 +483,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 		}
 
 		// Apply color style.
-		if (use_colors) {
+		if (!_settings.monochrome) {
 			attron (COLOR_PAIR(3));
-			if (color.urljumpbold)
+			if (_settings.color.urljumpbold)
 				attron (WA_BOLD);
 		} else
 			attron (WA_BOLD);
@@ -503,9 +497,9 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			mvprintw (LINES-2, 1, "-> %s", current_feed->link);
 
 		// Disable color style.
-		if (use_colors) {
+		if (!_settings.monochrome) {
 			attroff (COLOR_PAIR(3));
-			if (color.urljumpbold)
+			if (_settings.color.urljumpbold)
 				attroff (WA_BOLD);
 		} else
 			attroff (WA_BOLD);
@@ -516,7 +510,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			UIStatus (tmpstr, 0, 0);
 		} else {
 			char tmpstr[128];
-			snprintf (tmpstr, sizeof(tmpstr), _("Press '%c' to return to main menu, '%c' to show help."), keybindings.prevmenu, keybindings.help);
+			snprintf (tmpstr, sizeof(tmpstr), _("Press '%c' to return to main menu, '%c' to show help."), _settings.keybindings.prevmenu, _settings.keybindings.help);
 			UIStatus (tmpstr, 0, 0);
 		}
 
@@ -544,12 +538,12 @@ static int UIDisplayFeed (struct feed* current_feed) {
 				}
 			}
 		} else {
-			if (uiinput == keybindings.help || uiinput == '?')
+			if (uiinput == _settings.keybindings.help || uiinput == '?')
 				UIDisplayFeedHelp();
-			else if (uiinput == keybindings.prevmenu) {
+			else if (uiinput == _settings.keybindings.prevmenu) {
 				free (categories);
 				return reloaded;
-			} else if ((uiinput == KEY_UP || uiinput == keybindings.prev) && highlighted && highlighted->prev_ptr) {
+			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev_ptr) {
 				// Check if we have no items at all!
 				highlighted = highlighted->prev_ptr;
 				// Adjust first visible entry.
@@ -557,14 +551,14 @@ static int UIDisplayFeed (struct feed* current_feed) {
 					++highlightnum;
 					first_scr_ptr = first_scr_ptr->prev_ptr;
 				}
-			} else if ((uiinput == KEY_DOWN || uiinput == keybindings.next) && highlighted && highlighted->next_ptr) {
+			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next_ptr) {
 				highlighted = highlighted->next_ptr;
 				// Adjust first visible entry.
 				if (++highlightnum > LINES-7u && first_scr_ptr->next_ptr) {
 					--highlightnum;
 					first_scr_ptr = first_scr_ptr->next_ptr;
 				}
-			} else if ((uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == keybindings.pdown) && highlighted) {
+			} else if ((uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) && highlighted) {
 				// Move highlight one page up/down == LINES-7
 				for (unsigned i = 0; i < LINES-7u && highlighted->next_ptr; ++i) {
 					highlighted = highlighted->next_ptr;
@@ -573,7 +567,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 						first_scr_ptr = first_scr_ptr->next_ptr;
 					}
 				}
-			} else if ((uiinput == KEY_PPAGE || uiinput == keybindings.pup) && highlighted) {
+			} else if ((uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) && highlighted) {
 				for (unsigned i = 0; i < LINES-7u && highlighted->prev_ptr; ++i) {
 					highlighted = highlighted->prev_ptr;
 					if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {
@@ -581,10 +575,10 @@ static int UIDisplayFeed (struct feed* current_feed) {
 						first_scr_ptr = first_scr_ptr->prev_ptr;
 					}
 				}
-			} else if (uiinput == KEY_HOME || uiinput == keybindings.home) {
+			} else if (uiinput == KEY_HOME || uiinput == _settings.keybindings.home) {
 				highlighted = first_scr_ptr = current_feed->items;
 				highlightnum = 0;
-			} else if (uiinput == KEY_END || uiinput == keybindings.end) {
+			} else if (uiinput == KEY_END || uiinput == _settings.keybindings.end) {
 				highlighted = first_scr_ptr = current_feed->items;
 				highlightnum = 0;
 				while (highlighted && highlighted->next_ptr) {
@@ -594,15 +588,15 @@ static int UIDisplayFeed (struct feed* current_feed) {
 						first_scr_ptr = first_scr_ptr->next_ptr;
 					}
 				}
-			} else if (uiinput == keybindings.reload || uiinput == keybindings.forcereload) {
-				if (first_bak != NULL) {
+			} else if (uiinput == _settings.keybindings.reload || uiinput == _settings.keybindings.forcereload) {
+				if ( _unfiltered_feed_list) {
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 					continue;
 				}
 				if (current_feed->smartfeed == 1)
 					continue;
 
-				if (uiinput == keybindings.forcereload) {
+				if (uiinput == _settings.keybindings.forcereload) {
 					free (current_feed->lastmodified);
 					current_feed->lastmodified = NULL;
 				}
@@ -612,19 +606,19 @@ static int UIDisplayFeed (struct feed* current_feed) {
 				// Reset first_scr_ptr if reloading.
 				first_scr_ptr = current_feed->items;
 				reloaded = true;
-			} else if (uiinput == keybindings.urljump)
+			} else if (uiinput == _settings.keybindings.urljump)
 				UISupportURLJump (current_feed->link);
-			else if (uiinput == keybindings.urljump2 && highlighted)
+			else if (uiinput == _settings.keybindings.urljump2 && highlighted)
 				UISupportURLJump (highlighted->data->link);
-			else if (uiinput == keybindings.markread) {	// Mark everything read.
+			else if (uiinput == _settings.keybindings.markread) {	// Mark everything read.
 				for (struct newsitem* i = current_feed->items; i; i = i->next_ptr)
 					i->data->readstatus = 1;
-			} else if (uiinput == keybindings.markunread && highlighted) {
+			} else if (uiinput == _settings.keybindings.markunread && highlighted) {
 				highlighted->data->readstatus = !highlighted->data->readstatus;
 				reloaded = true;
-			} else if (uiinput == keybindings.about)
+			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
-			else if (uiinput == keybindings.feedinfo)
+			else if (uiinput == _settings.keybindings.feedinfo)
 				FeedInfo(current_feed);
 			else if (resize_dirty || uiinput == KEY_RESIZE) {
 				endwin();
@@ -633,12 +627,12 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			} else if (uiinput == 12)	// Redraw screen on ^L
 				clear();
 		}
-		if (uiinput == '\n' || (uiinput == keybindings.enter && !typeahead)) {
+		if (uiinput == '\n' || (uiinput == _settings.keybindings.enter && !typeahead)) {
 			// If typeahead is active clear it's state and free the structure.
 			if (typeahead) {
 				free (searchstr);
 				typeahead = false;
-				if (!cursor_always_visible)
+				if (!_settings.cursor_always_visible)
 					curs_set(0);
 				typeaheadskip = 0;
 			}
@@ -670,12 +664,12 @@ static int UIDisplayFeed (struct feed* current_feed) {
 		}
 
 		// TAB key is decimal 9.
-		if (uiinput == 9 || uiinput == keybindings.typeahead) {
+		if (uiinput == 9 || uiinput == _settings.keybindings.typeahead) {
 			if (typeahead) {
 				if (searchstrlen == 0) {
 					typeahead = false;
 					// Typeahead now off.
-					if (!cursor_always_visible)
+					if (!_settings.cursor_always_visible)
 						curs_set(0);
 					free (searchstr);
 					typeaheadskip = 0;
@@ -724,11 +718,11 @@ static int UIDisplayFeed (struct feed* current_feed) {
 }
 
 void UIMainInterface (void) {
-	struct feed* first_scr_ptr = first_ptr;	// First pointer on top of screen. Used for scrolling.
+	struct feed* first_scr_ptr = _feed_list;	// First pointer on top of screen. Used for scrolling.
 	struct feed* savestart = first_scr_ptr;
 
 	struct feed* savestart_first = NULL;
-	struct feed* highlighted = first_ptr;
+	struct feed* highlighted = _feed_list;
 	unsigned highlightnum = 1;
 	unsigned highlightline = LINES-1; // Line with current selected item cursor
 					// will be moved to this line to have it in
@@ -780,10 +774,10 @@ void UIMainInterface (void) {
 		// Never EVER set filteractivated=true if there is no filter defined!
 		// This should be moved to its own function in ui-support.c!
 		if (filteractivated) {
-			if (first_bak == NULL)
-				first_bak = first_ptr;
-			first_ptr = NULL;
-			for (const struct feed* cur_ptr = first_bak; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
+			if (!_unfiltered_feed_list)
+				_unfiltered_feed_list = _feed_list;
+			_feed_list = NULL;
+			for (const struct feed* cur_ptr = _unfiltered_feed_list; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
 				unsigned found = 0;
 				if (!cur_ptr->feedcategories)
 					continue;
@@ -827,14 +821,14 @@ void UIMainInterface (void) {
 					new_feed->feedcategories = cur_ptr->feedcategories;
 
 					// Add to bottom of pointer chain.
-					struct feed** prev_feed = &first_ptr;
+					struct feed** prev_feed = &_feed_list;
 					while (*prev_feed && (*prev_feed)->next_ptr)
 					    *prev_feed = (*prev_feed)->next_ptr;
 					new_feed->prev_ptr = *prev_feed;
 					(*prev_feed)->next_ptr = new_feed;
 				}
 			}
-			first_scr_ptr = first_ptr;
+			first_scr_ptr = _feed_list;
 			highlighted = first_scr_ptr;
 			filteractivated = false;
 		}
@@ -843,11 +837,11 @@ void UIMainInterface (void) {
 
 		if (typeahead) {
 			// This resets the offset for every typeahead loop.
-			first_scr_ptr = first_ptr;
+			first_scr_ptr = _feed_list;
 
 			unsigned count = 0, skipper = 0;
 			bool found = false;
-			for (struct feed* cur_ptr = first_ptr; cur_ptr; ++count, cur_ptr = cur_ptr->next_ptr) {
+			for (struct feed* cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next_ptr) {
 				// count+1 >= Lines-4: if the _next_ line would go over the boundary.
 				if (count+1 > LINES-4u && first_scr_ptr->next_ptr)
 					first_scr_ptr = first_scr_ptr->next_ptr;
@@ -926,9 +920,9 @@ void UIMainInterface (void) {
 			UIStatus (msgbuf, 0, 0);
 		} else {
 			char msgbuf[128];
-			snprintf (msgbuf, sizeof(msgbuf), _("Press '%c' for help window."), keybindings.help);
+			snprintf (msgbuf, sizeof(msgbuf), _("Press '%c' for help window."), _settings.keybindings.help);
 			if (easterEgg())
-				snprintf (msgbuf, sizeof(msgbuf), _("Press '%c' for help window. (Press '%c' to play Santa Hunta!)"), keybindings.help, keybindings.about);
+				snprintf (msgbuf, sizeof(msgbuf), _("Press '%c' for help window. (Press '%c' to play Santa Hunta!)"), _settings.keybindings.help, _settings.keybindings.about);
 			UIStatus (msgbuf, 0, 0);
 		}
 
@@ -951,33 +945,33 @@ void UIMainInterface (void) {
 				}
 			}
 		} else {
-			if (uiinput == keybindings.quit) {
-				// Restore original first_ptr if filter is defined!
+			if (uiinput == _settings.keybindings.quit) {
+				// Restore original _feed_list if filter is defined!
 				if (filters[0])
-					first_ptr = first_bak;
+					_feed_list = _unfiltered_feed_list;
 				MainQuit (NULL, NULL);
-			} else if (uiinput == keybindings.reload || uiinput == keybindings.forcereload) {
+			} else if (uiinput == _settings.keybindings.reload || uiinput == _settings.keybindings.forcereload) {
 				if (filters[0])
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
-					if (highlighted && uiinput == keybindings.forcereload) {
+					if (highlighted && uiinput == _settings.keybindings.forcereload) {
 						free (highlighted->lastmodified);
 						highlighted->lastmodified = NULL;
 					}
 					UpdateFeed (highlighted);
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.reloadall) {
+			} else if (uiinput == _settings.keybindings.reloadall) {
 				if (filters[0])
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
 					UpdateAllFeeds();
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.addfeed || uiinput == keybindings.newheadlines) {
+			} else if (uiinput == _settings.keybindings.addfeed || uiinput == _settings.keybindings.newheadlines) {
 				if (filters[0])
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
-				else if (uiinput == keybindings.addfeed) {
+				else if (uiinput == _settings.keybindings.addfeed) {
 					switch (UIAddFeed(NULL)) {
 						case 0: UIStatus (_("Successfully added new item..."), 1, 0); break;
 						case 2: UIStatus (_("Invalid URL! Please add http:// if you forgot this."), 2, 1); break;
@@ -988,12 +982,12 @@ void UIMainInterface (void) {
 					UIAddFeed ("smartfeed:/newitems");
 
 				// Scroll to top of screen and redraw everything.
-				highlighted = first_ptr;
-				first_scr_ptr = first_ptr;
+				highlighted = _feed_list;
+				first_scr_ptr = _feed_list;
 				update_smartfeeds = true;
-			} else if (uiinput == keybindings.help || uiinput == '?')
+			} else if (uiinput == _settings.keybindings.help || uiinput == '?')
 				UIHelpScreen();
-			else if (uiinput == keybindings.deletefeed) {
+			else if (uiinput == _settings.keybindings.deletefeed) {
 				// This should be moved to its own function in ui-support.c!
 				if (filters[0]) {
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
@@ -1022,18 +1016,18 @@ void UIMainInterface (void) {
 						unlink (cachefilename);
 
 						// Unlink pointer from chain.
-						if (highlighted == first_ptr) {
+						if (highlighted == _feed_list) {
 							// first element
-							if (first_ptr->next_ptr != NULL) {
-								first_ptr = first_ptr->next_ptr;
-								first_scr_ptr = first_ptr;
+							if (_feed_list->next_ptr != NULL) {
+								_feed_list = _feed_list->next_ptr;
+								first_scr_ptr = _feed_list;
 								highlighted->next_ptr->prev_ptr = NULL;
 							} else {
-								first_ptr = NULL;
+								_feed_list = NULL;
 								first_scr_ptr = NULL;
 							}
-							// Set new highlighted to first_ptr again.
-							saved_highlighted = first_ptr;
+							// Set new highlighted to _feed_list again.
+							saved_highlighted = _feed_list;
 						} else if (highlighted->next_ptr == NULL) {
 							// last element
 							// Set new highlighted to element before deleted one.
@@ -1088,19 +1082,19 @@ void UIMainInterface (void) {
 						update_smartfeeds = true;
 					}
 				}
-			} else if ((uiinput == KEY_UP || uiinput == keybindings.prev) && highlighted && highlighted->prev_ptr) {
+			} else if ((uiinput == KEY_UP || uiinput == _settings.keybindings.prev) && highlighted && highlighted->prev_ptr) {
 				highlighted = highlighted->prev_ptr;
 				if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {	// Reached first onscreen entry.
 					++highlightnum;
 					first_scr_ptr = first_scr_ptr->prev_ptr;
 				}
-			} else if ((uiinput == KEY_DOWN || uiinput == keybindings.next) && highlighted && highlighted->next_ptr) {
+			} else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next_ptr) {
 				highlighted = highlighted->next_ptr;
 				if (++highlightnum >= LINES-5u && first_scr_ptr->next_ptr) {	// If we fall off the screen, advance first_scr_ptr to next entry.
 					--highlightnum;
 					first_scr_ptr = first_scr_ptr->next_ptr;
 				}
-			} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == keybindings.pdown) {
+			} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) {
 				// Move highlight one page up/down == LINES-6
 				for (unsigned i = 0; i < LINES-6u && highlighted->next_ptr; ++i) {
 					highlighted = highlighted->next_ptr;
@@ -1109,7 +1103,7 @@ void UIMainInterface (void) {
 						first_scr_ptr = first_scr_ptr->next_ptr;
 					}
 				}
-			} else if (uiinput == KEY_PPAGE || uiinput == keybindings.pup) {
+			} else if (uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) {
 				for (unsigned i = 0; i < LINES-6u && highlighted->prev_ptr; ++i) {
 					highlighted = highlighted->prev_ptr;
 					if (--highlightnum < 1 && first_scr_ptr->prev_ptr) {
@@ -1117,11 +1111,11 @@ void UIMainInterface (void) {
 						first_scr_ptr = first_scr_ptr->prev_ptr;
 					}
 				}
-			} else if (uiinput == KEY_HOME || uiinput == keybindings.home) {
-				highlighted = first_scr_ptr = first_ptr;
+			} else if (uiinput == KEY_HOME || uiinput == _settings.keybindings.home) {
+				highlighted = first_scr_ptr = _feed_list;
 				highlightnum = 0;
-			} else if (uiinput == KEY_END || uiinput == keybindings.end) {
-				highlighted = first_scr_ptr = first_ptr;
+			} else if (uiinput == KEY_END || uiinput == _settings.keybindings.end) {
+				highlighted = first_scr_ptr = _feed_list;
 				highlightnum = 0;
 				while (highlighted && highlighted->next_ptr) {
 					highlighted = highlighted->next_ptr;
@@ -1130,7 +1124,7 @@ void UIMainInterface (void) {
 						first_scr_ptr = first_scr_ptr->next_ptr;
 					}
 				}
-			} else if (uiinput == keybindings.moveup) {
+			} else if (uiinput == _settings.keybindings.moveup) {
 				// This function is deactivated when a filter is active.
 				if (filters[0] != NULL) {
 					UIStatus (_("You cannot move items while a category filter is defined!"), 2, 0);
@@ -1146,7 +1140,7 @@ void UIMainInterface (void) {
 					}
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.movedown) {
+			} else if (uiinput == _settings.keybindings.movedown) {
 				// This function is deactivated when a filter is active.
 				if (filters[0]) {
 					UIStatus (_("You cannot move items while a category filter is defined!"), 2, 0);
@@ -1164,42 +1158,42 @@ void UIMainInterface (void) {
 					}
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.dfltbrowser)
+			} else if (uiinput == _settings.keybindings.dfltbrowser)
 				UIChangeBrowser();
-			else if (uiinput == keybindings.markallread) {
+			else if (uiinput == _settings.keybindings.markallread) {
 				// This function is safe for using in filter mode, because it only
 				// changes int values. It automatically marks the correct ones read
 				// if a filter is applied since we are using a copy of the main data.
-				for (const struct feed* f = first_ptr; f; f = f->next_ptr)
+				for (const struct feed* f = _feed_list; f; f = f->next_ptr)
 					for (struct newsitem* i = f->items; i; i = i->next_ptr)
 						i->data->readstatus = 1;
-			} else if (uiinput == keybindings.about)
+			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
-			else if (uiinput == keybindings.changefeedname && highlighted) {
+			else if (uiinput == _settings.keybindings.changefeedname && highlighted) {
 				if (filters[0])	// This needs to be worked on before it works while a filter is applied!
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
 					UIChangeFeedName(highlighted);
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.perfeedfilter && highlighted) {
+			} else if (uiinput == _settings.keybindings.perfeedfilter && highlighted) {
 				if (filters[0])
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else
 					UIPerFeedFilter (highlighted);
-			} else if (uiinput == keybindings.sortfeeds && highlighted) {
+			} else if (uiinput == _settings.keybindings.sortfeeds && highlighted) {
 				if (filters[0])	// Deactivate sorting function if filter is applied.
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else {
 					SnowSort();
 					update_smartfeeds = true;
 				}
-			} else if (uiinput == keybindings.categorize && highlighted && highlighted->smartfeed) {
+			} else if (uiinput == _settings.keybindings.categorize && highlighted && highlighted->smartfeed) {
 				if (filters[0])	// This needs to be worked on before it works while a filter is applied!
 					UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 				else
 					CategorizeFeed (highlighted);
-			} else if (uiinput == keybindings.filter) {
+			} else if (uiinput == _settings.keybindings.filter) {
 				// GUI to set a filter
 				char* filterstring = DialogGetCategoryFilter();
 				if (filterstring) {
@@ -1214,17 +1208,17 @@ void UIMainInterface (void) {
 					ResetFilters (filters);
 
 					// If DialogGetCategoryFilter() was used to switch off filter
-					// Restore first_ptr here.
-					if (first_bak) {
-						// Restore first_ptr
-						first_ptr = first_bak;
-						first_scr_ptr = first_ptr;
-						highlighted = first_ptr;
-						first_bak = NULL;
+					// Restore _feed_list here.
+					if (_unfiltered_feed_list) {
+						// Restore _feed_list
+						_feed_list = _unfiltered_feed_list;
+						first_scr_ptr = _feed_list;
+						highlighted = _feed_list;
+						_unfiltered_feed_list = NULL;
 					}
 				}
 				free (filterstring);
-			} else if (uiinput == keybindings.filtercurrent) {
+			} else if (uiinput == _settings.keybindings.filtercurrent) {
 				// Set filter to primary filter of this feed.
 				// Free filter if it's not empty to avoid memory leaks!
 				if (filters[0]) {
@@ -1238,25 +1232,25 @@ void UIMainInterface (void) {
 						filteractivated = true;
 					}
 
-					// Restore first_ptr
-					first_ptr = first_bak;
-					first_scr_ptr = first_ptr;
-					highlighted = first_ptr;
-					first_bak = NULL;
+					// Restore _feed_list
+					_feed_list = _unfiltered_feed_list;
+					first_scr_ptr = _feed_list;
+					highlighted = _feed_list;
+					_unfiltered_feed_list = NULL;
 				} else if (highlighted && highlighted->feedcategories) {
 					filters[0] = strdup (highlighted->feedcategories->name);
 					filteractivated = true;
 				}
-			} else if (uiinput == keybindings.nofilter) {
+			} else if (uiinput == _settings.keybindings.nofilter) {
 				// Remove all filters.
 				if (filters[0]) {
 					ResetFilters (filters);
 
-					// Restore first_ptr
-					first_ptr = first_bak;
-					first_scr_ptr = first_ptr;
-					highlighted = first_ptr;
-					first_bak = NULL;
+					// Restore _feed_list
+					_feed_list = _unfiltered_feed_list;
+					first_scr_ptr = _feed_list;
+					highlighted = _feed_list;
+					_unfiltered_feed_list = NULL;
 				}
 			} else if (uiinput == 'X' && filters[0]) {	// AND or OR matching for the filer.
 				andxor = !andxor;
@@ -1270,7 +1264,7 @@ void UIMainInterface (void) {
 			else if (uiinput == 'E')
 				displayErrorLog();
 		}
-		if (uiinput == '\n' || (uiinput == keybindings.enter && !typeahead)) {
+		if (uiinput == '\n' || (uiinput == _settings.keybindings.enter && !typeahead)) {
 			// If typeahead is active clear it's state and free the structure.
 			if (typeahead) {
 				free (search);
@@ -1290,7 +1284,7 @@ void UIMainInterface (void) {
 		}
 
 		// TAB key is decimal 9.
-		if (uiinput == 9 || uiinput == keybindings.typeahead) {
+		if (uiinput == 9 || uiinput == _settings.keybindings.typeahead) {
 			if (typeahead) {
 				if (searchlen == 0) {
 					typeahead = false;
@@ -1301,7 +1295,7 @@ void UIMainInterface (void) {
 					first_scr_ptr = savestart_first;
 				} else {
 					unsigned found = 0;
-					for (const struct feed* f = first_ptr; f; f = f->next_ptr)
+					for (const struct feed* f = _feed_list; f; f = f->next_ptr)
 						if (s_strcasestr (f->title, search)) // Substring match.
 							++found;
 					if (typeaheadskip == found-1)	// found-1 to avoid empty tab cycle.

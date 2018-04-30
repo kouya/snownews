@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "main.h"
 
 struct feed * newFeedStruct (void);
 int UpdateFeed (struct feed * cur_ptr);

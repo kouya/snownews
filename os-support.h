@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
 #ifdef SUN
 char* strsep (char** str, const char* delims);

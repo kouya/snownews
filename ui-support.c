@@ -15,13 +15,8 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "ui-support.h"
-#include "io-internal.h"
-#include <unistd.h>
 #include <ncurses.h>
-
-extern struct color color;
-extern char *browser;
-extern bool cursor_always_visible;
+#include <unistd.h>
 
 // Init the ncurses library.
 void InitCurses (void) {
@@ -30,7 +25,7 @@ void InitCurses (void) {
 	cbreak();		// No buffering.
 	noecho();		// Do not echo typed chars onto the screen.
 	clear();
-	curs_set (cursor_always_visible);
+	curs_set (_settings.cursor_always_visible);
 }
 
 // Print text in statusbar.
@@ -73,15 +68,15 @@ const char* SnowSortIgnore (const char* title) {
 // Sorting criteria is struct feed->title
 void SnowSort (void) {
 	// If there is no element do not run sort or it'll crash!
-	if (first_ptr == NULL)
+	if (!_feed_list)
 		return;
 	UIStatus(_("Sorting, please wait..."), 0, 0);
 
 	unsigned elements = 0;
-	for (const struct feed* f = first_ptr; f; f = f->next_ptr)
+	for (const struct feed* f = _feed_list; f; f = f->next_ptr)
 		elements++;
 	for (unsigned i = 0; i <= elements; ++i) {
-		for (struct feed* f = first_ptr; f->next_ptr; f = f->next_ptr) {
+		for (struct feed* f = _feed_list; f->next_ptr; f = f->next_ptr) {
 			const char* one = SnowSortIgnore (f->title);
 			const char* two = SnowSortIgnore (f->next_ptr->title);
 			if (strcasecmp (one, two) > 0)
@@ -133,7 +128,7 @@ void UISupportURLJump (const char* url) {
 		return;	// Should not happen. Nope, really should not happen.
 	if (strncmp(url, "smartfeed", strlen("smartfeed")) == 0)
 		return;	// Smartfeeds cannot be opened (for now).
-	if (strchr (browser, '\'')) {
+	if (strchr (_settings.browser, '\'')) {
 		UIStatus (_("Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"), 5, 1);
 		return;	// Complain loudly if browser string contains a single quote.
 	}
@@ -144,7 +139,7 @@ void UISupportURLJump (const char* url) {
 	char escapedurl [PATH_MAX];
 	snprintf (escapedurl, sizeof(escapedurl), "'%s' 2>/dev/null", url);
 	char browcall [PATH_MAX];
-	snprintf (browcall, sizeof(browcall), browser, escapedurl);
+	snprintf (browcall, sizeof(browcall), _settings.browser, escapedurl);
 
 	char execmsg [128];
 	snprintf (execmsg, sizeof(execmsg), _("Executing %s"), browcall);
@@ -155,7 +150,7 @@ void UISupportURLJump (const char* url) {
 }
 
 void SmartFeedsUpdate (void) {
-	for (struct feed* f = first_ptr; f; f = f->next_ptr)
+	for (struct feed* f = _feed_list; f; f = f->next_ptr)
 		if (f->smartfeed)
 			SmartFeedNewitems (f);
 }
@@ -172,7 +167,7 @@ void SmartFeedNewitems (struct feed* smart_feed) {
 		free (smart_feed->items);
 		smart_feed->items = NULL;
 	}
-	for (struct feed* f = first_ptr; f; f = f->next_ptr) {
+	for (struct feed* f = _feed_list; f; f = f->next_ptr) {
 		// Do not add the smart feed recursively. 8)
 		if (f == smart_feed)
 			continue;
@@ -204,7 +199,7 @@ void SmartFeedNewitems (struct feed* smart_feed) {
 bool SmartFeedExists (const char * smartfeed) {
 	// Find our smart feed.
 	if (strcmp (smartfeed, "newitems") == 0)
-		for (const struct feed* f = first_ptr; f; f = f->next_ptr)
+		for (const struct feed* f = _feed_list; f; f = f->next_ptr)
 			if (f->smartfeed == 1)
 				return true;
 	return false;

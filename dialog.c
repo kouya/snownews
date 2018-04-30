@@ -14,24 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "config.h"
+#include "dialog.h"
+#include "main.h"
 #include "categories.h"
 #include "conversions.h"
-#include "dialog.h"
 #include "filters.h"
-#include "interface.h"
 #include "io-internal.h"
-#include "main.h"
 #include "ui-support.h"
 #include "xmlparse.h"
 #include <ncurses.h>
 #include <sys/stat.h>
-
-extern char *browser;
-extern struct keybindings keybindings;
-extern struct color color;
-
-extern bool cursor_always_visible;
 
 char * UIOneLineEntryField (int x, int y) {
 	char* text = malloc(512);
@@ -48,7 +40,7 @@ char * UIOneLineEntryField (int x, int y) {
 	getnstr (text, 511);
 
 	noecho();
-	if (!cursor_always_visible)
+	if (!_settings.cursor_always_visible)
 		curs_set(0);
 	attroff (WA_REVERSE);
 
@@ -60,9 +52,9 @@ void UIChangeBrowser (void) {
 	// malloc = 17 (strlen("Current setting: ") + browser
 	// We will malloc a bigger junk, because other languages
 	// might need longer strings and crash!
-	size_t cbrsl = strlen(_("Current setting: %s")) + strlen(browser) + 1;
+	size_t cbrsl = strlen(_("Current setting: %s")) + strlen(_settings.browser) + 1;
 	char curbrowserstr [cbrsl];
-	snprintf (curbrowserstr, cbrsl, _("Current setting: %s"), browser);
+	snprintf (curbrowserstr, cbrsl, _("Current setting: %s"), _settings.browser);
 
 repeat:
 	// Clear screen area we want to "draw" to.
@@ -88,8 +80,8 @@ repeat:
 	if (strstr(browserstring, "'") != NULL)
 		UIStatus (_("Unsafe browser string (contains quotes)! See snownews.kcore.de/faq#toc2.4"), 3, 1);
 
-	free (browser);
-	browser = browserstring;
+	free (_settings.browser);
+	_settings.browser = browserstring;
 }
 
 // Dialog to change feedname.
@@ -190,11 +182,11 @@ int UIAddFeed (char * newurl) {
 
 	// Attach to feed pointer chain.
 	strncpy (new_ptr->feedurl, url, strlen(url)+1);
-	new_ptr->next_ptr = first_ptr;
-	if (first_ptr != NULL)
-		first_ptr->prev_ptr = new_ptr;
+	new_ptr->next_ptr = _feed_list;
+	if (_feed_list != NULL)
+		_feed_list->prev_ptr = new_ptr;
 	new_ptr->prev_ptr = NULL;
-	first_ptr = new_ptr;
+	_feed_list = new_ptr;
 
 	// Tag execurl.
 	if (strncasecmp (url, "exec:", 5) == 0)
@@ -341,25 +333,25 @@ void UIHelpScreen (void) {
 	attron (WA_REVERSE);
 	// Keys
 	const int offset = 18, offsetstr = 12;
-	mvprintw (centery-9, centerx-offset, "%c:", keybindings.addfeed);
-	mvprintw (centery-8, centerx-offset, "%c:", keybindings.deletefeed);
-	mvprintw (centery-7, centerx-offset, "%c:", keybindings.changefeedname);
-	mvprintw (centery-6, centerx-offset, "%c:", keybindings.reloadall);
-	mvprintw (centery-5, centerx-offset, "%c:", keybindings.reload);
-	mvprintw (centery-4, centerx-offset, "%c:", keybindings.markallread);
-	mvprintw (centery-3, centerx-offset, "%c:", keybindings.dfltbrowser);
-	mvprintw (centery-2, centerx-offset, "%c, %c:", keybindings.moveup, keybindings.movedown);
-	mvprintw (centery-1, centerx-offset, "%c:", keybindings.sortfeeds);
-	mvprintw (centery,   centerx-offset, "%c:", keybindings.categorize);
-	mvprintw (centery+1, centerx-offset, "%c:", keybindings.filter);
-	mvprintw (centery+2, centerx-offset, "%c:", keybindings.filtercurrent);
-	mvprintw (centery+3, centerx-offset, "%c:", keybindings.nofilter);
-	mvprintw (centery+4, centerx-offset, "%c:", keybindings.newheadlines);
-	mvprintw (centery+5, centerx-offset, "%c:", keybindings.perfeedfilter);
+	mvprintw (centery-9, centerx-offset, "%c:", _settings.keybindings.addfeed);
+	mvprintw (centery-8, centerx-offset, "%c:", _settings.keybindings.deletefeed);
+	mvprintw (centery-7, centerx-offset, "%c:", _settings.keybindings.changefeedname);
+	mvprintw (centery-6, centerx-offset, "%c:", _settings.keybindings.reloadall);
+	mvprintw (centery-5, centerx-offset, "%c:", _settings.keybindings.reload);
+	mvprintw (centery-4, centerx-offset, "%c:", _settings.keybindings.markallread);
+	mvprintw (centery-3, centerx-offset, "%c:", _settings.keybindings.dfltbrowser);
+	mvprintw (centery-2, centerx-offset, "%c, %c:", _settings.keybindings.moveup, _settings.keybindings.movedown);
+	mvprintw (centery-1, centerx-offset, "%c:", _settings.keybindings.sortfeeds);
+	mvprintw (centery,   centerx-offset, "%c:", _settings.keybindings.categorize);
+	mvprintw (centery+1, centerx-offset, "%c:", _settings.keybindings.filter);
+	mvprintw (centery+2, centerx-offset, "%c:", _settings.keybindings.filtercurrent);
+	mvprintw (centery+3, centerx-offset, "%c:", _settings.keybindings.nofilter);
+	mvprintw (centery+4, centerx-offset, "%c:", _settings.keybindings.newheadlines);
+	mvprintw (centery+5, centerx-offset, "%c:", _settings.keybindings.perfeedfilter);
 	mvaddstr (centery+6, centerx-offset, _("tab:"));
-	mvprintw (centery+7, centerx-offset, "%c:", keybindings.about);
+	mvprintw (centery+7, centerx-offset, "%c:", _settings.keybindings.about);
 	mvprintw (centery+8, centerx-offset, "%c:", 'E');
-	mvprintw (centery+9, centerx-offset, "%c:", keybindings.quit);
+	mvprintw (centery+9, centerx-offset, "%c:", _settings.keybindings.quit);
 	// Descriptions
 	mvaddstr (centery-9, centerx-offsetstr, _("Add RSS feed..."));
 	mvaddstr (centery-8, centerx-offsetstr, _("Delete highlighted RSS feed..."));
@@ -393,18 +385,18 @@ void UIDisplayFeedHelp (void) {
 	attron (WA_REVERSE);
 	// Keys
 	const int offset = 18, offsetstr = 7;
-	mvprintw (centery-5, centerx-offset, _("%c, up:"), keybindings.prev);
-	mvprintw (centery-4, centerx-offset, _("%c, down:"), keybindings.next);
+	mvprintw (centery-5, centerx-offset, _("%c, up:"), _settings.keybindings.prev);
+	mvprintw (centery-4, centerx-offset, _("%c, down:"), _settings.keybindings.next);
 	mvaddstr (centery-3, centerx-offset, _("enter:"));
-	mvprintw (centery-2, centerx-offset, "%c:", keybindings.reload);
-	mvprintw (centery-1, centerx-offset, "%c:", keybindings.forcereload);
-	mvprintw (centery,   centerx-offset, "%c:", keybindings.urljump);
-	mvprintw (centery+1, centerx-offset, "%c:", keybindings.urljump2);
-	mvprintw (centery+2, centerx-offset, "%c:", keybindings.markread);
-	mvprintw (centery+3, centerx-offset, "%c:", keybindings.markunread);
-	mvprintw (centery+4, centerx-offset, "%c:", keybindings.feedinfo);
+	mvprintw (centery-2, centerx-offset, "%c:", _settings.keybindings.reload);
+	mvprintw (centery-1, centerx-offset, "%c:", _settings.keybindings.forcereload);
+	mvprintw (centery,   centerx-offset, "%c:", _settings.keybindings.urljump);
+	mvprintw (centery+1, centerx-offset, "%c:", _settings.keybindings.urljump2);
+	mvprintw (centery+2, centerx-offset, "%c:", _settings.keybindings.markread);
+	mvprintw (centery+3, centerx-offset, "%c:", _settings.keybindings.markunread);
+	mvprintw (centery+4, centerx-offset, "%c:", _settings.keybindings.feedinfo);
 	mvaddstr (centery+5, centerx-offset, _("tab:"));
-	mvprintw (centery+6, centerx-offset, "%c:", keybindings.prevmenu);
+	mvprintw (centery+6, centerx-offset, "%c:", _settings.keybindings.prevmenu);
 	// Descriptions
 	mvprintw (centery-5, centerx-offsetstr, _("Previous item"));
 	mvprintw (centery-4, centerx-offsetstr, _("Next item"));
@@ -432,10 +424,10 @@ void UIDisplayItemHelp (void) {
 	attron (WA_REVERSE);
 	// Keys
 	const int offset = 16, offsetstr = 6;
-	mvprintw (centery-1, centerx-offset, "%c, <-:", keybindings.prev);
-	mvprintw (centery,   centerx-offset, "%c, ->:", keybindings.next);
-	mvprintw (centery+1, centerx-offset, "%c:", keybindings.urljump);
-	mvprintw (centery+2, centerx-offset, _("%c, enter:"), keybindings.prevmenu);
+	mvprintw (centery-1, centerx-offset, "%c, <-:", _settings.keybindings.prev);
+	mvprintw (centery,   centerx-offset, "%c, ->:", _settings.keybindings.next);
+	mvprintw (centery+1, centerx-offset, "%c:", _settings.keybindings.urljump);
+	mvprintw (centery+2, centerx-offset, _("%c, enter:"), _settings.keybindings.prevmenu);
 	// Descriptions
 	mvaddstr (centery-1, centerx-offsetstr, _("Previous item"));
 	mvaddstr (centery,   centerx-offsetstr, _("Next item"));
@@ -455,7 +447,7 @@ void CategorizeFeed (struct feed * current_feed) {
 
 	// Determine number of global categories.
 	unsigned nglobalcat = 0;
-	for (const struct categories* c = first_category; c; c = c->next_ptr)
+	for (const struct categories* c = _settings.global_categories; c; c = c->next_ptr)
 		++nglobalcat;
 
 	// We're taking over the program!
@@ -476,13 +468,13 @@ void CategorizeFeed (struct feed * current_feed) {
 		if (current_feed->feedcategories == NULL) {
 			unsigned y = 5;
 			mvaddstr (y, (COLS/2)-33, _("No category defined. Select one or add a new category:"));
-			for (const struct categories* c = first_category; c; ++y, c = c->next_ptr) {
+			for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
 				mvprintw (y+1, COLS/2-33, "%c. %s", catletter, c->name);
 				if (++catletter == '9'+1)
 					catletter = 'a';	// Fast forward to 'a' after the digits
 			}
 			char tmp [128];
-			snprintf (tmp, sizeof(tmp), _("Select category number to add, press 'A' to add a new category or '%c' to quit."), keybindings.quit);
+			snprintf (tmp, sizeof(tmp), _("Select category number to add, press 'A' to add a new category or '%c' to quit."), _settings.keybindings.quit);
 			UIStatus (tmp, 0, 0);
 		} else {
 			unsigned y = 5;
@@ -493,13 +485,13 @@ void CategorizeFeed (struct feed * current_feed) {
 					catletter = 'a';	// Fast forward to 'a' after the digits
 			}
 			char tmp [128];
-			snprintf (tmp, sizeof(tmp), _("Select a category number to delete, press 'A' to add a new one or '%c' to quit."), keybindings.quit);
+			snprintf (tmp, sizeof(tmp), _("Select a category number to delete, press 'A' to add a new one or '%c' to quit."), _settings.keybindings.quit);
 			UIStatus (tmp, 0, 0);
 		}
 		refresh();
 
 		int uiinput = getch();
-		if (uiinput == keybindings.quit)
+		if (uiinput == _settings.keybindings.quit)
 			return;
 		if (uiinput == 'A') {
 			if (nfeedcat && nglobalcat) {
@@ -510,13 +502,13 @@ void CategorizeFeed (struct feed * current_feed) {
 				catletter = '1';
 				unsigned y = 5;
 				mvaddstr (y, (COLS/2)-33, _("Select a new category or add a new one:"));
-				for (const struct categories* c = first_category; c; ++y, c = c->next_ptr) {
+				for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
 					mvprintw (y+1, COLS/2-33, "%c. %s", catletter, c->name);
 					if (++catletter == '9'+1)
 						catletter = 'a';	// Fast forward to 'a' after the digits
 				}
 				char tmp [128];
-				snprintf (tmp, sizeof(tmp), _("Select category number to add, press 'A' to add a new category or '%c' to quit."), keybindings.quit);
+				snprintf (tmp, sizeof(tmp), _("Select category number to add, press 'A' to add a new category or '%c' to quit."), _settings.keybindings.quit);
 				UIStatus (tmp, 0, 0);
 
 				uiinput = getch();
@@ -550,7 +542,7 @@ void CategorizeFeed (struct feed * current_feed) {
 				for (; c && selcat > 1; --selcat, c = c->next_ptr) {}
 				FeedCategoryDelete (current_feed, c->name);
 			} else {	// global categories are only added
-				const struct categories* c = first_category;
+				const struct categories* c = _settings.global_categories;
 				for (; c && selcat > 1; --selcat, c = c->next_ptr) {}
 				FeedCategoryAdd (current_feed, c->name);
 			}
@@ -564,7 +556,7 @@ void CategorizeFeed (struct feed * current_feed) {
 char * DialogGetCategoryFilter (void) {
 	// Determine number of global categories.
 	unsigned nglobalcat = 0;
-	for (const struct categories* c = first_category; c; c = c->next_ptr)
+	for (const struct categories* c = _settings.global_categories; c; c = c->next_ptr)
 		++nglobalcat;
 
 	UISupportDrawBox ((COLS/2)-35, 2, (COLS/2)+35, nglobalcat+4);
@@ -574,7 +566,7 @@ char * DialogGetCategoryFilter (void) {
 
 	char catletter = '1';
 	unsigned y = 3;
-	for (const struct categories* c = first_category; c; ++y, c = c->next_ptr) {
+	for (const struct categories* c = _settings.global_categories; c; ++y, c = c->next_ptr) {
 		mvprintw (y+1, (COLS/2)-33, "%c. %s", catletter, c->name);
 		if (++catletter == '9'+1)
 			catletter = 'a';	// Fast forward to 'a' after the digits
@@ -593,7 +585,7 @@ char * DialogGetCategoryFilter (void) {
 		sel = uiinput - '0';
 	else
 		sel = uiinput - ('a'-10);
-	const struct categories* c = first_category;
+	const struct categories* c = _settings.global_categories;
 	for (; c && sel > 1; --sel, c = c->next_ptr) {}
 	return strdup (c->name);
 }

@@ -15,7 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
-#include "config.h"
+#include "main.h"
 
 int NetSupportAuth (struct feed* cur_ptr, const char* authdata, const char* url, const char* netbuf);
 int checkValidHTTPHeader (const unsigned char* header, unsigned size);

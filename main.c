@@ -14,11 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "config.h"
-#include "getopt.h"
+#include "main.h"
 #include "interface.h"
 #include "io-internal.h"
-#include "main.h"
 #include "setup.h"
 #include "ui-support.h"
 #include "updatecheck.h"
@@ -28,13 +26,72 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-extern struct feed *first_bak;		// For use with the signal handler.
-enum EPIDAction { pid_file_delete, pid_file_create };
+//----------------------------------------------------------------------
+// Global variables
+
+struct feed* _feed_list = NULL;
+struct feed* _unfiltered_feed_list = NULL;	// Backup first pointer for filter mode.
+				// Needs to be global so it can be used in the signal handler.
+				// Must be set to NULL by default and whenever it's not used anymore!
+
+struct settings _settings = {
+	.keybindings = {
+		// Define default values for keybindings. If some are defined differently
+		// in the keybindings file they will be overwritten. If some are missing or broken/wrong
+		// these are sane defaults.
+		.about		= 'A',
+		.addfeed	= 'a',
+		.andxor		= 'X',
+		.categorize	= 'C',
+		.changefeedname	= 'c',
+		.deletefeed	= 'D',
+		.dfltbrowser	= 'B',
+		.end		= '>',
+		.enter		= 'l',
+		.feedinfo	= 'i',
+		.filter		= 'f',
+		.filtercurrent	= 'g',
+		.forcereload	= 'T',
+		.help		= 'h',
+		.home		= '<',
+		.markallread	= 'm',
+		.markread	= 'm',
+		.markunread	= 'M',
+		.movedown	= 'N',
+		.moveup		= 'P',
+		.newheadlines	= 'H',
+		.next		= 'n',
+		.nofilter	= 'F',
+		.pdown		= ' ',
+		.perfeedfilter	= 'e',
+		.prev		= 'p',
+		.prevmenu	= 'q',
+		.pup		= 'b',
+		.quit		= 'q',
+		.reload		= 'r',
+		.reloadall	= 'R',
+		.sortfeeds	= 's',
+		.typeahead	= '/',
+		.urljump	= 'o',
+		.urljump2	= 'O'
+	},
+	.color = {
+		.feedtitle	= -1,
+		.feedtitlebold	= 0,
+		.newitems	= 5,
+		.newitemsbold	= 0,
+		.urljump	= 4,
+		.urljumpbold	= 0
+	},
+};
+
+//----------------------------------------------------------------------
 
 static int last_signal = 0;
 
-bool cursor_always_visible = false;
-const char* forced_target_charset = NULL;
+//----------------------------------------------------------------------
+
+enum EPIDAction { pid_file_delete, pid_file_create };
 
 static void modifyPIDFile (enum EPIDAction action) {
 	char pid_path [PATH_MAX];
@@ -112,10 +169,10 @@ _Noreturn void MainQuit (const char* func, const char* error) {
 static void MainSignalHandler (int sig) {
 	last_signal = sig;
 
-	// If there is a first_bak!=NULL a filter is set. Reset first_ptr
+	// If there is a _unfiltered_feed_list!=NULL a filter is set. Reset _feed_list
 	// so the correct list gets written on the disk when exisiting via SIGINT.
-	if (first_bak)
-		first_ptr = first_bak;
+	if (_unfiltered_feed_list)
+		_feed_list = _unfiltered_feed_list;
 	MainQuit (NULL, "Signal");
 }
 
@@ -156,11 +213,11 @@ int main (int argc, char *argv[]) {
 		} else if (strcmp(arg, "-u") == 0 || strcmp(arg, "--update") == 0) {
 			autoupdate = true;
 		} else if (strcmp(arg, "-c") == 0 || strcmp(arg, "--cursor-on") == 0) {
-			cursor_always_visible = true;
+			_settings.cursor_always_visible = true;
 		} else if (strcmp(arg, "-l") == 0 || strcmp(arg, "--charset") == 0) {
 			const char* chset = argv[i++];
 			if (chset)
-				forced_target_charset = chset;
+				_settings.global_charset = chset;
 			else {
 				badOption(arg);
 				return EXIT_FAILURE;

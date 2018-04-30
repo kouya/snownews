@@ -23,10 +23,7 @@
 	#define socklen_t unsigned int
 #endif
 #include "netio.h"
-#include "conversions.h"
-#include "interface.h"
 #include "io-internal.h"
-#include "main.h"
 #include "net-support.h"
 #include "ui-support.h"
 #include "zlib_interface.h"
@@ -45,10 +42,6 @@ enum PollOp {
     NET_READ = 1,
     NET_WRITE
 };
-
-extern char* proxyname;				// Hostname of proxyserver.
-extern unsigned short proxyport;		// Port on proxyserver to use.
-extern char* useragent;
 
 // Waits NET_TIMEOUT seconds for the socket to return data.
 //
@@ -100,9 +93,9 @@ static int NetConnect (int* my_socket, const char* host, struct feed* cur_ptr, b
 		return -1;
 	}
 
-	// If proxyport is 0 we didn't execute the if http_proxy statement in main
+	// If _settings.proxyport is 0 we didn't execute the if http_proxy statement in main
 	// so there is no proxy. On any other value of proxyport do proxyrequests instead.
-	if (proxyport == 0) {
+	if (_settings.proxyport == 0) {
 		// Lookup remote IP.
 		struct hostent* remotehost = gethostbyname (realhost);
 		if (!remotehost) {
@@ -151,7 +144,7 @@ static int NetConnect (int* my_socket, const char* host, struct feed* cur_ptr, b
 		}
 	} else {
 		// Lookup proxyserver IP.
-		struct hostent* remotehost = gethostbyname (proxyname);
+		struct hostent* remotehost = gethostbyname (_settings.proxyname);
 		if (!remotehost) {
 			close (*my_socket);
 			free (realhost);
@@ -162,7 +155,7 @@ static int NetConnect (int* my_socket, const char* host, struct feed* cur_ptr, b
 		// Set the remote address.
 		struct sockaddr_in address;
 		address.sin_family = AF_INET;
-		address.sin_port = htons(proxyport);
+		address.sin_port = htons(_settings.proxyport);
 		memcpy (&address.sin_addr.s_addr, remotehost->h_addr_list[0], remotehost->h_length);
 
 		// Connect socket.
@@ -239,14 +232,14 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 		return NULL;
 	}
 
-	// Again is proxyport == 0, non proxy mode, otherwise make proxy requests.
-	if (proxyport == 0) {
+	// Again is _settings.proxyport == 0, non proxy mode, otherwise make proxy requests.
+	if (_settings.proxyport == 0) {
 		// Request URL from HTTP server.
 		if (cur_ptr->lastmodified != NULL) {
 			fprintf(stream,
 					"GET %s HTTP/1.0\r\nAccept-Encoding: gzip\r\nAccept: application/rdf+xml,application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.1\r\nUser-Agent: %s\r\nConnection: close\r\nHost: %s\r\nIf-Modified-Since: %s\r\n%s%s\r\n",
 					url,
-					useragent,
+					_settings.useragent,
 					host,
 					cur_ptr->lastmodified,
 					(cur_ptr->authinfo ? cur_ptr->authinfo : ""),
@@ -255,7 +248,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 			fprintf(stream,
 					"GET %s HTTP/1.0\r\nAccept-Encoding: gzip\r\nAccept: application/rdf+xml,application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.1\r\nUser-Agent: %s\r\nConnection: close\r\nHost: %s\r\n%s%s\r\n",
 					url,
-					useragent,
+					_settings.useragent,
 					host,
 					(cur_ptr->authinfo ? cur_ptr->authinfo : ""),
 					(cur_ptr->cookies ? cur_ptr->cookies : ""));
@@ -268,7 +261,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 					"GET http://%s%s HTTP/1.0\r\nAccept-Encoding: gzip\r\nAccept: application/rdf+xml,application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.1\r\nUser-Agent: %s\r\nConnection: close\r\nHost: %s\r\nIf-Modified-Since: %s\r\n%s%s\r\n",
 					host,
 					url,
-					useragent,
+					_settings.useragent,
 					host,
 					cur_ptr->lastmodified,
 					(cur_ptr->authinfo ? cur_ptr->authinfo : ""),
@@ -278,7 +271,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 					"GET http://%s%s HTTP/1.0\r\nAccept-Encoding: gzip\r\nAccept: application/rdf+xml,application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.1\r\nUser-Agent: %s\r\nConnection: close\r\nHost: %s\r\n%s%s\r\n",
 					host,
 					url,
-					useragent,
+					_settings.useragent,
 					host,
 					(cur_ptr->authinfo ? cur_ptr->authinfo : ""),
 					(cur_ptr->cookies ? cur_ptr->cookies : ""));

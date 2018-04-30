@@ -15,6 +15,6 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
-#include "config.h"
+#include "main.h"
 
 char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput);

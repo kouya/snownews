@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "config.h"
-#include "categories.h"
+#include "io-internal.h"
 #include "conversions.h"
 #include "filters.h"
 #include "io-internal.h"
-#include "main.h"
 #include "netio.h"
 #include "ui-support.h"
 #include "xmlparse.h"
@@ -28,8 +26,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libxml/parser.h>
-
-extern char *browser;
 
 struct feed * newFeedStruct (void) {
 	struct feed* new = calloc (1, sizeof(struct feed));
@@ -181,7 +177,7 @@ int UpdateFeed (struct feed * cur_ptr) {
 }
 
 int UpdateAllFeeds (void) {
-	for (struct feed* f = first_ptr; f; f = f->next_ptr)
+	for (struct feed* f = _feed_list; f; f = f->next_ptr)
 		if (0 != UpdateFeed (f))
 			continue;
 	return 0;
@@ -250,7 +246,7 @@ int LoadAllFeeds (unsigned numfeeds) {
 	unsigned titlestrlen = strlen (_("Loading cache ["));
 	int oldnumobjects = 0;
 	unsigned count = 1;
-	for (struct feed* f = first_ptr; f; f = f->next_ptr) {
+	for (struct feed* f = _feed_list; f; f = f->next_ptr) {
 		// Progress bar
 		int numobjects = count*(COLS-titlestrlen-2)/numfeeds-2;
 		if (numobjects < 1)
@@ -278,7 +274,7 @@ void WriteCache (void) {
 	FILE* browserfile = fopen (browserfilename, "w");
 	if (!browserfile)
 		MainQuit (_("Save settings (browser)"), strerror(errno));
-	fputs (browser, browserfile);
+	fputs (_settings.browser, browserfile);
 	fclose (browserfile);
 
 	// Make a backup of urls.
@@ -297,12 +293,12 @@ void WriteCache (void) {
 		MainQuit (_("Save settings (urls)"), strerror(errno));
 
 	unsigned numfeeds = 0;
-	for (const struct feed* f = first_ptr; f; f = f->next_ptr)
+	for (const struct feed* f = _feed_list; f; f = f->next_ptr)
 		++numfeeds;
 
 	unsigned count = 1;
 	int oldnumobjects = 0;
-	for (const struct feed* cur_ptr = first_ptr; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
+	for (const struct feed* cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next_ptr) {
 		// Progress bar
 		int numobjects = count*(COLS-titlestrlen-2)/numfeeds-2;
 		if (numobjects < 1)

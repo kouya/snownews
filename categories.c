@@ -14,18 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
+#include "main.h"
 #include "categories.h"
-
-//----------------------------------------------------------------------
-
-struct categories *first_category = NULL;
-
-//----------------------------------------------------------------------
 
 // Compare global category list with string categoryname and return 1 if a
 // matching category was found.
 static bool CategoryListItemExists (const char* categoryname) {
-	for (const struct categories* category = first_category; category; category = category->next_ptr)
+	for (const struct categories* category = _settings.global_categories; category; category = category->next_ptr)
 		if (strcasecmp (category->name, categoryname) == 0)
 			return true;	// Matching category found.
 	return false;
@@ -35,7 +30,7 @@ static bool CategoryListItemExists (const char* categoryname) {
 static void CategoryListAddItem (const char* categoryname) {
 	if (CategoryListItemExists (categoryname)) {
 		// Only increase refcount
-		for (struct categories* category = first_category; category; category = category->next_ptr)
+		for (struct categories* category = _settings.global_categories; category; category = category->next_ptr)
 			if (strcasecmp (category->name, categoryname) == 0)
 				category->refcount++;
 	} else {
@@ -44,20 +39,20 @@ static void CategoryListAddItem (const char* categoryname) {
 		category->name = strdup (categoryname);
 		category->next_ptr = NULL;
 
-		if (!first_category) {	// Contains no elements
-			category->next_ptr = first_category;
-			first_category = category;
+		if (!_settings.global_categories) {	// Contains no elements
+			category->next_ptr = _settings.global_categories;
+			_settings.global_categories = category;
 		} else {
 			bool inserted = false;
 			struct categories *before_ptr = NULL;
-			for (struct categories* new_ptr = first_category; new_ptr; new_ptr = new_ptr->next_ptr) {
+			for (struct categories* new_ptr = _settings.global_categories; new_ptr; new_ptr = new_ptr->next_ptr) {
 				if (strcasecmp (category->name, new_ptr->name) > 0)
 					before_ptr = new_ptr;	// New category still below current one. Move on.
 				else {
-					if (!before_ptr) {	// Insert before first_ptr
-						category->next_ptr = first_category;
-						first_category = category;
-					} else {		// Insert after first_ptr
+					if (!before_ptr) {	// Insert before _settings.global_categories
+						category->next_ptr = _settings.global_categories;
+						_settings.global_categories = category;
+					} else {		// Insert after category
 						before_ptr->next_ptr = category;
 						category->next_ptr = new_ptr;
 					}
@@ -76,7 +71,7 @@ static void CategoryListAddItem (const char* categoryname) {
 // Delete item from category list. Decrease refcount for each deletion.
 // If refcount hits 0, remove from list.
 static void CategoryListDeleteItem (const char* categoryname) {
-	for (struct categories *category = first_category, *before_ptr = NULL; category; category = category->next_ptr) {
+	for (struct categories *category = _settings.global_categories, *before_ptr = NULL; category; category = category->next_ptr) {
 		if (strcasecmp (category->name, categoryname) == 0) {
 			// Check refcount
 			if (category->refcount > 1) {
@@ -85,8 +80,8 @@ static void CategoryListDeleteItem (const char* categoryname) {
 				break;
 			} else {
 				// Last feed using this category removed, kill off the structure
-				if (category == first_category) {
-					first_category = first_category->next_ptr;
+				if (category == _settings.global_categories) {
+					_settings.global_categories = _settings.global_categories->next_ptr;
 					free (category->name);
 					free (category);
 					break;

@@ -14,15 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
+#include "main.h"
 #include "about.h"
 #include <ncurses.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-
-//----------------------------------------------------------------------
-
-extern struct keybindings keybindings;
-extern struct color color;
 
 //----------------------------------------------------------------------
 
@@ -74,7 +70,7 @@ static void SHDrawGun (unsigned gun_pos) {
 static void SHDrawStatus (void) {
 	attron (WA_BOLD);
 	mvprintw (LINES-1, 1, _("Move: cursor or %c/%c; shoot: space; quit: %c"),
-	          keybindings.prev, keybindings.next, keybindings.quit);
+	          _settings.keybindings.prev, _settings.keybindings.next, _settings.keybindings.quit);
 	move (LINES-1, COLS-1);
 	attroff (WA_BOLD);
 }
@@ -292,10 +288,10 @@ static void santaHunta (void) {
 				shot.fired = false;
 		}
 
-		if ((input == KEY_RIGHT) || (input == keybindings.next)) {
+		if ((input == KEY_RIGHT) || (input == _settings.keybindings.next)) {
 			if (gun_pos < COLS-5u)
 				++gun_pos;
-		} else if ((input == KEY_LEFT) || (input == keybindings.prev)) {
+		} else if ((input == KEY_LEFT) || (input == _settings.keybindings.prev)) {
 			if (gun_pos > 3)
 				--gun_pos;
 		} else if (input == ' ') {
@@ -308,7 +304,7 @@ static void santaHunta (void) {
 				shot.y = LINES-4;
 				shot.fired = true;
 			}
-		} else if (input == keybindings.quit) {
+		} else if (input == _settings.keybindings.quit) {
 			if (score)
 				SHFinalScore(score);
 			break;

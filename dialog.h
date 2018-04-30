@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "main.h"
 
 void UIHelpScreen (void);
 void UIDisplayFeedHelp (void);

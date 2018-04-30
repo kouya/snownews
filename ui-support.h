@@ -15,7 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
-#include "config.h"
+#include "main.h"
 
 typedef enum {
 	NORMAL,

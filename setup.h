@@ -18,10 +18,3 @@
 #include "config.h"
 
 unsigned Config (void);
-
-struct entity {
-	char* entity;
-	char* converted_entity;
-	int entity_length;
-	struct entity* next_ptr;
-};

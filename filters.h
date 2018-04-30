@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "main.h"
 
 int FilterExecURL (struct feed * cur_ptr);
 int FilterPipeNG (struct feed * cur_ptr);

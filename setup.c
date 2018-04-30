@@ -15,75 +15,16 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "setup.h"
+#include "main.h"
 #include "categories.h"
 #include "cookies.h"
 #include "io-internal.h"
-#include "main.h"
 #include "ui-support.h"
 #include <errno.h>
 #include <ncurses.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-struct feed* first_ptr = NULL;
-struct entity* first_entity = NULL;
-
-struct keybindings keybindings = {
-	// Define default values for keybindings. If some are defined differently
-	// in the keybindings file they will be overwritten. If some are missing or broken/wrong
-	// these are sane defaults.
-	.about		= 'A',
-	.addfeed	= 'a',
-	.andxor		= 'X',
-	.categorize	= 'C',
-	.changefeedname	= 'c',
-	.deletefeed	= 'D',
-	.dfltbrowser	= 'B',
-	.end		= '>',
-	.enter		= 'l',
-	.feedinfo	= 'i',
-	.filter		= 'f',
-	.filtercurrent	= 'g',
-	.forcereload	= 'T',
-	.help		= 'h',
-	.home		= '<',
-	.markallread	= 'm',
-	.markread	= 'm',
-	.markunread	= 'M',
-	.movedown	= 'N',
-	.moveup		= 'P',
-	.newheadlines	= 'H',
-	.next		= 'n',
-	.nofilter	= 'F',
-	.pdown		= ' ',
-	.perfeedfilter	= 'e',
-	.prev		= 'p',
-	.prevmenu	= 'q',
-	.pup		= 'b',
-	.quit		= 'q',
-	.reload		= 'r',
-	.reloadall	= 'R',
-	.sortfeeds	= 's',
-	.typeahead	= '/',
-	.urljump	= 'o',
-	.urljump2	= 'O'
-};
-
-struct color color = {
-	.feedtitle	= -1,
-	.feedtitlebold	= 0,
-	.newitems	= 5,
-	.newitemsbold	= 0,
-	.urljump	= 4,
-	.urljumpbold	= 0
-};
-
-char* browser = NULL;		// Browser command. lynx is standard.
-char* proxyname = NULL;		// Hostname of proxyserver.
-char* useragent = NULL;		// Snownews User-Agent string.
-unsigned short proxyport = 0;	// Port on proxyserver to use.
-bool use_colors = true;		// Default to enabled.
 
 // Load browser command from ~./snownews/browser.
 static void SetupBrowser (const char* filename) {
@@ -93,15 +34,15 @@ static void SetupBrowser (const char* filename) {
 		configfile = fopen (filename, "w");
 		if (!configfile)
 			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); // Still didn't work?
-		browser = strdup("lynx %s");
-		fputs (browser, configfile);
+		_settings.browser = strdup("lynx %s");
+		fputs (_settings.browser, configfile);
 	} else {
 		char linebuf[256];
 		fgets (linebuf, sizeof(linebuf), configfile);
 		// Die newline, die!
 		if (linebuf[strlen(linebuf)-1] == '\n')
 			linebuf[strlen(linebuf)-1] = '\0';
-		browser = strdup (linebuf);
+		_settings.browser = strdup (linebuf);
 	}
 	fclose (configfile);
 }
@@ -120,9 +61,9 @@ static void SetupProxy (void) {
 	if (proxystring) {
 		strsep (&proxystring, "/");
 		if (proxystring) {
-			proxyname = strdup (strsep (&proxystring, ":"));
+			_settings.proxyname = strdup (strsep (&proxystring, ":"));
 			if (proxystring)
-				proxyport = atoi (strsep (&proxystring, "/"));
+				_settings.proxyport = atoi (strsep (&proxystring, "/"));
 		}
 	}
 	free (proxystrbase);
@@ -141,8 +82,8 @@ static void SetupUserAgent (void) {
 	static const char url[] = "http://snownews.kcore.de/software/snownews/";
 	const unsigned urllen = strlen(url);
 	unsigned ualen = strlen("Snownews/" SNOWNEWS_VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
-	useragent = malloc(ualen);
-	snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
+	_settings.useragent = malloc(ualen);
+	snprintf (_settings.useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
 }
 
 // Define global keybindings and load user customized bindings.
@@ -161,123 +102,123 @@ static void SetupKeybindings (const char* filename) {
 			strsep (&value, ":");
 
 			if (strcmp (linebuf, "next item") == 0)
-				keybindings.next = value[0];
+				_settings.keybindings.next = value[0];
 			else if (strcmp (linebuf, "previous item") == 0)
-				keybindings.prev = value[0];
+				_settings.keybindings.prev = value[0];
 			else if (strcmp (linebuf, "return to previous menu") == 0)
-				keybindings.prevmenu = value[0];
+				_settings.keybindings.prevmenu = value[0];
 			else if (strcmp (linebuf, "quit") == 0)
-				keybindings.quit = value[0];
+				_settings.keybindings.quit = value[0];
 			else if (strcmp (linebuf, "add feed") == 0)
-				keybindings.addfeed = value[0];
+				_settings.keybindings.addfeed = value[0];
 			else if (strcmp (linebuf, "delete feed") == 0)
-				keybindings.deletefeed = value[0];
+				_settings.keybindings.deletefeed = value[0];
 			else if (strcmp (linebuf, "mark feed as read") == 0)
-				keybindings.markread = value[0];
+				_settings.keybindings.markread = value[0];
 			else if (strcmp (linebuf, "mark item unread") == 0)
-				keybindings.markunread = value[0];
+				_settings.keybindings.markunread = value[0];
 			else if (strcmp (linebuf, "mark all as read") == 0)
-				keybindings.markallread = value[0];
+				_settings.keybindings.markallread = value[0];
 			else if (strcmp (linebuf, "change default browser") == 0)
-				keybindings.dfltbrowser = value[0];
+				_settings.keybindings.dfltbrowser = value[0];
 			else if (strcmp (linebuf, "sort feeds") == 0)
-				keybindings.sortfeeds = value[0];
+				_settings.keybindings.sortfeeds = value[0];
 			else if (strcmp (linebuf, "move item up") == 0)
-				keybindings.moveup = value[0];
+				_settings.keybindings.moveup = value[0];
 			else if (strcmp (linebuf, "move item down") == 0)
-				keybindings.movedown = value[0];
+				_settings.keybindings.movedown = value[0];
 			else if (strcmp (linebuf, "show feedinfo") == 0)
-				keybindings.feedinfo = value[0];
+				_settings.keybindings.feedinfo = value[0];
 			else if (strcmp (linebuf, "reload feed") == 0)
-				keybindings.reload = value[0];
+				_settings.keybindings.reload = value[0];
 			else if (strcmp (linebuf, "force reload feed") == 0)
-				keybindings.forcereload = value[0];
+				_settings.keybindings.forcereload = value[0];
 			else if (strcmp (linebuf, "reload all feeds") == 0)
-				keybindings.reloadall = value[0];
+				_settings.keybindings.reloadall = value[0];
 			else if (strcmp (linebuf, "open url") == 0)
-				keybindings.urljump = value[0];
+				_settings.keybindings.urljump = value[0];
 			else if (strcmp (linebuf, "open item url in overview") == 0)
-				keybindings.urljump2 = value[0];
+				_settings.keybindings.urljump2 = value[0];
 			else if (strcmp (linebuf, "change feedname") == 0)
-				keybindings.changefeedname = value[0];
+				_settings.keybindings.changefeedname = value[0];
 			else if (strcmp (linebuf, "page up") == 0)
-				keybindings.pup = value[0];
+				_settings.keybindings.pup = value[0];
 			else if (strcmp (linebuf, "page down") == 0)
-				keybindings.pdown = value[0];
+				_settings.keybindings.pdown = value[0];
 			else if (strcmp (linebuf, "top") == 0)
-				keybindings.home = value[0];
+				_settings.keybindings.home = value[0];
 			else if (strcmp (linebuf, "bottom") == 0)
-				keybindings.end = value[0];
+				_settings.keybindings.end = value[0];
 			else if (strcmp (linebuf, "categorize feed") == 0)
-				keybindings.categorize = value[0];
+				_settings.keybindings.categorize = value[0];
 			else if (strcmp (linebuf, "apply filter") == 0)
-				keybindings.filter = value[0];
+				_settings.keybindings.filter = value[0];
 			else if (strcmp (linebuf, "only current category") == 0)
-				keybindings.filtercurrent = value[0];
+				_settings.keybindings.filtercurrent = value[0];
 			else if (strcmp (linebuf, "remove filter") == 0)
-				keybindings.nofilter = value[0];
+				_settings.keybindings.nofilter = value[0];
 			else if (strcmp (linebuf, "per feed filter") == 0)
-				keybindings.perfeedfilter = value[0];
+				_settings.keybindings.perfeedfilter = value[0];
 			else if (strcmp (linebuf, "help menu") == 0)
-				keybindings.help = value[0];
+				_settings.keybindings.help = value[0];
 			else if (strcmp (linebuf, "about") == 0)
-				keybindings.about = value[0];
+				_settings.keybindings.about = value[0];
 			else if (strcmp (linebuf, "toggle AND/OR filtering") == 0)
-				keybindings.andxor = value[0];
+				_settings.keybindings.andxor = value[0];
 			else if (strcmp (linebuf, "enter") == 0)
-				keybindings.enter = value[0];
+				_settings.keybindings.enter = value[0];
 			else if (strcmp (linebuf, "show new headlines") == 0)
-				keybindings.newheadlines = value[0];
+				_settings.keybindings.newheadlines = value[0];
 			else if (strcmp (linebuf, "type ahead find") == 0)
-				keybindings.typeahead = value[0];
+				_settings.keybindings.typeahead = value[0];
 		}
 		// Override old default settings and make sure there is no clash.
 		// Default browser is now B; b moved to page up.
-		if (keybindings.dfltbrowser == 'b')
-			keybindings.dfltbrowser = 'B';
+		if (_settings.keybindings.dfltbrowser == 'b')
+			_settings.keybindings.dfltbrowser = 'B';
 		fclose (configfile);
 	}
 
 	configfile = fopen (filename, "w");
 	fputs ("# Snownews keybindings configfile\n", configfile);
 	fputs ("# Main menu bindings\n", configfile);
-	fprintf (configfile, "add feed:%c\n", keybindings.addfeed);
-	fprintf (configfile, "delete feed:%c\n", keybindings.deletefeed);
-	fprintf (configfile, "reload all feeds:%c\n", keybindings.reloadall);
-	fprintf (configfile, "change default browser:%c\n", keybindings.dfltbrowser);
-	fprintf (configfile, "move item up:%c\n", keybindings.moveup);
-	fprintf (configfile, "move item down:%c\n", keybindings.movedown);
-	fprintf (configfile, "change feedname:%c\n", keybindings.changefeedname);
-	fprintf (configfile, "sort feeds:%c\n", keybindings.sortfeeds);
-	fprintf (configfile, "categorize feed:%c\n", keybindings.categorize);
-	fprintf (configfile, "apply filter:%c\n", keybindings.filter);
-	fprintf (configfile, "only current category:%c\n", keybindings.filtercurrent);
-	fprintf (configfile, "mark all as read:%c\n", keybindings.markallread);
-	fprintf (configfile, "remove filter:%c\n", keybindings.nofilter);
-	fprintf (configfile, "per feed filter:%c\n", keybindings.perfeedfilter);
-	fprintf (configfile, "toggle AND/OR filtering:%c\n", keybindings.andxor);
-	fprintf (configfile, "quit:%c\n", keybindings.quit);
+	fprintf (configfile, "add feed:%c\n", _settings.keybindings.addfeed);
+	fprintf (configfile, "delete feed:%c\n", _settings.keybindings.deletefeed);
+	fprintf (configfile, "reload all feeds:%c\n", _settings.keybindings.reloadall);
+	fprintf (configfile, "change default browser:%c\n", _settings.keybindings.dfltbrowser);
+	fprintf (configfile, "move item up:%c\n", _settings.keybindings.moveup);
+	fprintf (configfile, "move item down:%c\n", _settings.keybindings.movedown);
+	fprintf (configfile, "change feedname:%c\n", _settings.keybindings.changefeedname);
+	fprintf (configfile, "sort feeds:%c\n", _settings.keybindings.sortfeeds);
+	fprintf (configfile, "categorize feed:%c\n", _settings.keybindings.categorize);
+	fprintf (configfile, "apply filter:%c\n", _settings.keybindings.filter);
+	fprintf (configfile, "only current category:%c\n", _settings.keybindings.filtercurrent);
+	fprintf (configfile, "mark all as read:%c\n", _settings.keybindings.markallread);
+	fprintf (configfile, "remove filter:%c\n", _settings.keybindings.nofilter);
+	fprintf (configfile, "per feed filter:%c\n", _settings.keybindings.perfeedfilter);
+	fprintf (configfile, "toggle AND/OR filtering:%c\n", _settings.keybindings.andxor);
+	fprintf (configfile, "quit:%c\n", _settings.keybindings.quit);
 	fputs ("# Feed display menu bindings\n", configfile);
-	fprintf (configfile, "show feedinfo:%c\n", keybindings.feedinfo);
-	fprintf (configfile, "mark feed as read:%c\n", keybindings.markread);
-	fprintf (configfile, "mark item unread:%c\n", keybindings.markunread);
+	fprintf (configfile, "show feedinfo:%c\n", _settings.keybindings.feedinfo);
+	fprintf (configfile, "mark feed as read:%c\n", _settings.keybindings.markread);
+	fprintf (configfile, "mark item unread:%c\n", _settings.keybindings.markunread);
 	fputs ("# General keybindungs\n", configfile);
-	fprintf (configfile, "next item:%c\n", keybindings.next);
-	fprintf (configfile, "previous item:%c\n", keybindings.prev);
-	fprintf (configfile, "return to previous menu:%c\n", keybindings.prevmenu);
-	fprintf (configfile, "reload feed:%c\n", keybindings.reload);
-	fprintf (configfile, "force reload feed:%c\n", keybindings.forcereload);
-	fprintf (configfile, "open url:%c\n", keybindings.urljump);
-	fprintf (configfile, "open item url in overview:%c\n", keybindings.urljump2);
-	fprintf (configfile, "page up:%c\n", keybindings.pup);
-	fprintf (configfile, "page down:%c\n", keybindings.pdown);
-	fprintf (configfile, "top:%c\n", keybindings.home);
-	fprintf (configfile, "bottom:%c\n", keybindings.end);
-	fprintf (configfile, "enter:%c\n", keybindings.enter);
-	fprintf (configfile, "show new headlines:%c\n", keybindings.newheadlines);
-	fprintf (configfile, "help menu:%c\n", keybindings.help);
-	fprintf (configfile, "about:%c\n", keybindings.about);
-	fprintf (configfile, "type ahead find:%c\n", keybindings.typeahead);
+	fprintf (configfile, "next item:%c\n", _settings.keybindings.next);
+	fprintf (configfile, "previous item:%c\n", _settings.keybindings.prev);
+	fprintf (configfile, "return to previous menu:%c\n", _settings.keybindings.prevmenu);
+	fprintf (configfile, "reload feed:%c\n", _settings.keybindings.reload);
+	fprintf (configfile, "force reload feed:%c\n", _settings.keybindings.forcereload);
+	fprintf (configfile, "open url:%c\n", _settings.keybindings.urljump);
+	fprintf (configfile, "open item url in overview:%c\n", _settings.keybindings.urljump2);
+	fprintf (configfile, "page up:%c\n", _settings.keybindings.pup);
+	fprintf (configfile, "page down:%c\n", _settings.keybindings.pdown);
+	fprintf (configfile, "top:%c\n", _settings.keybindings.home);
+	fprintf (configfile, "bottom:%c\n", _settings.keybindings.end);
+	fprintf (configfile, "enter:%c\n", _settings.keybindings.enter);
+	fprintf (configfile, "show new headlines:%c\n", _settings.keybindings.newheadlines);
+	fprintf (configfile, "help menu:%c\n", _settings.keybindings.help);
+	fprintf (configfile, "about:%c\n", _settings.keybindings.about);
+	fprintf (configfile, "type ahead find:%c\n", _settings.keybindings.typeahead);
 	fclose (configfile);
 }
 
@@ -298,16 +239,16 @@ static void SetupColors (const char* filename) {
 			unsigned cval = atoi(value);
 			bool cvalbold = (cval > 7);
 			if (strcmp (linebuf, "enabled") == 0) 
-				use_colors = cval;
+				_settings.monochrome = !cval;
 			else if (strcmp (linebuf, "new item") == 0) {
-				color.newitems = cval;
-				color.newitemsbold = cvalbold;
+				_settings.color.newitems = cval;
+				_settings.color.newitemsbold = cvalbold;
 			} else if (strcmp (linebuf, "goto url") == 0) {
-				color.urljump = cval;
-				color.urljumpbold = cvalbold;
+				_settings.color.urljump = cval;
+				_settings.color.urljumpbold = cvalbold;
 			} else if (strcmp (linebuf, "feedtitle") == 0) {
-				color.feedtitle = cval;
-				color.feedtitlebold = cvalbold;
+				_settings.color.feedtitle = cval;
+				_settings.color.feedtitlebold = cvalbold;
 			}
 		}
 		fclose (configfile);
@@ -333,13 +274,13 @@ static void SetupColors (const char* filename) {
 	fputs ("# brightcyan:14\n", configfile);
 	fputs ("# white:15\n", configfile);
 	fputs ("# no color:-1\n", configfile);
-	fprintf (configfile, "enabled:%d\n", use_colors);
-	fprintf (configfile, "new item:%d\n", color.newitems);
-	fprintf (configfile, "goto url:%d\n", color.urljump);
-	fprintf (configfile, "feedtitle:%d\n", color.feedtitle);
+	fprintf (configfile, "enabled:%d\n", !_settings.monochrome);
+	fprintf (configfile, "new item:%d\n", _settings.color.newitems);
+	fprintf (configfile, "goto url:%d\n", _settings.color.urljump);
+	fprintf (configfile, "feedtitle:%d\n", _settings.color.feedtitle);
 	fclose (configfile);
 
-	if (use_colors) {
+	if (!_settings.monochrome) {
 		start_color();
 
 		// The following call will automagically implement -1 as the terminal's
@@ -360,9 +301,9 @@ static void SetupColors (const char* filename) {
 		init_pair (63, -1, -1);
 
 		// Initialize all color pairs we're gonna use.
-		init_pair (2, color.newitems-8*color.newitemsbold, -1);	// New item.
-		init_pair (3, color.urljump-8*color.urljumpbold, -1);	// Goto url line
-		init_pair (4, color.feedtitle-8*color.feedtitlebold, -1); // Feed title header
+		init_pair (2, _settings.color.newitems-8*_settings.color.newitemsbold, -1);	// New item.
+		init_pair (3, _settings.color.urljump-8*_settings.color.urljumpbold, -1);	// Goto url line
+		init_pair (4, _settings.color.feedtitle-8*_settings.color.feedtitlebold, -1); // Feed title header
 	}
 
 }
@@ -422,11 +363,11 @@ static void SetupEntities (const char * file) {
 		entity->entity_length = strlen (entity->converted_entity);
 
 		// Add entity to linked list structure.
-		if (!first_entity)
-			first_entity = entity;
+		if (!_settings.html_entities)
+			_settings.html_entities = entity;
 		else {
-			entity->next_ptr = first_entity;
-			first_entity = entity;
+			entity->next_ptr = _settings.html_entities;
+			_settings.html_entities = entity;
 		}
 	}
 }
@@ -476,10 +417,10 @@ static unsigned SetupFeedList (const char* filename)
 			LoadCookies (new_ptr);
 
 		// Add to bottom of pointer chain.
-		if (!first_ptr)
-			first_ptr = new_ptr;
+		if (!_feed_list)
+			_feed_list = new_ptr;
 		else {
-			new_ptr->prev_ptr = first_ptr;
+			new_ptr->prev_ptr = _feed_list;
 			while (new_ptr->prev_ptr->next_ptr)
 				new_ptr->prev_ptr = new_ptr->prev_ptr->next_ptr;
 			new_ptr->prev_ptr->next_ptr = new_ptr;

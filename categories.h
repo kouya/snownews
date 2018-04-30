@@ -15,27 +15,10 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
-#include "config.h"
+#include "main.h"
 
 void FeedCategoryAdd (struct feed* cur_ptr, const char* categoryname);
 void FeedCategoryDelete (struct feed* cur_ptr, const char* categoryname);
 bool FeedCategoryExists (const struct feed* cur_ptr, const char* categoryname);
 char* GetCategoryList (const struct feed* feed);
 void ResetFilters (char **filters);
-
-// A feeds categories
-struct feedcategories {
-	char* name;	// Category name
-	struct feedcategories * next_ptr;
-};
-
-// Global list of all defined categories, their refcounts and color labels.
-struct categories {
-	char* name;	// Category name
-	int refcount;	// Number of feeds using this category.
-	int label;	// Color label of this category.
-	int labelbold;
-	struct categories * next_ptr;
-};
-
-extern struct categories* first_category;

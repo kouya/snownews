@@ -18,30 +18,25 @@
 #ifndef _GNU_SOURCE
 	#define _GNU_SOURCE
 #endif
-#include "config.h"
+#include "main.h"
 #include "conversions.h"
-#include "digcalc.h"
-#include "interface.h"
-#include "io-internal.h"
 #include "os-support.h"
-#include "setup.h"
-#include "ui-support.h"
 #include <iconv.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 
-extern struct entity *first_entity;
-
-extern const char* forced_target_charset;
+//----------------------------------------------------------------------
 
 static int calcAgeInDays (const struct tm* t);
 
+//----------------------------------------------------------------------
+
 char* iconvert (const char* inbuf) {
 	iconv_t cd;	// Iconvs conversion descriptor.
-	if (forced_target_charset)
-		cd = iconv_open (forced_target_charset, "UTF-8");
+	if (_settings.global_charset)
+		cd = iconv_open (_settings.global_charset, "UTF-8");
 	else {
 		const char* langcset = nl_langinfo(CODESET);
 		if (strcasecmp (langcset, "UTF-8") == 0)
@@ -199,7 +194,7 @@ char* UIDejunk (const char* feed_description) {
 
 				// Decode user defined entities.
 				bool found = false;
-				for (const struct entity* cur_entity = first_entity; cur_entity; cur_entity = cur_entity->next_ptr) {
+				for (const struct entity* cur_entity = _settings.html_entities; cur_entity; cur_entity = cur_entity->next_ptr) {
 					if (strcmp (entity, cur_entity->entity) == 0) {
 						// We have found a matching entity.
 
