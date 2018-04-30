@@ -1,20 +1,22 @@
 ################ Source files ##########################################
 
-man/MANS	:= $(wildcard man/man1/*.1)
-man/LANGS	:= $(notdir $(filter-out man/Module.mk man/man1,$(wildcard man/*)))
-man/LMANS	:= $(foreach l,${man/LANGS},$(wildcard man/${l}/man1/*.1))
+man/LMANS	:= $(wildcard man/snownews.*.1)
+man/MANS	:= $(filter-out ${man/LMANS},$(wildcard man/*.1))
+man/LANGS	:= $(subst man/snownews.,,$(man/LMANS:.1=))
 
 ################ Installation ##########################################
 ifdef MANPATH
-
 .PHONY:	man/install man/uninstall
 
 man/IPREFIX	:= ${PKGDIR}${MANPATH}
-man/MANSI	:= $(subst man/,${man/IPREFIX}/,${man/MANS})
-man/LMANSI	:= $(foreach l,${man/LANGS},$(subst man/,${man/IPREFIX}/,$(wildcard man/${l}/man1/*.1)))
+man/MANSI	:= $(subst man/,${man/IPREFIX}/man1/,${man/MANS})
+man/LMANSI	:= $(foreach l,${man/LANGS},${man/IPREFIX}/${l}/man1/snownews.1)
 man/MANI	:= ${man/MANSI} ${man/LMANSI}
 
-${man/MANI}:	${man/IPREFIX}/%:	man/%
+${man/MANSI}:	${man/IPREFIX}/man1/%:	man/%
+	@echo "Installing $@ ..."
+	@${INSTALLDATA} $< $@
+${man/LMANSI}:	${man/IPREFIX}/%/man1/snownews.1:	man/snownews.%.1
 	@echo "Installing $@ ..."
 	@${INSTALLDATA} $< $@
 
