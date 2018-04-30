@@ -1,5 +1,11 @@
+################ Package information #################################
+
 NAME		:= @PKG_NAME@
 VERSION		:= @PKG_VERSION@
+
+#DEBUG		:= 1
+
+################ Programs ############################################
 
 CC		:= @CC@
 MSGFMT		:= @MSGFMT@
@@ -9,14 +15,25 @@ INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
 INSTALLSCR	:= ${INSTALL} -D -p -m 755
 INSTALLDATA	:= ${INSTALL} -D -p -m 644
 
+################ Destination #########################################
+
 PREFIX		:= @prefix@
 BINDIR		:= @bindir@
 LOCALEPATH	:= @localedir@
 MANPATH		:= @mandir@
-
-CFLAGS		:= -Wall -Wextra -Os -std=c11 -I/usr/include/libxml2
-LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz -lm
-
 BUILDDIR	:= @builddir@/${NAME}
-O		:= .o/
 PKGDIR		:= @pkgdir@
+O		:= .o/
+
+################ Compiler options ####################################
+
+CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow \
+		   -std=c11 -I/usr/include/libxml2
+LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz
+ifdef DEBUG
+    CFLAGS	+= -O0 -ggdb3
+    LDFLAGS	+= -g -rdynamic
+else
+    CFLAGS	+= -Os -g0 -DNDEBUG=1
+    LDFLAGS	+= -s
+endif

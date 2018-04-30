@@ -176,20 +176,6 @@ Ein Kurzhilfe Fenster ist in jeder Ansicht mit der Taste
 .B 'h'
 erhältlich.
 .P
-Das Programm überprüft automatisch einmal pro Woche, ob eine neue Version erhältlich
-ist, wenn es sich beendet. Es lädt eine Datei mit dem Namen "version"
-von meinem Webserver und vergleicht den Inhalt mit der lokalen
-Version. Wenn diese unterschiedlich sind schreibt es beim beenden
-eine entsprechende Meldung auf den Bildschirm. Dies war meiner
-Meinung nach die am wenigsten nervige Methode die Funktion zu
-implementieren. Sie können diese Meldung einfach ignorieren, wenn
-Sie nicht updaten wollen oder können, weil das Programm z.B mit Ihrer
-Distribution kam. Um die überprüfung zu deaktivieren, schreiben Sie
-den Wert -1 in die Datei ~/.snownews/updatecheck. Snownews
-überträgt übrigens absolut nichts zu meinem Server. Es lädt nur
-über HTTP eine Datei, die die Versionnummer enthält und vergleicht
-diese lokal.
-.P
 Wenn Sie einen Proxyserver benötigen um in das Internet zu gelangen, setzen
 Sie die Umgebungsvariable "http_proxy". Snownews erwartet diese Variable in der
 Form

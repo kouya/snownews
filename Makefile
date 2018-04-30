@@ -16,7 +16,7 @@ ONAME   := $(notdir $(abspath $O))
 all:	${EXE}
 
 run:	${EXE}
-	${EXE}
+	@${EXE}
 
 ${EXE}:	${OBJS}
 	@echo "Linking $@ ..."
