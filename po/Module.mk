@@ -4,10 +4,6 @@ po/SRCS	:= $(filter-out po/messages.po,$(wildcard po/*.po))
 po/OBJS	:= $(addprefix $O,$(po/SRCS:.po=.mo))
 LOCALES	:= $(notdir $(po/SRCS:.po=))
 
-$O%.mo:	%.po
-	@echo "    Compiling $< ..."
-	@${MSGFMT} -o $@ $<
-
 ################ Installation ##########################################
 ifdef LOCALEPATH
 .PHONY:	po/install po/uninstall po/clean
