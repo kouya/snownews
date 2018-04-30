@@ -23,5 +23,3 @@ int UpdateAllFeeds (void);
 int LoadFeed (struct feed * cur_ptr);
 int LoadAllFeeds (unsigned numfeeds);
 void WriteCache (void);
-void printlog (const struct feed* feed, const char* text);
-void printlogSimple (const char * text);

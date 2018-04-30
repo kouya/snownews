@@ -33,5 +33,4 @@ void SmartFeedsUpdate (void);
 void SmartFeedNewitems (struct feed * smart_feed);
 bool SmartFeedExists (const char * smartfeed);
 void DrawProgressBar (int numobjects, int titlestrlen);
-void displayErrorLog (void);
 void clearLine (int line, clear_line how);

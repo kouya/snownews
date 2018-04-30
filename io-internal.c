@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libxml/parser.h>
+#include <syslog.h>
 
 struct feed * newFeedStruct (void) {
 	struct feed* new = calloc (1, sizeof(struct feed));
@@ -114,7 +115,7 @@ static void PrintUpdateError (const struct feed* cur_ptr) {
 			break;
 	}
 	UIStatus(errstr, 2, 1);
-	printlog(cur_ptr, errstr);
+	syslog (LOG_ERR, errstr);
 }
 
 // Update given feed from server.
@@ -421,18 +422,4 @@ void WriteCache (void) {
 	}
 	fclose (urlfile);
 	return;
-}
-
-void printlog (const struct feed* feed, const char* text) {
-	time_t t = time(NULL);
-	char* timestring = ctime(&t);
-	timestring[strlen(timestring)-1] = 0;	// remove newline
-	fprintf (stderr, "%s: (%s) %s\n", timestring, feed->feedurl, text);
-}
-
-void printlogSimple (const char* text) {
-	time_t t = time(NULL);
-	char* timestring = ctime(&t);
-	timestring[strlen(timestring)-1] = 0;	// remove newline
-	fprintf (stderr, "%s: %s\n", timestring, text);
 }

@@ -1261,8 +1261,6 @@ void UIMainInterface (void) {
 				resize_dirty = false;
 			} else if (uiinput == 12)	// Redraw screen on ^L
 				clear();
-			else if (uiinput == 'E')
-				displayErrorLog();
 		}
 		if (uiinput == '\n' || (uiinput == _settings.keybindings.enter && !typeahead)) {
 			// If typeahead is active clear it's state and free the structure.

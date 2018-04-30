@@ -328,7 +328,7 @@ bool UIDeleteFeed (const char* feedname) {
 void UIHelpScreen (void) {
 	unsigned centerx = COLS/2u, centery = LINES/2u;
 
-	UISupportDrawBox (centerx-20, centery-10, centerx+24, centery+10);
+	UISupportDrawBox (centerx-20, centery-10, centerx+24, centery+9);
 
 	attron (WA_REVERSE);
 	// Keys
@@ -350,8 +350,7 @@ void UIHelpScreen (void) {
 	mvprintw (centery+5, centerx-offset, "%c:", _settings.keybindings.perfeedfilter);
 	mvaddstr (centery+6, centerx-offset, _("tab:"));
 	mvprintw (centery+7, centerx-offset, "%c:", _settings.keybindings.about);
-	mvprintw (centery+8, centerx-offset, "%c:", 'E');
-	mvprintw (centery+9, centerx-offset, "%c:", _settings.keybindings.quit);
+	mvprintw (centery+8, centerx-offset, "%c:", _settings.keybindings.quit);
 	// Descriptions
 	mvaddstr (centery-9, centerx-offsetstr, _("Add RSS feed..."));
 	mvaddstr (centery-8, centerx-offsetstr, _("Delete highlighted RSS feed..."));
@@ -370,8 +369,7 @@ void UIHelpScreen (void) {
 	mvaddstr (centery+5, centerx-offsetstr, _("Add conversion filter..."));
 	mvaddstr (centery+6, centerx-offsetstr, _("Type Ahead Find"));
 	mvaddstr (centery+7, centerx-offsetstr, _("About"));
-	mvaddstr (centery+8, centerx-offsetstr, _("Show error log..."));
-	mvaddstr (centery+9, centerx-offsetstr, _("Quit program"));
+	mvaddstr (centery+8, centerx-offsetstr, _("Quit program"));
 	attroff (WA_REVERSE);
 
 	UIStatus (_("Press the any(tm) key to exit help screen."), 0, 0);

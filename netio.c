@@ -31,6 +31,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <syslog.h>
 #include <unistd.h>
 
 enum {
@@ -421,7 +422,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 							}
 							if (!suppressoutput) {
 								UIStatus (_("URL points to permanent redirect, updating with new location..."), 1, 0);
-								printlog (cur_ptr, _("URL points to permanent redirect, updating with new location..."));
+								syslog (LOG_NOTICE, _("URL points to permanent redirect, updating with new location..."));
 							}
 							free (cur_ptr->feedurl);
 							if (authdata == NULL)
@@ -520,7 +521,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 				} else {
 					// second pass, give up on unknown error base class
 					cur_ptr->netio_error = NET_ERR_HTTP_NON_200;
-					printlog (cur_ptr, servreply);
+					syslog (LOG_ERR, servreply);
 					fclose (stream);
 					return NULL;
 				}
@@ -731,10 +732,8 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 		// gzipinflate
 		int gzipstatus = jg_gzip_uncompress (body, length, (void **)&inflatedbody, &cur_ptr->content_length);
 		if (gzipstatus) {
-			char errstr[255];
 			free (body);
-			snprintf(errstr, sizeof(errstr), _("zlib exited with code: %d"), gzipstatus);
-			printlog(cur_ptr, errstr);
+			syslog (LOG_ERR, _("zlib exited with code: %d"), gzipstatus);
 			cur_ptr->netio_error = NET_ERR_GZIP_ERR;
 			return NULL;
 		}

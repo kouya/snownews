@@ -459,18 +459,9 @@ unsigned Config (void) {
 	} else if (!S_ISDIR(dirtest.st_mode))
 		MainQuit ("Creating config directory ~/.snownews/cache/", "A file with the name \"~/.snownews/cache/\" exists!");
 
-	// Redirect stderr to ~/.snownews/error.log
-	// Be sure to call _after_ the directory checks above!
-	char filename [PATH_MAX];
-	snprintf (filename, sizeof(filename), "%s/.snownews/error.log", getenv("HOME"));
-	int errorlogfd = open (filename, O_WRONLY| O_CREAT| O_TRUNC, DEFFILEMODE);
-	if (errorlogfd >= 0) {
-		dup2 (errorlogfd, STDERR_FILENO);
-		close (errorlogfd);
-	}
-
 	UIStatus (_("Reading configuration settings..."), 0, 0);
 
+	char filename [PATH_MAX];
 	snprintf (filename, sizeof(filename), "%s/.snownews/browser", getenv("HOME"));
 	SetupBrowser (filename);
 

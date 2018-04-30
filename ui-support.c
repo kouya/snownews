@@ -213,22 +213,6 @@ void DrawProgressBar (int numobjects, int titlestrlen) {
 	attroff(WA_REVERSE);
 }
 
-void displayErrorLog (void) {
-	erase();
-	UISupportDrawHeader ("Error log");
-	char errorfile [PATH_MAX];
-	snprintf (errorfile, sizeof(errorfile), "%s/.snownews/error.log", getenv("HOME"));
-	FILE* ef = fopen (errorfile, "r");
-	if (ef) {
-		char linebuf[128];
-		move (1, 0);
-		while (fgets (linebuf, sizeof(linebuf), ef))
-			addstr (linebuf);
-		fclose (ef);
-	}
-	getch();
-}
-
 void clearLine (int line, clear_line how) {
 	if (how == INVERSE)
 		attron(WA_REVERSE);
