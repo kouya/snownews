@@ -1,7 +1,7 @@
 Snownews
 ========
 
-What this is
+What it is
 ------------
 
 Snownews is a command-line RSS feed reader. It is designed to be simple and
@@ -12,14 +12,14 @@ Unix (and will even build with Cygwin).
 Features
 --------
 
-* Runs on Linux, *BSD, OS X (Darwin), Solaris and probably many more Unices. Yes, even works under Cygwin.
+* Runs on Linux, BSD, OS X (Darwin), Solaris and probably many more Unices. Yes, even works under Cygwin.
 * Fast and very resource friendly.
 * Builtin HTTP client will follow server redirects and update feed URLs that point to permanent redirects (301) automatically.
-* Snownews understands "Not-Modified" (304) server replies and handles gzip compression.
-* Local cache for minimal network traffic.
-* HTTP proxy support.
-* HTTP authentication support (basic and digest methods).
-* Optional, basic cookie support.
+* Understands "Not-Modified" (304) server replies and handles gzip compression.
+* Uses local cache for minimal network traffic.
+* Supports HTTP proxy.
+* Supports HTTP authentication (basic and digest methods).
+* Supports cookies.
 * A help menu available throughout the program.
 * Automatic update checking (can be deactivated).
 * Few dependencies on external libraries; ncurses and libxml2.
@@ -36,10 +36,10 @@ Building Snownews
 
 You will need the following:
 
-- GCC compiler (any recent version will do)
-- ncurses 5.0 or higher
-- libxml2 (any version)
-- openssl 1.0 *only*
+- GCC compiler 5+
+- ncurses 5.0+
+- libxml2
+- openssl 1.1+
 - Perl (any recent version will do)
 - gettext (lib and msgfmt tool)
 
@@ -51,34 +51,34 @@ make
 sudo make install
 ```
 
-By default, this will install Snownews into ``/usr/local``. If you prefer it to
-go somewhere else, set the ``PREFIX`` environmental variable before calling
-``make``. For example, if you're on Arch, you would do:
+By default, this will install Snownews into ``/usr/local``. If you
+prefer it to go somewhere else, set the ``./configure --prefix=DIR``
+parameter. ``configure --help`` will list other options that you may
+find interesting. For example, if you're on Arch, you would do:
 
 ```
-./configure
-PREFIX=/usr make
-PREFIX=/usr sudo make install
+./configure --prefix=/usr
+sudo make install
 ```
 
-How to use this
+How to use it
 ---------------
 
-Snownews comes with a complete man page, where you can find all the details for
-its use. If you prefer a tutorial, you can find one [here][1]. The man page is
-available in English, German, Dutch and French at the moment. 
+Snownews comes with a complete man page, where you can find all
+the details for its use. If you prefer a tutorial, you can find one
+[here](https://retro-freedom.nz/tech-101-snownews.html). The man page
+is available in English, German, Dutch and French at the moment.
 
-We also provide a set of helper scripts, made for Snownews by various
-contributors. You can find them in the ``contrib`` directory, along with
-instructions for their use.
+A set of helper scripts, made for Snownews by various contributors, can be
+found in the ``contrib`` directory, along with instructions for their use.
 
 Contributing
 ------------
 
-If you would like to contribute to Snownews, consider fixing one of our issues,
-adding a helper script, or writing a localization. If you are interested in
-contributing a helper script, please read ``contrib/CONTRIBUTING.md`` for
-details. 
+If you would like to contribute to Snownews, consider fixing one of
+our issues, adding a helper script, or writing a localization. If
+you are interested in contributing a helper script, please read
+[contrib/CONTRIBUTING.md](contrib/CONTRIBUTING.md) for details.
 
 Localization
 ------------
@@ -109,5 +109,3 @@ License
 Snownews is licensed under the GNU General Public License, version 3 *only*
 (SPDX code ``GPL-3.0``). For more details, as well as the text of the license,
 please see the ``COPYING`` file.
-
-[1]: https://retro-freedom.nz/tech-101-snownews.html 

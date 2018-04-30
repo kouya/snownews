@@ -1,103 +1,231 @@
-#!/usr/bin/perl
-# $Id: configure 1181 2008-07-27 07:27:56Z kiza $
+#!/bin/sh
+######################################################################
+# Project Configuration						     #
+######################################################################
 
-use strict;
+PKG_NAME="snownews"
+PKG_VERSTR="v1.5.13"
 
-# The defaults. Change here if you need.
-my $os = `uname`;
-chomp($os);
-my $xmlcflags = `xml2-config --cflags`;
-chomp($xmlcflags);
-my $xmlldflags = `xml2-config --libs`;
-chomp($xmlldflags);
+MNT_NAME="Oliver Feiler"
+MNT_MAIL="kiza@kcore.de"
 
-my $prefix = "/usr/local";
-my $cflags = "-Wall -Wextra -O2 -DLOCALEPATH=\"\\\"\$(LOCALEPATH)\\\"\" -DOS=\\\"$os\\\" $xmlcflags \$(EXTRA_CFLAGS) ";
-my $ldflags = "\$(EXTRA_LDFLAGS) -lncurses -lcrypto $xmlldflags ";
+# Files that get created by this script
+FILES="Config.mk config.h"
 
-my $use_nls = 1;
-parse_cmdl_line();
+# Package options
+COMPONENTS="
+{
+name=[with-debug]
+desc=[	Compile for debugging]
+seds=[s/^#\(DEBUG\)/\1/]
+}{
+name=[with-native]
+desc=[	Use -march=native]
+seds=[s/ -std=c/ -march=native -std=c/]
+}{
+name=[without-nls]
+desc=[	Disable translations]
+seds=[s/^#define \(LOCALEPATH\)/#undef \1 \/\/ /;s/ -lintl//]
+}{
+name=[with-experimental]
+desc=[Enable experimental code]
+seds=[s/^#undef \(USE_UNSUPPORTED_AND_BROKEN_CODE\)/#define \1/]
+}";
 
+# First pair is used if nothing matches
+PROGS="CC=gcc CC=clang INSTALL=install MSGFMT=msgfmt"
 
-##############################
-# OS dependent configuration #
-##############################
+# Libs found using pkg-config
+LIBS="libcrypto libxml-2.0 ncurses zlib"
+# Defaults to substitute with pkg-config --libs output
+DEFLIBS="-lcrypto -lxml2 -lncursesw -lz"
+# Defaults to substitute with pkg-config --cflags output
+DEFINCS="-I\/usr\/include\/libxml2"
 
-if (lc($os) eq "linux") {
-	print "Configuring for a Linux system... ";
-} elsif ($os =~ /gnu/) {
-	print "Configuring for a GNU based system... ";
-} elsif (lc($os) =~ /darwin/) {
-	print "Configuring for a Darwin/OS X system...";
-	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/local/include';
-	if ($use_nls == 1) {
-		$ldflags .= ' -lintl ';
-	}
-	$ldflags .= ' -lz -liconv';
-} elsif (lc($os) =~ /bsd|freemint/) {
-	print "Configuring for a BSD style system... ";
-	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/local/include';
-	if ($use_nls == 1) {
-		$ldflags .= ' -lintl ';
-	}
-	$ldflags .= ' -liconv';
-} elsif (lc($os) =~ /cygwin/) {
-	print "Configuring for a Cygwin system... ";
-	$cflags = $cflags.' -DSTATIC_CONST_ICONV -I/usr/include/libxml2';
-	if ($use_nls == 1) {
-		$ldflags .= ' -lintl ';
-	}
-	$ldflags .= ' -liconv';
-} elsif (lc($os) eq "sunos") {
-	print "Configuring for a Solaris system... ";
-	$cflags = $cflags.' -DSUN -I/opt/sfw/include';
-	$ldflags .= ' -L/opt/sfw/lib -liconv';
-	if ($use_nls == 1) {
-		$ldflags .= ' -lintl ';
-	}
-} else {
-	print "Unknown host system. Type 'make' and hope for the best. :) ... \n";
-	$cflags = $cflags,' -I/usr/local/include';
-	$ldflags .= ' -L/usr/local/lib -liconv ';
-	if ($use_nls == 1) {
-		$ldflags .= ' -lintl ';
-	}
+# Automatic vars
+[ -d .git ] && PKG_VERSTR=`git describe --tags --always`
+PKG_MAJOR=`expr "$PKG_VERSTR" : 'v\([0-9]*\)\.[0-9]*\.[0-9]*'`
+PKG_MINOR=`expr "$PKG_VERSTR" : 'v[0-9]*\.\([0-9]*\)\.[0-9]*'`
+PKG_BUILD=`expr "$PKG_VERSTR" : 'v[0-9]*\.[0-9]*\.\([0-9]*\)'`
+PKG_STRING="$PKG_NAME $PKG_VERSTR"
+PKG_BUGREPORT="$MNT_NAME <$MNT_MAIL>"
+
+# Miscellaneous substitutions
+CUSTSUBS="s/@PKG_NAME@/$PKG_NAME/g
+s/@PKG_VERSION@/$PKG_MAJOR.$PKG_MINOR.$PKG_BUILD/g
+s/@PKG_VERSTR@/$PKG_VERSTR/g
+s/@PKG_STRING@/$PKG_STRING/g
+s/@PKG_UNAME@/`echo $PKG_NAME|tr a-z A-Z`/g
+s/@PKG_BUGREPORT@/$PKG_BUGREPORT/g
+s/@PKG_MAJOR@/$PKG_MAJOR/g
+s/@PKG_MINOR@/$PKG_MINOR/g"
+
+######################################################################
+# The rest of the file is configuration code. Leave it alone.	     #
+######################################################################
+
+die() { rm -f config.sed; exit; }
+sub() { printf "%s\n" "$1">>config.sed; }
+escpath() { echo $* | sed 's/\//\\\//g'; }
+
+#### Set host-dependent options ######################################
+
+SYSNAME=`uname|tr A-Z a-z`
+case "$SYSNAME" in
+    *solaris*| *sun*)	SYSNAME="sun";;
+    *darwin*| *osx*)	SYSNAME="mac";;
+    *bsd*)		SYSNAME="bsd";;
+    *cygwin*)		SYSNAME="cygwin";;
+esac
+
+sub "s/^#undef \(OS\)/#define \1 \"$SYSNAME\"/"
+if [ "$SYSNAME" == "linux" ]; then
+    sub "s/ -liconv//;s/ -lintl//"
+elif [ "$SYSNAME" == "sun" ]; then
+    sub "s/^#undef \(SUN\)/#define \1 1/"
+fi
+
+#### Printing helper functions #######################################
+
+PrintComponents() {
+    local cc name desc
+    cc=$COMPONENTS
+    echo "Options:"
+    while [ ! -z "$cc" ]; do
+	name=`expr "$cc" : '[^}]*name=\[\([^]]*\)\]'`
+	desc=`expr "$cc" : '[^}]*desc=\[\([^]]*\)\]'`
+	echo "  --$name	$desc"
+	cc=`expr "$cc" : '[^}]*}\(.*\)'`
+    done
+    echo
 }
 
-open (SETTINGS, ">platform_settings") || die "Cannot write platform_settings file: $!\n";
-print SETTINGS "PREFIX=  $prefix\n";
-print SETTINGS "CFLAGS=  $cflags\n";
-print SETTINGS "LDFLAGS= $ldflags\n";
-close (SETTINGS);
+PrintHelp() {
+    echo "This program configures $PKG_STRING for many kinds of systems.
 
-# And we're...
-print "Done\n";
-# with the program. :)
+Usage: configure [OPTION]...
 
-sub parse_cmdl_line {
-	while ($_ = shift @ARGV) {
-		if (($_ eq "--help") || ($_ eq "-h")) {
-			print_help();
-		} elsif (/--prefix=/) {
-			$prefix = (split(/=/,$_))[1];
-		} elsif (/--disable-nls/) {
-			$cflags =~ s/-DLOCALEPATH="\\"\$\(LOCALEPATH\)\\""//;
-			$use_nls = 0;
-		} elsif (/--use-experimental/) {
-			$cflags .= " -DUSE_UNSUPPORTED_AND_BROKEN_CODE ";
-		} else {
-			print_help();
-		}
-	}
+Configuration:
+  -h, --help		display this help and exit
+  -V, --version		display version information and exit
+
+Installation directories:
+  --prefix=PREFIX	architecture-independent files [/usr/local]
+  --mandir=DIR		manual pages [PREFIX/share/man]
+  --localedir=DIR	localization files [PREFIX/share/locale]
+  --builddir=DIR	location for compiled objects [/tmp/$USER/make]
+  --pkgdir=DIR		package tree root []
+"
+    PrintComponents
+    echo "Report bugs to $PKG_BUGREPORT."
 }
 
-sub print_help {
-	print	"Snownews configure script\n".
-			"=========================\n\n".
-			"Available options:\n".
-			"\t--prefix=[path]    Install root (default: /usr/local)\n".
-			"\t--help             This help screen\n\n".
-			"\t--disable-nls      Disable translations\n".
-			"\t--use-experimental Compile in experimental and broken code.\n";
-	exit(0);
+PrintVersion() {
+    echo "$PKG_NAME configure $PKG_VERSTR"
 }
+
+SubVar() {
+    local esc2
+    esc2=`escpath $2`
+    eval ac_var_$1='$esc2';
+    sub "s/@$1@/$esc2/g"
+}
+
+SubComp() {
+    local cc name seds
+    cc=$COMPONENTS
+    while [ ! -z "$cc" ]; do
+	name=`expr "$cc" : '[^}]*name=\[\([^]]*\)\]'`
+	seds=`expr "$cc" : '[^}]*seds=\[\([^]]*\)\]'`
+	[ "$name" = "$1" ] && sub "$seds"
+	cc=`expr "$cc" : '[^}]*}\(.*\)'`
+    done
+}
+
+for i in $*; do
+    case $i in
+	--)		break;;
+	--version |-V)	PrintVersion && die;;
+	--help |-h |-?)	PrintHelp && die;;
+	--*=*)		SubVar `expr "$i" : '--\([^=]*\)='` `expr "$i" : '[^=]*=\(.*\)'`;;
+	--*)		SubComp `expr "$i" : '--\(.*\)'`;;
+	*)		echo "Error: unrecognized option \"$i\"" && die;;
+    esac
+done
+
+#### Set directory prefixes ##########################################
+
+sub "s/@prefix@/${ac_var_prefix:=\/usr\/local}/g
+s/@bindir@/${ac_var_bindir:=$ac_var_prefix\/bin}/g
+s/@mandir@/${ac_var_mandir:=$ac_var_prefix\/share\/man}/g
+s/@localedir@/${ac_var_localedir:=$ac_var_prefix\/share\/locale}/g
+s/@builddir@/\/tmp\/$USER\/make/g
+s/@pkgdir@//g"
+
+# Replace prefix variables, where available
+if [ "$ac_var_bindir" = "$ac_var_prefix\/bin" ]; then
+    sub "s/$ac_var_bindir/\${PREFIX}\/bin/";
+fi
+if [ "$ac_var_mandir" = "$ac_var_prefix\/share\/man" ]; then
+    sub "s/$ac_var_mandir/\${PREFIX}\/share\/man/";
+fi
+if [ "$ac_var_localedir" = "$ac_var_prefix\/share\/locale" ]; then
+    sub "s/ $ac_var_localedir/ \${PREFIX}\/share\/locale/";
+fi
+
+#### Find programs and libs ##########################################
+
+for i in $PROGS; do
+    pname=`expr "$i" : '\([^=]*\)=[^=]*'`
+    pcall=`expr "$i" : '[^=]*=\([^=]*\)'`
+    ppath=`eval echo \$\{$pname\}`
+    ppath=`escpath "$ppath"`
+    # First check if an environment variable is set
+    [ ! -z "$ppath" ] && sub "s/@$pname@/$ppath/g"
+    # Check if the program exists
+    [ -x `which $pcall 2>/dev/null` ] && sub "s/@$pname@/$pcall/g"
+done
+# If nothing found in first loop, set the first pair anyway.
+for i in $PROGS; do
+    pname=`expr "$i" : '\([^=]*\)=[^=]*'`
+    pcall=`expr "$i" : '[^=]*=\([^=]*\)'`
+    sub "s/@$pname@/$pcall/g"
+done
+# And, finally, the environment variables
+for i in $ENVIRONS; do
+    esciv="`eval echo '"'\$\{$i\}'"'|sed 's/\//\\\&/g'`"
+    ppath=`eval echo \$\{$pname\}`
+    ppath=`escpath "$ppath"`
+    [ ! -z "$ppath" ] && ppath=" $ppath"
+    sub "s/ @$i@/$ppath/g"
+done
+
+sub "$CUSTSUBS"
+
+# If pkg-config is installed, the defaults can be checked
+PKGCONFIG=`which pkg-config 2>/dev/null`
+if [ -x $PKGCONFIG ]; then
+    for l in $LIBS; do
+	if ! $PKGCONFIG --exists $l; then
+	    echo "required library $l is missing";
+	    die;
+	fi
+    done
+    sub "s/$DEFLIBS/$(escpath $($PKGCONFIG --libs $LIBS))/"
+    sub "s/$DEFINCS/$(escpath $($PKGCONFIG --cflags $LIBS))/"
+fi
+
+#### Apply substitutions to all files ################################
+
+for i in $FILES; do
+    sed -f config.sed $i.in > $i
+done
+
+touch config.status
+echo "#!/bin/sh
+$0 $*
+`tail -n+3 config.status`" > config.status.new
+chmod u+x config.status.new
+mv config.status.new config.status
+
+die

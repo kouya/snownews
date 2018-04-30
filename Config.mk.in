@@ -1,0 +1,22 @@
+NAME		:= @PKG_NAME@
+VERSION		:= @PKG_VERSION@
+
+CC		:= @CC@
+MSGFMT		:= @MSGFMT@
+INSTALL		:= @INSTALL@
+
+INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
+INSTALLSCR	:= ${INSTALL} -D -p -m 755
+INSTALLDATA	:= ${INSTALL} -D -p -m 644
+
+PREFIX		:= @prefix@
+BINDIR		:= @bindir@
+LOCALEPATH	:= @localedir@
+MANPATH		:= @mandir@
+
+CFLAGS		:= -Wall -Wextra -Os -std=c11 -I/usr/include/libxml2
+LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz -lm
+
+BUILDDIR	:= @builddir@/${NAME}
+O		:= .o/
+PKGDIR		:= @pkgdir@

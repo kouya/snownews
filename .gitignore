@@ -1,8 +1,4 @@
-.hgignore
-.DS_Store
-.gdb_history
 *.o
-*.mo
-platform_settings
-*.1
-snownews
+config.h
+Config.mk
+config.status
