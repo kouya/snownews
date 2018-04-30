@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
 enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_OLDVERSION = -1,
@@ -25,9 +26,4 @@ enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_BAD_FLAGS = -6
 };
 
-int jg_zlib_uncompress(void const *in_buf, int in_size, 
-                       void **out_buf_ptr, int *out_size,
-                       int gzip);   
-
-int jg_gzip_uncompress(void const *in_buf, int in_size,
-                       void **out_buf_ptr, int *out_size);
+int jg_gzip_uncompress(const void* in_buf, unsigned in_size, void** out_buf_ptr, unsigned* out_size);

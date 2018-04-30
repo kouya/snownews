@@ -19,13 +19,12 @@
 void UIHelpScreen (void);
 void UIDisplayFeedHelp (void);
 void UIDisplayItemHelp (void);
-void UIAbout (void);
 char * UIOneLineEntryField (int x, int y);
 void UIChangeBrowser (void);
 void UIChangeFeedName (struct feed *cur_ptr);
 int UIAddFeed (char * newurl);
-void FeedInfo (struct feed * current_feed);
-int UIDeleteFeed (char * feedname);
+void FeedInfo (const struct feed* current_feed);
+bool UIDeleteFeed (const char* feedname);
 void CategorizeFeed (struct feed * current_feed);
 char * DialogGetCategoryFilter (void);
 int UIPerFeedFilter (struct feed * current_feed);

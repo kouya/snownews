@@ -14,8 +14,9 @@ BINDIR		:= @bindir@
 LOCALEPATH	:= @localedir@
 MANPATH		:= @mandir@
 
-CFLAGS		:= -Wall -Wextra -Os -std=c11 -I/usr/include/libxml2
-LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz -lm
+CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow \
+		   -Os -std=c11 -I/usr/include/libxml2
+LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz
 
 BUILDDIR	:= @builddir@/${NAME}
 O		:= .o/

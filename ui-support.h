@@ -15,6 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
 typedef enum {
 	NORMAL,
@@ -30,7 +31,7 @@ void UISupportDrawHeader (const char * headerstring);
 void UISupportURLJump (const char * url);
 void SmartFeedsUpdate (void);
 void SmartFeedNewitems (struct feed * smart_feed);
-int SmartFeedExists (const char * smartfeed);
+bool SmartFeedExists (const char * smartfeed);
 void DrawProgressBar (int numobjects, int titlestrlen);
 void displayErrorLog (void);
 void clearLine (int line, clear_line how);

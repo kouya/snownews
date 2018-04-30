@@ -15,11 +15,12 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
-void FeedCategoryAdd (struct feed * cur_ptr, char * categoryname);
-void FeedCategoryDelete (struct feed * cur_ptr, char * categoryname);
-int FeedCategoryExists (struct feed * cur_ptr, char * categoryname);
-char *GetCategoryList (struct feed * feed);
+void FeedCategoryAdd (struct feed* cur_ptr, const char* categoryname);
+void FeedCategoryDelete (struct feed* cur_ptr, const char* categoryname);
+bool FeedCategoryExists (const struct feed* cur_ptr, const char* categoryname);
+char* GetCategoryList (const struct feed* feed);
 void ResetFilters (char **filters);
 
 // A feeds categories
@@ -36,3 +37,5 @@ struct categories {
 	int labelbold;
 	struct categories * next_ptr;
 };
+
+extern struct categories* first_category;

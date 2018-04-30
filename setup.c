@@ -14,270 +14,231 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include <ncurses.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-
-#include "config.h"
-
-#include "cookies.h"
-#include "categories.h"
-#include "ui-support.h"
-#include "main.h"
 #include "setup.h"
+#include "categories.h"
+#include "cookies.h"
 #include "io-internal.h"
+#include "main.h"
+#include "ui-support.h"
+#include <errno.h>
+#include <ncurses.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-struct feed *first_ptr = NULL;
-struct entity *first_entity = NULL;
+struct feed* first_ptr = NULL;
+struct entity* first_entity = NULL;
 
-struct keybindings keybindings;
-struct color color;
-
-char *browser;			// Browser command. lynx is standard.
-char *proxyname;		// Hostname of proxyserver.
-char *useragent;		// Snownews User-Agent string.
-unsigned short proxyport = 0;	// Port on proxyserver to use.
-int use_colors = 1;		// Default to enabled.
-
-// Load browser command from ~./snownews/browser.
-void SetupBrowser (const char * file) {
-	char filebuf[256];
-	FILE *configfile;
-
-	configfile = fopen (file, "r");
-	if (configfile == NULL) {
-		UIStatus (_("Creating new config \"browser\"..."), 0, 0);
-		configfile = fopen (file, "w+");
-		if (configfile == NULL)
-			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); // Still didn't work?
-		browser = strdup("lynx %s");
-		fputs (browser, configfile);
-		fclose (configfile);
-	} else {
-		// Careful not to overflow char browser!
-		fgets (filebuf, sizeof(filebuf), configfile);
-		browser = strdup(filebuf);
-		fclose (configfile);
-		// Die newline, die!
-		if (browser[strlen(browser)-1] == '\n')
-			browser[strlen(browser)-1] = '\0';
-	}
-}
-
-
-// Parse http_proxy environment variable and define proxyname and proxyport.
-void SetupProxy (void) {
-	char *freeme;
-	char *proxystring;
-	char *tmp;
-	
-	// Check for proxy environment variable.
-	if (getenv("http_proxy") != NULL) {
-		// The pointer returned by getenv must not be altered.
-		// What about mentioning this in the manpage of getenv?
-		proxystring = strdup(getenv("http_proxy"));
-		freeme = proxystring;
-		strsep (&proxystring, "/");
-		if (proxystring != NULL) {
-			strsep (&proxystring, "/");
-		} else {
-			free (freeme);
-			return;
-		}
-		if (proxystring != NULL) {
-			tmp = strsep (&proxystring, ":");
-			proxyname = strdup(tmp);
-		} else {
-			free (freeme);
-			return;
-		}
-		if (proxystring != NULL) {
-			proxyport = atoi (strsep (&proxystring, "/"));
-		} else {
-			free (freeme);
-			return;
-		}
-		free (freeme);
-	}
-}
-
-
-// Construct the user agent string that snownews sends to the webserver.
-// This includes Snownews/VERSION, OS name and language setting.
-void SetupUserAgent (void) {
-	char *lang;
-	char url[] = "http://snownews.kcore.de/";
-	int ualen, urllen;
-
-	urllen = strlen(url);
-	
-	// Constuct the User-Agent string of snownews. This is done here in program init,
-	// because we need to do it exactly once and it will never change while the program
-	// is running.
-	if (getenv("LANG") != NULL) {
-		lang = getenv("LANG");
-		// Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/)
-		ualen = strlen("Snownews/") + strlen(SNOWNEWS_VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
-		useragent = malloc(ualen);
-		snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
-	} else {
-		// "Snownews/" + VERSION + "(http://kiza.kcore.de/software/snownews/)"
-		ualen = strlen("Snownews/") + strlen(SNOWNEWS_VERSION) + 2 + strlen(OS) + 2 + urllen + 2;
-		useragent = malloc(ualen);
-		snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s)", url);
-	}
-}
-
-// Define global keybindings and load user customized bindings.
-void SetupKeybindings (const char * file) {
-	char filebuf[128];
-	char *freeme, *tmpbuf;
-	FILE *configfile;
-
+struct keybindings keybindings = {
 	// Define default values for keybindings. If some are defined differently
 	// in the keybindings file they will be overwritten. If some are missing or broken/wrong
 	// these are sane defaults.
-	keybindings.next = 'n';
-	keybindings.prev = 'p';
-	keybindings.prevmenu = 'q';
-	keybindings.quit = 'q';
-	keybindings.addfeed = 'a';
-	keybindings.deletefeed = 'D';
-	keybindings.markread = 'm';
-	keybindings.markallread = 'm';
-	keybindings.markunread = 'M';
-	keybindings.dfltbrowser = 'B';
-	keybindings.moveup = 'P';
-	keybindings.movedown = 'N';
-	keybindings.feedinfo = 'i';
-	keybindings.reload = 'r';
-	keybindings.reloadall = 'R';
-	keybindings.forcereload = 'T';
-	keybindings.urljump = 'o';
-	keybindings.urljump2 = 'O';
-	keybindings.changefeedname = 'c';
-	keybindings.sortfeeds = 's';
-	keybindings.pup = 'b';
-	keybindings.pdown = ' ';
-	keybindings.home = '<';
-	keybindings.end = '>';
-	keybindings.categorize = 'C';
-	keybindings.filter = 'f';
-	keybindings.filtercurrent = 'g';
-	keybindings.nofilter = 'F';
-	keybindings.help = 'h';
-	keybindings.about = 'A';
-	keybindings.perfeedfilter = 'e';
-	keybindings.andxor = 'X';
-	keybindings.enter = 'l';
-	keybindings.newheadlines = 'H';
-	keybindings.typeahead = '/';
-	
-	configfile = fopen (file, "r");
+	.about		= 'A',
+	.addfeed	= 'a',
+	.andxor		= 'X',
+	.categorize	= 'C',
+	.changefeedname	= 'c',
+	.deletefeed	= 'D',
+	.dfltbrowser	= 'B',
+	.end		= '>',
+	.enter		= 'l',
+	.feedinfo	= 'i',
+	.filter		= 'f',
+	.filtercurrent	= 'g',
+	.forcereload	= 'T',
+	.help		= 'h',
+	.home		= '<',
+	.markallread	= 'm',
+	.markread	= 'm',
+	.markunread	= 'M',
+	.movedown	= 'N',
+	.moveup		= 'P',
+	.newheadlines	= 'H',
+	.next		= 'n',
+	.nofilter	= 'F',
+	.pdown		= ' ',
+	.perfeedfilter	= 'e',
+	.prev		= 'p',
+	.prevmenu	= 'q',
+	.pup		= 'b',
+	.quit		= 'q',
+	.reload		= 'r',
+	.reloadall	= 'R',
+	.sortfeeds	= 's',
+	.typeahead	= '/',
+	.urljump	= 'o',
+	.urljump2	= 'O'
+};
 
+struct color color = {
+	.feedtitle	= -1,
+	.feedtitlebold	= 0,
+	.newitems	= 5,
+	.newitemsbold	= 0,
+	.urljump	= 4,
+	.urljumpbold	= 0
+};
+
+char* browser = NULL;		// Browser command. lynx is standard.
+char* proxyname = NULL;		// Hostname of proxyserver.
+char* useragent = NULL;		// Snownews User-Agent string.
+unsigned short proxyport = 0;	// Port on proxyserver to use.
+bool use_colors = true;		// Default to enabled.
+
+// Load browser command from ~./snownews/browser.
+static void SetupBrowser (const char* filename) {
+	FILE* configfile = fopen (filename, "r");
+	if (!configfile) {
+		UIStatus (_("Creating new config \"browser\"..."), 0, 0);
+		configfile = fopen (filename, "w");
+		if (!configfile)
+			MainQuit (_("Create initial configfile \"config\""), strerror(errno)); // Still didn't work?
+		browser = strdup("lynx %s");
+		fputs (browser, configfile);
+	} else {
+		char linebuf[256];
+		fgets (linebuf, sizeof(linebuf), configfile);
+		// Die newline, die!
+		if (linebuf[strlen(linebuf)-1] == '\n')
+			linebuf[strlen(linebuf)-1] = '\0';
+		browser = strdup (linebuf);
+	}
+	fclose (configfile);
+}
+
+// Parse http_proxy environment variable and define proxyname and proxyport.
+static void SetupProxy (void) {
+	// Check for proxy environment variable.
+	const char* proxyenv = getenv("http_proxy");
+	if (!proxyenv)
+		return;
+	// The pointer returned by getenv must not be altered.
+	// What about mentioning this in the manpage of getenv?
+	char* proxystring = strdup (proxyenv);
+	char* proxystrbase = proxystring;
+	strsep (&proxystring, "/");
+	if (proxystring) {
+		strsep (&proxystring, "/");
+		if (proxystring) {
+			proxyname = strdup (strsep (&proxystring, ":"));
+			if (proxystring)
+				proxyport = atoi (strsep (&proxystring, "/"));
+		}
+	}
+	free (proxystrbase);
+}
+
+// Construct the user agent string that snownews sends to the webserver.
+// This includes Snownews/VERSION, OS name and language setting.
+static void SetupUserAgent (void) {
+	// Constuct the User-Agent string of snownews. This is done here in program init,
+	// because we need to do it exactly once and it will never change while the program
+	// is running.
+	const char* lang = getenv("LANG");
+	if (!lang)
+		lang = "C";
+	// Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/)
+	static const char url[] = "http://snownews.kcore.de/software/snownews/";
+	const unsigned urllen = strlen(url);
+	unsigned ualen = strlen("Snownews/" SNOWNEWS_VERSION) + 2 + strlen(lang) + 2 + strlen(OS)+2 + urllen + 2;
+	useragent = malloc(ualen);
+	snprintf (useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
+}
+
+// Define global keybindings and load user customized bindings.
+static void SetupKeybindings (const char* filename) {
+	FILE* configfile = fopen (filename, "r");
 	if (configfile != NULL) {
 		// Read keybindings and populate keybindings struct.
 		while (!feof(configfile)) {
-			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
+			char linebuf[128];
+			if (!fgets (linebuf, sizeof(linebuf), configfile))
 				break;
-			if (strstr(filebuf, "#") != NULL)
+			if (linebuf[0] == '#')
 				continue;
-			tmpbuf = strdup(filebuf);	// strsep only works on *ptr
-			freeme = tmpbuf;		// Save start pos. This is also the string we need to compare. strsep will \0 the delimiter.
-			strsep (&tmpbuf, ":");
+			linebuf[strlen(linebuf)-1] = 0;	// chop newline
+			char* value = linebuf;
+			strsep (&value, ":");
 
-			// Munch trailing newline and avoid \n being bound to a function if no key is defined.
-			if (tmpbuf != NULL)
-				tmpbuf[strlen(tmpbuf)-1] = 0;
-
-			if (strcmp (freeme, "next item") == 0)
-				keybindings.next = tmpbuf[0];
-			else if (strcmp (freeme, "previous item") == 0)
-				keybindings.prev = tmpbuf[0];
-			else if (strcmp (freeme, "return to previous menu") == 0)
-				keybindings.prevmenu = tmpbuf[0];
-			else if (strcmp (freeme, "quit") == 0)
-				keybindings.quit = tmpbuf[0];
-			else if (strcmp (freeme, "add feed") == 0)
-				keybindings.addfeed = tmpbuf[0];
-			else if (strcmp (freeme, "delete feed") == 0)
-				keybindings.deletefeed = tmpbuf[0];
-			else if (strcmp (freeme, "mark feed as read") == 0)
-				keybindings.markread = tmpbuf[0];
-			else if (strcmp (freeme, "mark item unread") == 0)
-				keybindings.markunread = tmpbuf[0];
-			else if (strcmp (freeme, "mark all as read") == 0)
-				keybindings.markallread = tmpbuf[0];
-			else if (strcmp (freeme, "change default browser") == 0)
-				keybindings.dfltbrowser = tmpbuf[0];
-			else if (strcmp (freeme, "sort feeds") == 0)
-				keybindings.sortfeeds = tmpbuf[0];
-			else if (strcmp (freeme, "move item up") == 0)
-				keybindings.moveup = tmpbuf[0];
-			else if (strcmp (freeme, "move item down") == 0)
-				keybindings.movedown = tmpbuf[0];
-			else if (strcmp (freeme, "show feedinfo") == 0)
-				keybindings.feedinfo = tmpbuf[0];
-			else if (strcmp (freeme, "reload feed") == 0)
-				keybindings.reload = tmpbuf[0];
-			else if (strcmp (freeme, "force reload feed") == 0)
-				keybindings.forcereload = tmpbuf[0];
-			else if (strcmp (freeme, "reload all feeds") == 0)
-				keybindings.reloadall = tmpbuf[0];
-			else if (strcmp (freeme, "open url") == 0)
-				keybindings.urljump = tmpbuf[0];
-			else if (strcmp (freeme, "open item url in overview") == 0)
-				keybindings.urljump2 = tmpbuf[0];
-			else if (strcmp (freeme, "change feedname") == 0)
-				keybindings.changefeedname = tmpbuf[0];
-			else if (strcmp (freeme, "page up") == 0)
-				keybindings.pup = tmpbuf[0];
-			else if (strcmp (freeme, "page down") == 0)
-				keybindings.pdown = tmpbuf[0];
-			else if (strcmp (freeme, "top") == 0)
-				keybindings.home = tmpbuf[0];
-			else if (strcmp (freeme, "bottom") == 0)
-				keybindings.end = tmpbuf[0];
-			else if (strcmp (freeme, "categorize feed") == 0)
-				keybindings.categorize = tmpbuf[0];
-			else if (strcmp (freeme, "apply filter") == 0)
-				keybindings.filter = tmpbuf[0];
-			else if (strcmp (freeme, "only current category") == 0)
-				keybindings.filtercurrent = tmpbuf[0];
-			else if (strcmp (freeme, "remove filter") == 0)
-				keybindings.nofilter = tmpbuf[0];
-			else if (strcmp (freeme, "per feed filter") == 0)
-				keybindings.perfeedfilter = tmpbuf[0];
-			else if (strcmp (freeme, "help menu") == 0)
-				keybindings.help = tmpbuf[0];
-			else if (strcmp (freeme, "about") == 0)
-				keybindings.about = tmpbuf[0];
-			else if (strcmp (freeme, "toggle AND/OR filtering") == 0)
-				keybindings.andxor = tmpbuf[0];
-			else if (strcmp (freeme, "enter") == 0)
-				keybindings.enter = tmpbuf[0];
-			else if (strcmp (freeme, "show new headlines") == 0)
-				keybindings.newheadlines = tmpbuf[0];
-			else if (strcmp (freeme, "type ahead find") == 0)
-				keybindings.typeahead = tmpbuf[0];
-			
-			free (freeme);
+			if (strcmp (linebuf, "next item") == 0)
+				keybindings.next = value[0];
+			else if (strcmp (linebuf, "previous item") == 0)
+				keybindings.prev = value[0];
+			else if (strcmp (linebuf, "return to previous menu") == 0)
+				keybindings.prevmenu = value[0];
+			else if (strcmp (linebuf, "quit") == 0)
+				keybindings.quit = value[0];
+			else if (strcmp (linebuf, "add feed") == 0)
+				keybindings.addfeed = value[0];
+			else if (strcmp (linebuf, "delete feed") == 0)
+				keybindings.deletefeed = value[0];
+			else if (strcmp (linebuf, "mark feed as read") == 0)
+				keybindings.markread = value[0];
+			else if (strcmp (linebuf, "mark item unread") == 0)
+				keybindings.markunread = value[0];
+			else if (strcmp (linebuf, "mark all as read") == 0)
+				keybindings.markallread = value[0];
+			else if (strcmp (linebuf, "change default browser") == 0)
+				keybindings.dfltbrowser = value[0];
+			else if (strcmp (linebuf, "sort feeds") == 0)
+				keybindings.sortfeeds = value[0];
+			else if (strcmp (linebuf, "move item up") == 0)
+				keybindings.moveup = value[0];
+			else if (strcmp (linebuf, "move item down") == 0)
+				keybindings.movedown = value[0];
+			else if (strcmp (linebuf, "show feedinfo") == 0)
+				keybindings.feedinfo = value[0];
+			else if (strcmp (linebuf, "reload feed") == 0)
+				keybindings.reload = value[0];
+			else if (strcmp (linebuf, "force reload feed") == 0)
+				keybindings.forcereload = value[0];
+			else if (strcmp (linebuf, "reload all feeds") == 0)
+				keybindings.reloadall = value[0];
+			else if (strcmp (linebuf, "open url") == 0)
+				keybindings.urljump = value[0];
+			else if (strcmp (linebuf, "open item url in overview") == 0)
+				keybindings.urljump2 = value[0];
+			else if (strcmp (linebuf, "change feedname") == 0)
+				keybindings.changefeedname = value[0];
+			else if (strcmp (linebuf, "page up") == 0)
+				keybindings.pup = value[0];
+			else if (strcmp (linebuf, "page down") == 0)
+				keybindings.pdown = value[0];
+			else if (strcmp (linebuf, "top") == 0)
+				keybindings.home = value[0];
+			else if (strcmp (linebuf, "bottom") == 0)
+				keybindings.end = value[0];
+			else if (strcmp (linebuf, "categorize feed") == 0)
+				keybindings.categorize = value[0];
+			else if (strcmp (linebuf, "apply filter") == 0)
+				keybindings.filter = value[0];
+			else if (strcmp (linebuf, "only current category") == 0)
+				keybindings.filtercurrent = value[0];
+			else if (strcmp (linebuf, "remove filter") == 0)
+				keybindings.nofilter = value[0];
+			else if (strcmp (linebuf, "per feed filter") == 0)
+				keybindings.perfeedfilter = value[0];
+			else if (strcmp (linebuf, "help menu") == 0)
+				keybindings.help = value[0];
+			else if (strcmp (linebuf, "about") == 0)
+				keybindings.about = value[0];
+			else if (strcmp (linebuf, "toggle AND/OR filtering") == 0)
+				keybindings.andxor = value[0];
+			else if (strcmp (linebuf, "enter") == 0)
+				keybindings.enter = value[0];
+			else if (strcmp (linebuf, "show new headlines") == 0)
+				keybindings.newheadlines = value[0];
+			else if (strcmp (linebuf, "type ahead find") == 0)
+				keybindings.typeahead = value[0];
 		}
-		
 		// Override old default settings and make sure there is no clash.
 		// Default browser is now B; b moved to page up.
-		if (keybindings.dfltbrowser == 'b') {
+		if (keybindings.dfltbrowser == 'b')
 			keybindings.dfltbrowser = 'B';
-		}
 		fclose (configfile);
 	}
 
-	configfile = fopen (file, "w+");
+	configfile = fopen (filename, "w");
 	fputs ("# Snownews keybindings configfile\n", configfile);
 	fputs ("# Main menu bindings\n", configfile);
 	fprintf (configfile, "add feed:%c\n", keybindings.addfeed);
@@ -321,67 +282,40 @@ void SetupKeybindings (const char * file) {
 }
 
 // Set up colors and load user customized colors.
-void SetupColors (const char * file) {
-	char filebuf[128];
-	char *freeme, *tmpbuf;
-	FILE *configfile;
-
-	color.newitems = 5;
-	color.newitemsbold = 0;
-	color.urljump = 4;
-	color.urljumpbold = 0;
-	color.feedtitle = -1;
-	color.feedtitlebold = 0;
-	
-	configfile = fopen (file, "r");
-	
+static void SetupColors (const char* filename) {
 	// If there is a config file, read it.
-	if (configfile != NULL) {
+	FILE* configfile = fopen (filename, "r");
+	if (configfile) {
 		while (!feof(configfile)) {
-			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
+			char linebuf[128];
+			if (!fgets (linebuf, sizeof(linebuf), configfile))
 				break;
-			if (strstr(filebuf, "#") != NULL)
+			if (linebuf[0] == '#')
 				continue;
-			tmpbuf = strdup(filebuf);	// strsep only works on *ptr
-			freeme = tmpbuf;		// Save start pos. This is also the string we need to compare. strsep will \0 the delimiter.
-			strsep (&tmpbuf, ":");
-
-			// Munch trailing newline.
-			if (tmpbuf != NULL)
-				tmpbuf[strlen(tmpbuf)-1] = 0;
-				
-			if (strcmp (freeme, "enabled") == 0) 
-				use_colors = atoi(tmpbuf);
-			if (strcmp (freeme, "new item") == 0) {
-				color.newitems = atoi(tmpbuf);
-				if (color.newitems > 7) {
-					color.newitemsbold = 1;
-				} else
-					color.newitemsbold = 0;
+			linebuf[strlen(linebuf)-1] = 0;	// chop newline
+			char* value = linebuf;
+			strsep (&value, ":");
+			unsigned cval = atoi(value);
+			bool cvalbold = (cval > 7);
+			if (strcmp (linebuf, "enabled") == 0) 
+				use_colors = cval;
+			else if (strcmp (linebuf, "new item") == 0) {
+				color.newitems = cval;
+				color.newitemsbold = cvalbold;
+			} else if (strcmp (linebuf, "goto url") == 0) {
+				color.urljump = cval;
+				color.urljumpbold = cvalbold;
+			} else if (strcmp (linebuf, "feedtitle") == 0) {
+				color.feedtitle = cval;
+				color.feedtitlebold = cvalbold;
 			}
-			if (strcmp (freeme, "goto url") == 0) {
-				color.urljump = atoi(tmpbuf);
-				if (color.urljump > 7) {
-					color.urljumpbold = 1;
-				} else
-					color.urljumpbold = 0;
-			}
-			if (strcmp (freeme, "feedtitle") == 0) {
-				color.feedtitle = atoi(tmpbuf);
-				if (color.feedtitle > 7)
-					color.feedtitlebold = 1;
-				else
-					color.feedtitlebold = 0;
-			}
-						
-			free (freeme);
 		}
 		fclose (configfile);
 	}
-	
+
 	// Write the file. This will write all setting with their
 	// values read before and new ones with the defaults.
-	configfile = fopen (file, "w+");
+	configfile = fopen (filename, "w");
 	fputs ("# Snownews color definitons\n", configfile);
 	fputs ("# black:0\n", configfile);
 	fputs ("# red:1\n", configfile);
@@ -404,14 +338,14 @@ void SetupColors (const char * file) {
 	fprintf (configfile, "goto url:%d\n", color.urljump);
 	fprintf (configfile, "feedtitle:%d\n", color.feedtitle);
 	fclose (configfile);
-	
+
 	if (use_colors) {
 		start_color();
-		
+
 		// The following call will automagically implement -1 as the terminal's
 		// default color for fg/bg in init_pair.
 		use_default_colors();
-		
+
 		// Internally used color pairs.
 		// Use with WA_BOLD to get bright color (orange->yellow, gray->white, etc).
 		init_pair (10, 1, -1);		// red
@@ -421,107 +355,138 @@ void SetupColors (const char * file) {
 		init_pair (14, 5, -1);		// magenta
 		init_pair (15, 6, -1);		// cyan
 		init_pair (16, 7, -1);		// gray
-		
+
 		// Default terminal color color pair
 		init_pair (63, -1, -1);
-		
+
 		// Initialize all color pairs we're gonna use.
-		// New item.
-		if (color.newitemsbold == 1)
-			init_pair (2, color.newitems-8, -1);
-		else
-			init_pair (2, color.newitems, -1);
-			
-		// Goto url line
-		if (color.urljumpbold == 1)
-			init_pair (3, color.urljump-8, -1);
-		else
-			init_pair (3, color.urljump, -1);
-		
-		// Feed title header
-		if (color.feedtitlebold == 1)
-			init_pair (4, color.feedtitle-8, -1);
-		else
-			init_pair (4, color.feedtitle, -1);
-		
+		init_pair (2, color.newitems-8*color.newitemsbold, -1);	// New item.
+		init_pair (3, color.urljump-8*color.urljumpbold, -1);	// Goto url line
+		init_pair (4, color.feedtitle-8*color.feedtitlebold, -1); // Feed title header
 	}
 
 }
 
 // Load user customized entity conversion table.
-void SetupEntities (const char * file) {
-	char filebuf[128];
-	char *freeme, *tmpbuf, *tmppos;
-	FILE *configfile;
-	struct entity *entity;
-	
-	configfile = fopen (file, "r");
-	
-	if (configfile == NULL) {
-		configfile = fopen (file, "w+");
-		
-		fputs ("# HTML entity conversion table\n", configfile);
-		fputs ("# \n", configfile);
-		fputs ("# Put all entities you want to have converted into this file.\n", configfile);
-		fputs ("# File format: &entity;[converted string/char]\n", configfile);
-		fputs ("# Example:     &mdash;--\n", configfile);
-		fputs ("# \n", configfile);
-		fputs ("# XML defined entities are converted by default. These are:\n# &amp;, &lt;, &gt;, &apos;, &quot;\n", configfile);
-		fputs ("# \n", configfile);
-		fprintf (configfile, "&auml;%c\n&ouml;%c\n&uuml;%c\n", 0xe4, 0xf6, 0xfc);	// umlauted a,o,u
-		fprintf (configfile, "&Auml;%c\n&Ouml;%c\n&Uuml;%c\n", 0xc4, 0xd6, 0xdc);	// umlauted A,O,U
-		fprintf (configfile, "&szlig;%c\n", 0xdf);	// german b
-		fputs ("&nbsp; \n&mdash;--\n&hellip;...\n&#8220;\"\n&#8221;\"\n", configfile);
-		fputs ("&raquo;\"\n&laquo;\"\n", configfile);
-		
+static void SetupEntities (const char * file) {
+	FILE* configfile = fopen (file, "r");
+	if (!configfile) {
+		configfile = fopen (file, "w");
+		enum {	// Non-ascii character codes that should not be in source code
+		    Umlauta = 0xe4, Umlauto = 0xf6, Umlautu = 0xfc,
+		    UmlautA = 0xc4, UmlautO = 0xd6, UmlautU = 0xdc,
+		    GermanB = 0xdf
+		};
+		fprintf (configfile, "# HTML entity conversion table\n"
+			"#\n"
+			"# Put all entities you want to have converted into this file.\n"
+			"# File format: &entity;[converted string/char]\n"
+			"# Example:     &mdash;--\n"
+			"#\n"
+			"# XML defined entities are converted by default. These are:\n"
+			"# &amp;, &lt;, &gt;, &apos;, &quot;\n"
+			"#\n"
+			"&auml;%c\n"
+			"&ouml;%c\n"
+			"&uuml;%c\n"
+			"&Auml;%c\n"
+			"&Ouml;%c\n"
+			"&Uuml;%c\n"
+			"&szlig;%c\n"
+			"&nbsp; \n"
+			"&mdash;--\n"
+			"&hellip;...\n"
+			"&#8220;\"\n"
+			"&#8221;\"\n"
+			"&raquo;\"\n"
+			"&laquo;\"\n",
+			Umlauta, Umlauto, Umlautu, UmlautA, UmlautO, UmlautU, GermanB);
 		fclose (configfile);
 		configfile = fopen (file, "r");
 	}
-	
 	while (!feof(configfile)) {
-		if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
+		char linebuf [128];
+		if (!fgets (linebuf, sizeof(linebuf), configfile))
 			break;
-		
-		// Discard comment lines.
-		if (filebuf[0] == '#')
-			continue;
-		
-		// Entities must start with '&', otherwise discard.
-		if (filebuf[0] == '&') {
-			entity = malloc (sizeof (struct entity));
-			
-			tmpbuf = strdup (filebuf);
-			freeme = tmpbuf;
-			
-			// Munch trailing newline.
-			if (tmpbuf[strlen(tmpbuf)-1] == '\n')
-				tmpbuf[strlen(tmpbuf)-1] = '\0';
-			
-			// Delete starting '&' and set pointer to beginning of entity.
-			tmpbuf[0] = '\0';
-			tmpbuf++;
-			tmppos = tmpbuf;
-			
-			strsep (&tmpbuf, ";");
-			
-			entity->entity = strdup (tmppos);
-			entity->converted_entity = strdup (tmpbuf);
-			entity->entity_length = strlen (entity->converted_entity);
-			entity->next_ptr = NULL;
-			
-			free (freeme);
-			
-			// Add entity to linked list structure.
-			if (first_entity == NULL)
-				first_entity = entity;
-			else {
-				entity->next_ptr = first_entity;
-				first_entity = entity;
-			}
-			
-		} else
-			continue;
+		if (linebuf[0] != '&')
+			continue;	// Entities must start with '&'
+		linebuf[strlen(linebuf)-1] = 0;	// chop newline
+
+		char* parse = &linebuf[1];	// Go past the '&'
+		const char* ename = strsep (&parse, ";");
+		const char* evalue = parse;
+
+		struct entity* entity = calloc (1, sizeof (struct entity));
+		entity->entity = strdup (ename);
+		entity->converted_entity = strdup (evalue);
+		entity->entity_length = strlen (entity->converted_entity);
+
+		// Add entity to linked list structure.
+		if (!first_entity)
+			first_entity = entity;
+		else {
+			entity->next_ptr = first_entity;
+			first_entity = entity;
+		}
 	}
+}
+
+static unsigned SetupFeedList (const char* filename)
+{
+	unsigned numfeeds = 0;
+	FILE* configfile = fopen (filename, "r");
+	if (!configfile)
+		return numfeeds;	// no feeds
+	while (!feof(configfile)) {
+		char linebuf [256];
+		if (!fgets (linebuf, sizeof(linebuf), configfile))
+			break;
+		if (linebuf[0] == '\n')
+			break;
+		linebuf[strlen(linebuf)-1] = 0;	// chop newline
+
+		// File format is url|custom name|comma seperated categories|filters
+		char* parse = linebuf;
+		const char* url = strsep (&parse, "|");
+		if (!url || !url[0])
+			continue;	// no url
+		const char* cname = strsep (&parse, "|");
+		char* categories = strsep (&parse, "|");
+		const char* filters = parse;
+
+		++numfeeds;
+
+		struct feed* new_ptr = newFeedStruct();
+		new_ptr->feedurl = strdup (url);
+		if (strncasecmp (new_ptr->feedurl, "exec:", strlen("exec:")) == 0)
+			new_ptr->execurl = true;
+		else if (strncasecmp (new_ptr->feedurl, "smartfeed:", strlen("smartfeed:")) == 0)
+			new_ptr->smartfeed = true;
+		if (cname && cname[0])
+			new_ptr->override = strdup (cname);
+		if (filters && filters[0])
+			new_ptr->perfeedfilter = strdup (filters);
+		if (categories && categories[0])	// Put categories into cat struct.
+			for (char *catnext = categories, *catname; (catname = strsep (&catnext, ","));)
+				FeedCategoryAdd (new_ptr, catname);
+
+		// Load cookies for this feed.
+		// But skip loading cookies for execurls.
+		if (new_ptr->execurl != 1)
+			LoadCookies (new_ptr);
+
+		// Add to bottom of pointer chain.
+		if (!first_ptr)
+			first_ptr = new_ptr;
+		else {
+			new_ptr->prev_ptr = first_ptr;
+			while (new_ptr->prev_ptr->next_ptr)
+				new_ptr->prev_ptr = new_ptr->prev_ptr->next_ptr;
+			new_ptr->prev_ptr->next_ptr = new_ptr;
+		}
+	}
+	fclose (configfile);
+	return numfeeds;
 }
 
 // Create snownews' config directories if they do not exist yet,
@@ -529,168 +494,56 @@ void SetupEntities (const char * file) {
 //
 // Returns number of feeds successfully loaded.
 //
-int Config (void) {
-	char file[512];			// File locations.
-	char filebuf[2048];
-	char *freeme, *tmpbuf, *tmppos, *tmpstr;
-	char *categories = NULL;	// Holds comma seperated category string.
-	FILE *configfile;
-	FILE *errorlog;
-	struct feed *new_ptr;
-	struct stat dirtest;
-	int numfeeds = 0;		// Number of feeds we have.
-	
-	SetupProxy();
-	
-	SetupUserAgent();	
-		
+unsigned Config (void) {
 	// Set umask to 077 for all created files.
-	umask(63);
-	
+	umask (0077);
+
+	SetupProxy();
+	SetupUserAgent();
+
 	// Setup config directories.
-	snprintf (file, sizeof(file), "%s/.snownews", getenv("HOME"));
-	if ((stat (file, &dirtest)) == -1 ) {
-		// Create directory.
-		if (mkdir (file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
+	char dirname [PATH_MAX];
+	snprintf (dirname, sizeof(dirname), "%s/.snownews", getenv("HOME"));
+	struct stat dirtest;
+	if (0 > stat (dirname, &dirtest)) {
+		if (0 > mkdir (dirname, S_IRWXU| S_IRGRP| S_IXGRP| S_IROTH| S_IXOTH))
 			MainQuit ("Creating config directory ~/.snownews/", strerror(errno));
-	} else {
-		// Something with the name .snownews exists, let's see what it is.
-		if ((dirtest.st_mode & S_IFDIR) != S_IFDIR) {
-			MainQuit ("Creating config directory ~/.snownews/",
-				"A file with the name \"~/.snownews/\" exists!");
-		}
-	}
-	
-	snprintf (file, sizeof(file), "%s/.snownews/cache", getenv("HOME"));
-	if ((stat (file, &dirtest)) == -1) {
-		// Create directory.
-		if (mkdir (file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
+	} else if (!S_ISDIR(dirtest.st_mode))
+		MainQuit ("Creating config directory ~/.snownews/", "A file with the name \"~/.snownews/\" exists!");
+
+	snprintf (dirname, sizeof(dirname), "%s/.snownews/cache", getenv("HOME"));
+	if (0 > stat (dirname, &dirtest)) {
+		if (0 > mkdir (dirname, S_IRWXU| S_IRGRP| S_IXGRP| S_IROTH| S_IXOTH))
 			MainQuit (_("Creating config directory ~/.snownews/cache/"), strerror(errno));
-	} else {
-		if ((dirtest.st_mode & S_IFDIR) != S_IFDIR) {
-			MainQuit ("Creating config directory ~/.snownews/cache/",
-				"A file with the name \"~/.snownews/cache/\" exists!");
-		}
-	}
-	
+	} else if (!S_ISDIR(dirtest.st_mode))
+		MainQuit ("Creating config directory ~/.snownews/cache/", "A file with the name \"~/.snownews/cache/\" exists!");
+
 	// Redirect stderr to ~/.snownews/error.log
 	// Be sure to call _after_ the directory checks above!
-	snprintf (file, sizeof(file), "%s/.snownews/error.log", getenv("HOME"));
-	errorlog = fopen (file, "w+");
-	dup2 (fileno(errorlog), STDERR_FILENO);
-	
-	UIStatus (_("Reading configuration settings..."), 0, 0);
-	
-	snprintf (file, sizeof(file), "%s/.snownews/browser", getenv("HOME"));
-	SetupBrowser (file);
-
-	//------------
-	// Feed list
-	//------------
-	
-	snprintf (file, sizeof(file), "%s/.snownews/urls", getenv("HOME"));
-	configfile = fopen (file, "r");
-	if (configfile == NULL) {
-		UIStatus (_("Creating new configfile."), 0, 0);
-		configfile = fopen (file, "w+");
-		if (configfile == NULL)
-			MainQuit (_("Create initial configfile \"urls\""), strerror(errno));	// Still didn't work?
-	} else {
-		while (!feof(configfile)) {
-			if ((fgets (filebuf, sizeof(filebuf), configfile)) == NULL)
-				break;
-			if (filebuf[0] == '\n')
-				break;
-			
-			numfeeds++;
-			new_ptr = newFeedStruct();
-
-			// Reset to NULL on every loop run!
-			categories = NULL;
-			
-			// File format is url|custom name|comma seperated categories
-			tmpbuf = strdup (filebuf);
-			
-			// Munch trailing newline.
-			if (tmpbuf[strlen(tmpbuf)-1] == '\n')
-				tmpbuf[strlen(tmpbuf)-1] = '\0';
-				
-			freeme = tmpbuf;
-			tmpstr = strsep (&tmpbuf, "|");
-			
-			// The first | was squished with \0 so we can strdup the first part.
-			new_ptr->feedurl = strdup (freeme);
-			
-			if (strncasecmp (new_ptr->feedurl, "exec:", 5) == 0) {
-				new_ptr->execurl = 1;
-			} else if (strncasecmp (new_ptr->feedurl, "smartfeed:", 10) == 0) {
-				new_ptr->smartfeed = 1;
-			}
-			
-			// Save start position of override string
-			tmpstr = strsep (&tmpbuf, "|");
-			if (tmpstr != NULL) {
-				if (*tmpstr != '\0')
-					new_ptr->override = strdup (tmpstr);
-			}
-			tmpstr = strsep (&tmpbuf, "|");
-			if (tmpstr != NULL) {
-				if (*tmpstr != '\0')
-					categories = strdup (tmpstr);
-			}
-			
-			tmpstr = strsep (&tmpbuf, "|");
-			if (tmpstr != NULL) {
-				if (*tmpstr != '\0')
-					new_ptr->perfeedfilter = strdup (tmpstr);
-			}
-			
-			// We don't need freeme anymore.
-			free (freeme);
-			
-			// Put categories into cat struct.
-			if (categories != NULL) {
-				freeme = categories;
-				
-				while (1) {
-					tmppos = strsep (&categories, ",");
-					if (tmppos == NULL)
-						break;
-					
-					FeedCategoryAdd (new_ptr, tmppos);
-				}
-				free (freeme);
-			} else
-				new_ptr->feedcategories = NULL;
-			
-			// Load cookies for this feed.
-			// But skip loading cookies for execurls.
-			if (new_ptr->execurl != 1)
-				LoadCookies (new_ptr);
-			
-			// Add to bottom of pointer chain.
-			new_ptr->next_ptr = NULL;
-			if (first_ptr == NULL) {
-				new_ptr->prev_ptr = NULL;
-				first_ptr = new_ptr;
-			} else {
-				new_ptr->prev_ptr = first_ptr;
-				while (new_ptr->prev_ptr->next_ptr != NULL)
-					new_ptr->prev_ptr = new_ptr->prev_ptr->next_ptr;
-				new_ptr->prev_ptr->next_ptr = new_ptr;
-			}
-		}
+	char filename [PATH_MAX];
+	snprintf (filename, sizeof(filename), "%s/.snownews/error.log", getenv("HOME"));
+	int errorlogfd = open (filename, O_WRONLY| O_CREAT| O_TRUNC, DEFFILEMODE);
+	if (errorlogfd >= 0) {
+		dup2 (errorlogfd, STDERR_FILENO);
+		close (errorlogfd);
 	}
-	fclose (configfile);
-	
-	snprintf (file, sizeof(file), "%s/.snownews/keybindings", getenv("HOME"));
-	SetupKeybindings (file);
-	
-	snprintf (file, sizeof(file), "%s/.snownews/colors", getenv("HOME"));
-	SetupColors (file);
-	
-	snprintf (file, sizeof(file), "%s/.snownews/html_entities", getenv("HOME"));
-	SetupEntities (file);
-	
+
+	UIStatus (_("Reading configuration settings..."), 0, 0);
+
+	snprintf (filename, sizeof(filename), "%s/.snownews/browser", getenv("HOME"));
+	SetupBrowser (filename);
+
+	snprintf (filename, sizeof(filename), "%s/.snownews/urls", getenv("HOME"));
+	unsigned numfeeds = SetupFeedList (filename);
+
+	snprintf (filename, sizeof(filename), "%s/.snownews/keybindings", getenv("HOME"));
+	SetupKeybindings (filename);
+
+	snprintf (filename, sizeof(filename), "%s/.snownews/colors", getenv("HOME"));
+	SetupColors (filename);
+
+	snprintf (filename, sizeof(filename), "%s/.snownews/html_entities", getenv("HOME"));
+	SetupEntities (filename);
+
 	return numfeeds;
 }

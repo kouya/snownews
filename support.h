@@ -16,4 +16,4 @@
 
 #pragma once
 
-int easterEgg (void);
+bool easterEgg (void);

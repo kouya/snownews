@@ -14,64 +14,47 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-
-#include "config.h"
+#include "updatecheck.h"
 #include "netio.h"
 #include "io-internal.h"
-
+#include <time.h>
 
 void AutoVersionCheck (void) {
-	struct feed *update;
-	FILE *lastupdated;
-	char file[512];
-	char timestring[21];	// Should be enough for 64bit systems.
-	char oldtimestring[21];
-	int oldtime;
-	char *versionstring = NULL;
-	char *url;
-	
-	update = newFeedStruct();
-	
 	// We check once a week.
-	snprintf (timestring, sizeof(timestring), "%d", (int) time(NULL));
+	char timestring[21];	// Should be enough for 64bit systems.
+	snprintf (timestring, sizeof(timestring), "%ld", time(NULL));
+	char file [PATH_MAX];
 	snprintf (file, sizeof(file), "%s/.snownews/updatecheck", getenv("HOME"));
-	lastupdated = fopen (file, "r+");
-	if (lastupdated == NULL) {
+
+	FILE* lastupdated = fopen (file, "r+");
+	if (!lastupdated) {
 		lastupdated = fopen (file, "w+");
 		fputs (timestring, lastupdated);
-		fclose (lastupdated);
 	} else {
+		char oldtimestring[21];
 		fgets (oldtimestring, sizeof(oldtimestring), lastupdated);
-		oldtime = atoi(oldtimestring);
-		
+		time_t oldtime = atol(oldtimestring);
+
 		// If -1 is given in updatecheck or last check is <1 week, skip the check.
-		if (((((int) time(NULL))-oldtime) < 604800) ||
-			(oldtime == -1)) {
-			// Less than one week.
+		if (time(NULL)-oldtime < 7*24*3600 || oldtime <= 0) {
 			fclose (lastupdated);
-			free (update);
-			return;
+			return;	// Less than one week.
 		} else {
 			rewind (lastupdated);
 			fputs (timestring, lastupdated);
-			fclose (lastupdated);
 		}
 	}
-	
-	url = strdup ("http://kiza.kcore.de/software/snownews/version");
+	fclose (lastupdated);
+
+	struct feed* update = newFeedStruct();
+	char* url = strdup ("http://kiza.kcore.de/software/snownews/version");
 	update->feedurl = strdup(url);
-	versionstring = DownloadFeed (url, update, 1);
+	char* versionstring = DownloadFeed (url, update, 1);
 	free (url);
-	
-	if (versionstring != NULL) {
+
+	if (versionstring) {
 		if (versionstring[strlen(versionstring)-1] == '\n')
 			versionstring[strlen(versionstring)-1] = '\0';
-	
 		if (strcmp(versionstring, SNOWNEWS_VERSION) != 0) {
 			printf (_("A new version %s of Snownews is available.\n"), versionstring);
 			printf (_("If you want to download it, go to http://snownews.kcore.de/downloading/\n\n"));
@@ -84,8 +67,6 @@ void AutoVersionCheck (void) {
 	free (update->lastmodified);
 	free (update->feedurl);
 	free (update->content_type);
-	
 	free (update);
-	
 	return;
 }

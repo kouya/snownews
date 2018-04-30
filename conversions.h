@@ -17,20 +17,16 @@
 
 #pragma once
 
-#ifdef STATIC_CONST_ICONV
-char * iconvert (const char * inbuf);
-#else
-char * iconvert (char * inbuf);
-#endif
-char * UIDejunk (char * feed_description);
+char* iconvert (const char* inbuf);
+char* UIDejunk (const char* feed_description);
 char* WrapText (const char* text, unsigned width);
-char *base64encode(char const *inbuf, unsigned int inbuf_size);
+char* base64encode(const char* inbuf, unsigned int inbuf_size);
 void CleanupString (char * string, int tidyness);
 char * Hashify (const char * url);
 char* genItemHash (const char* const* hashitems, int items);
-int ISODateToUnix (char const * const ISODate);
-int pubDateToUnix (char const * const pubDate);
-char * unixToPostDateString (int unixDate);
+time_t ISODateToUnix (const char* ISODate);
+time_t pubDateToUnix (const char* pubDate);
+char* unixToPostDateString (time_t unixDate);
 
 #ifdef USE_UNSUPPORTED_AND_BROKEN_CODE
 char* decodechunked(char * chunked, unsigned int *inputlen);

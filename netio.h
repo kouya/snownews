@@ -15,33 +15,6 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
-struct feed;
-
-char * DownloadFeed (char * url, struct feed * cur_ptr, int suppressoutput);
-
-typedef enum {
-	NET_ERR_OK,
-	// Init errors
-	NET_ERR_URL_INVALID,
-	// Connect errors
-	NET_ERR_SOCK_ERR,
-	NET_ERR_HOST_NOT_FOUND,
-	NET_ERR_CONN_REFUSED,
-	NET_ERR_CONN_FAILED,
-	NET_ERR_TIMEOUT,
-	NET_ERR_UNKNOWN,
-	// Transfer errors
-	NET_ERR_REDIRECT_COUNT_ERR,
-	NET_ERR_REDIRECT_ERR,
-	NET_ERR_HTTP_410,
-	NET_ERR_HTTP_404,
-	NET_ERR_HTTP_NON_200,
-	NET_ERR_HTTP_PROTO_ERR,
-	NET_ERR_AUTH_FAILED,
-	NET_ERR_AUTH_NO_AUTHINFO,
-	NET_ERR_AUTH_GEN_AUTH_ERR,
-	NET_ERR_AUTH_UNSUPPORTED,
-	NET_ERR_GZIP_ERR,
-	NET_ERR_CHUNKED
-} netio_error_type;
+char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput);

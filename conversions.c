@@ -18,120 +18,69 @@
 #ifndef _GNU_SOURCE
 	#define _GNU_SOURCE
 #endif
-#include <sys/types.h>
-#include <string.h>
+#include "config.h"
+#include "conversions.h"
+#include "digcalc.h"
+#include "interface.h"
+#include "io-internal.h"
+#include "os-support.h"
+#include "setup.h"
+#include "ui-support.h"
 #include <iconv.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 #include <time.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
 #include <openssl/evp.h>
 #include <openssl/md5.h>
-#include "os-support.h"
-#include "conversions.h"
-#include "config.h"
-#include "interface.h"
-#include "ui-support.h"
-#include "setup.h"
-#include "digcalc.h"
-#include "io-internal.h"
 
 extern struct entity *first_entity;
 
-extern char *forced_target_charset;
+extern const char* forced_target_charset;
 
 static int calcAgeInDays (const struct tm* t);
 
-#ifdef STATIC_CONST_ICONV
-char * iconvert (const char * inbuf) {
-#else
-char * iconvert (char * inbuf) {
-#endif
-	iconv_t cd;			// Iconvs conversion descriptor.
-	char *outbuf, *outbuf_first;	// We need two pointers so we do not lose
-					// the string starting position.
-	char target_charset[64];
-	size_t inbytesleft, outbytesleft;
-
-	//(void)strlcpy(target_charset, nl_langinfo(CODESET), sizeof(target_charset));
-	strncpy(target_charset, nl_langinfo(CODESET), sizeof(target_charset));
-
-	// Take a shortcut.
-	if (strcasecmp (target_charset, "UTF-8") == 0)
-		return strdup(inbuf);
-
-	inbytesleft = strlen(inbuf);
-	outbytesleft = strlen(inbuf);
-
-	//(void)strlcat(target_charset, "//TRANSLIT", sizeof(target_charset));
-	strncat(target_charset, "//TRANSLIT", sizeof(target_charset));
-
-	// cd = iconv_open(nl_langinfo(CODESET), "UTF-8");
-	if (forced_target_charset) {
+char* iconvert (const char* inbuf) {
+	iconv_t cd;	// Iconvs conversion descriptor.
+	if (forced_target_charset)
 		cd = iconv_open (forced_target_charset, "UTF-8");
-	} else {
+	else {
+		const char* langcset = nl_langinfo(CODESET);
+		if (strcasecmp (langcset, "UTF-8") == 0)
+			return strdup (inbuf);	// Already in UTF-8
+		char target_charset[64];
+		snprintf (target_charset, sizeof(target_charset), "%s//TRANSLIT", langcset);
 		cd = iconv_open (target_charset, "UTF-8");
 	}
-	if (cd == (iconv_t) -1) {
+	if (cd == (iconv_t) -1)
 		return NULL;
-	}
 
-	outbuf = malloc (outbytesleft+1);
-	outbuf_first = outbuf;
+	size_t inbytesleft = strlen(inbuf), outbytesleft = inbytesleft;
+	// We need two pointers so we do not lose the string starting position.
+	char *outbuf = malloc (outbytesleft+1), *outbuf_first = outbuf;
 
-	if (iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1) {
+	if (iconv (cd, (char**) &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1) {
 		free(outbuf_first);
 		iconv_close(cd);
 		return NULL;
 	}
-
 	*outbuf = 0;
-
 	iconv_close (cd);
-
 	return outbuf_first;
 }
-
 
 // UIDejunk: remove html tags from feed description and convert
 // html entities to something useful if we hit them.
 // This function took almost forever to get right, but at least I learned
 // that html entity &hellip; has nothing to do with Lucifer's ISP, but
 // instead means "..." (3 dots, "and so on...").
-char * UIDejunk (char * feed_description) {
-	char *start;		// Points to first char everytime. Need to free this.
-	char *text;		// feed_description copy
-	char *newtext;		// Detag'ed *text.
-	char *detagged;		// Returned value from strsep. This is what we want.
-	char *htmltag;
-//	char *attribute;
-	char *entity;
-	struct entity *cur_entity;
-	int found = 0;		// User defined entity matched?
-//	int len;
-#ifdef __STDC_ISO_10646__
-	int len;
-	wchar_t ch;		// Decoded numeric entity
-	int mblen;		// Length of multi-byte entity
-#else
-	unsigned long ch;	// Decoded numeric entity
-#endif
-	const htmlEntityDesc *ep;	// For looking up HTML entities
-
+char* UIDejunk (const char* feed_description) {
 	// Gracefully handle passed NULL ptr.
-	if (feed_description == NULL) {
-		newtext = strdup("(null)");
-		return newtext;
-	}
+	if (feed_description == NULL)
+		return strdup("(null)");
 
 	// Make a copy and point *start to it so we can free the stuff again!
-	text = strdup (feed_description);
-	start = text;
-
+	char* text = strdup (feed_description);	// feed_description copy
+	char* start = text;	// Points to first char everytime. Need to free this.
 
 	// If text begins with a tag, discard all of them.
 	while (1) {
@@ -141,18 +90,17 @@ char * UIDejunk (char * feed_description) {
 		} else
 			break;
 		if (text == NULL) {
-			newtext = strdup (_("No description available."));
 			free (start);
-			return newtext;
+			return strdup (_("No description available."));
 		}
 	}
-	newtext = malloc (1);
+	char* newtext = malloc (1);	// Detag'ed *text.
 	newtext[0] = '\0';
 
 	while (1) {
 		// Strip tags... tagsoup mode.
 		// strsep puts everything before "<" into detagged.
-		detagged = strsep (&text, "<");
+		const char* detagged = strsep (&text, "<");
 		if (detagged == NULL)
 			break;
 
@@ -176,7 +124,7 @@ char * UIDejunk (char * feed_description) {
 		strcat (newtext, detagged);
 
 		// Advance *text to next position after the closed tag.
-		htmltag = strsep (&text, ">");
+		const char* htmltag = strsep (&text, ">");
 		if (htmltag == NULL)
 			break;
 
@@ -185,7 +133,7 @@ char * UIDejunk (char * feed_description) {
 			attribute = s_strcasestr(htmltag, "alt=");
 			if (attribute == NULL)
 				continue;
-			len = strlen(attribute);
+			size_t len = strlen(attribute);
 			newtext = realloc(newtext, strlen(newtext)+6+len+2);
 			strcat(newtext, "[img: ");
 			strncat(newtext, attribute+5, len-6);
@@ -219,7 +167,7 @@ char * UIDejunk (char * feed_description) {
 
 		while (1) {
 			// Strip HTML entities.
-			detagged = strsep (&text, "&");
+			const char* detagged = strsep (&text, "&");
 			if (detagged == NULL)
 				break;
 
@@ -230,7 +178,7 @@ char * UIDejunk (char * feed_description) {
 			// Expand newtext by one char.
 			newtext = realloc (newtext, strlen(newtext)+2);
 			// This might break if there is an & sign in the text.
-			entity = strsep (&text, ";");
+			const char* entity = strsep (&text, ";");
 			if (entity != NULL) {
 				// XML defined entities.
 				if (strcmp(entity, "amp") == 0) {
@@ -251,8 +199,8 @@ char * UIDejunk (char * feed_description) {
 				}
 
 				// Decode user defined entities.
-				found = 0;
-				for (cur_entity = first_entity; cur_entity != NULL; cur_entity = cur_entity->next_ptr) {
+				bool found = false;
+				for (const struct entity* cur_entity = first_entity; cur_entity; cur_entity = cur_entity->next_ptr) {
 					if (strcmp (entity, cur_entity->entity) == 0) {
 						// We have found a matching entity.
 
@@ -265,7 +213,7 @@ char * UIDejunk (char * feed_description) {
 						strcat (newtext, cur_entity->converted_entity);
 
 						// Set found flag.
-						found = 1;
+						found = true;
 
 						// We can now leave the for loop.
 						break;
@@ -274,34 +222,35 @@ char * UIDejunk (char * feed_description) {
 
 				// Try to parse some standard entities.
 				if (!found) {
+					wchar_t ch = 0;
 					// See if it was a numeric entity.
 					if (entity[0] == '#') {
 						if (entity[1] == 'x')
 							ch = strtoul(entity + 2, NULL, 16);
 						else
 							ch = atol(entity + 1);
-					}
-					else if ((ep = htmlEntityLookup((xmlChar *)entity)) != NULL)
+					} else {
+					    const htmlEntityDesc* ep = htmlEntityLookup ((xmlChar*)entity);
+					    if (ep)
 						ch = ep->value;
-					else
-						ch = 0;  // Didn't recognize it.
+					}
 
 					if (ch > 0) {
 #ifdef __STDC_ISO_10646__
 						// Convert to locale encoding and append.
-						len = strlen(newtext);
+						size_t len = strlen(newtext);
 						newtext = realloc(newtext, len + MB_CUR_MAX + 1);
-						mblen = wctomb(newtext + len, ch);
+						int mblen = wctomb(newtext + len, ch);
 						// Only set found flag if the conversion worked.
 						if (mblen > 0) {
 							newtext[len + mblen] = '\0';
-							found = 1;
+							found = true;
 						}
 #else
 						// Since we can't use wctomb(), just convert ASCII.
-						if (ch <= 0x7F) {
-							sprintf(newtext + strlen(newtext), "%c", (int)ch);
-							found = 1;
+						if (ch <= CHAR_MAX) {
+							sprintf(newtext + strlen(newtext), "%c", (char)ch);
+							found = true;
 						}
 #endif
 					}
@@ -329,32 +278,23 @@ char * UIDejunk (char * feed_description) {
 // the 4th version which corrupted some random memory unfortunately...
 // but this one works. Heureka!
 char* WrapText (const char* text, unsigned width) {
-	char *newtext;
-	char *textblob;		// Working copy of text.
-	char *chapter;
-	char *line;		// One line of text with max width.
-	char *savepos;		// Saved position pointer so we can go back in the string.
-	char *chunk;
-	char *start;
+	char* textblob = strdup (text);	// Working copy of text.
+	char* start = textblob;
 
-	textblob = strdup (text);
-	start = textblob;
-
-
-	line = malloc (1);
+	char* line = malloc (1); // One line of text with max width.
 	line[0] = '\0';
 
-	newtext = malloc(1);
+	char* newtext = malloc(1);
 	memset (newtext, 0, 1);
 
 	while (1) {
 		// First, cut at \n.
-		chapter = strsep (&textblob, "\n");
+		char* chapter = strsep (&textblob, "\n");
 		if (chapter == NULL)
 			break;
 		while (1) {
-			savepos = chapter;
-			chunk = strsep (&chapter, " ");
+			char* savepos = chapter; // Saved position pointer so we can go back in the string.
+			const char* chunk = strsep (&chapter, " ");
 
 			// Last chunk.
 			if (chunk == NULL) {
@@ -362,20 +302,6 @@ char* WrapText (const char* text, unsigned width) {
 					newtext = realloc (newtext, strlen(newtext)+strlen(line)+2);
 					strcat (newtext, line);
 					strcat (newtext, "\n");
-
-					// Faster replacement with memcpy.
-					// Overkill, overcomplicated and smelling of bugs all over.
-					#if 0
-						lena = strlen(newtext);
-						lenb = strlen(line);
-						newtext = realloc (newtext, lena+lenb+2);
-						p = newtext+lena;
-						memcpy (p, line, lenb);
-						p += lenb;
-						*p = '\n';
-						p++;
-						*p=0;
-					#endif
 					line[0] = '\0';
 				}
 				break;
@@ -424,30 +350,20 @@ char* WrapText (const char* text, unsigned width) {
 			}
 		}
 	}
-
 	free (line);
 	free (start);
-
 	return newtext;
 }
 
-char *base64encode(char const *inbuf, unsigned int inbuf_size) {
+char* base64encode (const char* inbuf, unsigned inbuf_size) {
 	static unsigned char const alphabet[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	char *outbuf = NULL;
-	unsigned int inbuf_pos = 0;
-	unsigned int outbuf_pos = 0;
-	unsigned int outbuf_size = 0;
-	int bits = 0;
-	int char_count = 0;
+	unsigned inbuf_pos = 0, outbuf_pos = 0, outbuf_size = 0, bits = 0, char_count = 0;
 
-	outbuf = malloc(1);
-
+	char* outbuf = malloc(1);
 	while (inbuf_pos < inbuf_size) {
-
 		bits |= *inbuf;
 		char_count++;
-
 		if (char_count == 3) {
 			outbuf = realloc(outbuf, outbuf_size+4);
 			outbuf_size += 4;
@@ -459,7 +375,6 @@ char *base64encode(char const *inbuf, unsigned int inbuf_size) {
 			bits = 0;
 			char_count = 0;
 		}
-
 		inbuf++;
 		inbuf_pos++;
 		bits <<= 8;
@@ -523,16 +438,12 @@ char* decodechunked(char * chunked, unsigned int *inputlen) {
 // tidyness: 0 = only suck chars from beginning of string
 //           1 = extreme, vacuum everything along the string.
 void CleanupString (char * string, int tidyness) {
-	int len, i;
-
 	// If we are passed a NULL pointer, leave it alone and return.
 	if (string == NULL)
 		return;
 
-	len = strlen(string);
-
-	while ((string[0] == '\n' || string [0] == ' ' || string [0] == '\t') &&
-			(len > 0)) {
+	size_t len = strlen(string);
+	while (len && (string[0] == '\n' || string [0] == ' ' || string [0] == '\t')) {
 		// len=strlen(string) does not include \0 of string.
 		// But since we copy from *string+1 \0 gets included.
 		// Delicate code. Think twice before it ends in buffer overflows.
@@ -541,31 +452,24 @@ void CleanupString (char * string, int tidyness) {
 	}
 
 	// Remove trailing spaces.
-	while ((len > 1) && (string[len-1] == ' ')) {
+	while (len > 1 && string[len-1] == ' ') {
 		string[len-1] = 0;
 		len--;
 	}
 
-	len = strlen(string);
 	// Eat newlines and tabs along the whole string.
-	for (i = 0; i < len; i++) {
-		if (string[i] == '\t') {
+	for (size_t i = 0; i < len; ++i) {
+		if (string[i] == '\t')
 			string[i] = ' ';
-		}
-		if (tidyness == 1 && string[i] == '\n') {
+		if (tidyness == 1 && string[i] == '\n')
 			string[i] = ' ';
-		}
 	}
 }
 
 // http://foo.bar/address.rdf -> http:__foo.bar_address.rdf
 char * Hashify (const char * url) {
-	int i, len;
-	char *hashed_url;
-
-	hashed_url = strdup(url);
-
-	len = strlen(hashed_url);
+	char* hashed_url = strdup(url);
+	size_t len = strlen(hashed_url);
 
 	// Don't allow filenames > 128 chars for teeny weeny operating systems.
 	if (len > 128) {
@@ -573,7 +477,7 @@ char * Hashify (const char * url) {
 		hashed_url[128] = '\0';
 	}
 
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < len; ++i) {
 		if (((hashed_url[i] < 32) || (hashed_url[i] > 38)) &&
 			((hashed_url[i] < 43) || (hashed_url[i] > 46)) &&
 			((hashed_url[i] < 48) || (hashed_url[i] > 90)) &&
@@ -615,54 +519,26 @@ char * genItemHash (const char* const* hashitems, int items) {
 
 // Date conversion
 // 2004-11-20T19:45:00+00:00
-int ISODateToUnix (char const * const ISODate) {
-	struct tm *t;
-	time_t tt = 0;
-	int time_unix = 0;
-
+time_t ISODateToUnix (const char* ISODate) {
 	// Do not crash with an empty tag
-	if (ISODate == NULL)
+	if (!ISODate)
 		return 0;
-
-	t = malloc(sizeof(struct tm));
-	gmtime_r(&tt, t);
-
+	struct tm t = {};
 	// OpenBSD does not know %F == %Y-%m-%d
-	// <insert inflamatory comment here>
-	if (strptime(ISODate, "%Y-%m-%dT%T", t)) {
+	if (!strptime(ISODate, "%Y-%m-%dT%T", &t) && !strptime(ISODate, "%Y-%m-%d", &t))
+	    return 0;
 #ifdef __CYGWIN__
-		time_unix = mktime(t);
+	return mktime(&t);
 #else
-		time_unix = timegm(t);
+	return timegm(&t);
 #endif
-	} else if (strptime(ISODate, "%Y-%m-%d", t)) {
-#ifdef __CYGWIN__
-		time_unix = mktime(t);
-#else
-		time_unix = timegm(t);
-#endif
-	}
-
-	free (t);
-	return time_unix;
 }
+
 // Sat, 20 Nov 2004 21:45:40 +0000
-int pubDateToUnix (char const * const pubDate) {
-	char const *start_here;
-	struct tm *t;
-	time_t tt = 0;
-	int time_unix = 0;
-
+time_t pubDateToUnix (const char* pubDate) {
 	// Do not crash with an empty Tag
-	if (pubDate == NULL)
+	if (!pubDate)
 		return 0;
-
-	start_here = pubDate;
-	start_here += 5;
-
-	t = malloc(sizeof(struct tm));
-	gmtime_r(&tt, t);
-
 #ifdef LOCALEPATH
 	// Cruft!
 	// Save old locale so we can parse the stupid pubDate format.
@@ -670,50 +546,34 @@ int pubDateToUnix (char const * const pubDate) {
 	// format string for abbr. month name NOT in the current locale. Grr.
 	//	
 	// This is also not thread safe!
-	char* oldlocale = strdup(setlocale(LC_TIME, NULL));
-	if (oldlocale) {
-		// Only reset if setlocale returned something !NULL.
-		// Will not parse the date correctly in this case, but will also not
-		// overwrite the user's locale setting.
-		setlocale(LC_TIME, "C");
-	}
+	char* oldlocale = setlocale (LC_TIME, NULL);
+	if (oldlocale)
+		setlocale (LC_TIME, "C");
 #endif
-
-	if (strptime(start_here, "%d %b %Y %T", t)) {
-#ifdef __CYGWIN__
-		time_unix = mktime(t);
-#else
-		time_unix = timegm(t);
-#endif
-	}
-
+	struct tm t = {};
+	char* r = strptime (pubDate+strlen("Sat, "), "%d %b %Y %T", &t);
 #ifdef LOCALEPATH
-	if (oldlocale) {
-		setlocale(LC_TIME, oldlocale);
-		free (oldlocale);
-	}
+	if (oldlocale)
+		setlocale (LC_TIME, oldlocale);
 #endif
-
-	free (t);
-	return time_unix;
+	if (!r)
+		return 0;
+#ifdef __CYGWIN__
+	return mktime(&t);
+#else
+	return timegm(&t);
+#endif
 }
-char * unixToPostDateString (int unixDate) {
-	time_t unix_t;
-	struct tm t;
-	char *time_str;
+
+char* unixToPostDateString (time_t unixDate) {
 	int len = 64;
-	char *time_strfstr;
+	char* time_str = malloc(len);
+
 	int strfstr_len = 32;
-	char tmpstr[32];
-	int age;
+	char* time_strfstr = malloc(strfstr_len);
 
-	time_str = malloc(len);
-	time_strfstr = malloc(strfstr_len);
-
-	unix_t = unixDate;
-	gmtime_r(&unix_t, &t);
-
-	age = calcAgeInDays(&t);
+	struct tm t;
+	gmtime_r (&unixDate, &t);
 
 	strftime(time_strfstr, strfstr_len, _(", %H:%M"), &t);
 	strcpy(time_str, _("Posted "));
@@ -721,6 +581,7 @@ char * unixToPostDateString (int unixDate) {
 	if (len <= 0)
 		return NULL;
 
+	int age = calcAgeInDays(&t);
 	if (age == 0) {
 		strncat(time_str, _("today"), len-1);
 		len -= strlen(_("today"));
@@ -736,6 +597,7 @@ char * unixToPostDateString (int unixDate) {
 		if (!(!t.tm_hour && !t.tm_min && !t.tm_sec))
 			strncat(time_str, time_strfstr, len-1);
 	} else if ((age > 1) && (age < 7)) {
+		char tmpstr[32];
 		snprintf(tmpstr, sizeof(tmpstr), _("%d days ago"), age);
 		strncat(time_str, tmpstr, len-1);
 		len -= strlen(tmpstr);

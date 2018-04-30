@@ -17,5 +17,4 @@
 #pragma once
 
 int FilterExecURL (struct feed * cur_ptr);
-//int FilterPipe (struct feed * cur_ptr);
 int FilterPipeNG (struct feed * cur_ptr);

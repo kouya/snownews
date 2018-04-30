@@ -17,4 +17,4 @@
 #pragma once
 #include "config.h"
 
-void MainQuit(const char * func, const char * error);
+_Noreturn void MainQuit (const char* func, const char* error);

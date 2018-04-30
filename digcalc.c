@@ -18,7 +18,6 @@
 // The code has been modified to work with Colin Plumb's
 // MD5 implementation rather than using RSA's.
 
-#include <string.h>
 #include "digcalc.h"
 #include <openssl/evp.h>
 
@@ -40,8 +39,7 @@ void DigestCalcHA1 (const char* pszAlg, const char* pszUserName, const char* psz
 
 	if (strcmp(pszAlg, "md5-sess") == 0) {
 		EVP_DigestInit (mdctx, EVP_md5());
-		HASH HA1;
-		EVP_DigestUpdate (mdctx, HA1, HASHLEN);
+		EVP_DigestUpdate (mdctx, md_value, md_len);
 		EVP_DigestUpdate (mdctx, ":", 1);
 		EVP_DigestUpdate (mdctx, pszNonce, strlen(pszNonce));
 		EVP_DigestUpdate (mdctx, ":", 1);

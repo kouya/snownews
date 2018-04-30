@@ -15,12 +15,13 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
-int Config (void);
+unsigned Config (void);
 
 struct entity {
-	char * entity;
-	char * converted_entity;
+	char* entity;
+	char* converted_entity;
 	int entity_length;
-	struct entity * next_ptr;
+	struct entity* next_ptr;
 };

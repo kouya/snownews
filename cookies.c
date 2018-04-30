@@ -19,43 +19,23 @@
 //
 // .host.com	host_match[BOOL]	/path	secure[BOOL]	expire[unix time]	NAME	VALUE
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
 #include "config.h"
 #include "ui-support.h"
+#include <time.h>
 
-void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
-	char buf[4096];	// File read buffer.
-	char tmp[512];
-	char *host;	// Current feed hostname.
-	char *path;	// Current feed path.
-	char *url;
-	char *freeme, *tmpstr;
-	char *tmphost;
-	char *cookie;
-	char *cookiehost = NULL;
-	char *cookiepath = NULL;
-	char *cookiename = NULL;
-	char *cookievalue = NULL;
-	int cookieexpire = 0;
-	int cookiesecure = 0;
-	int i;
+static void CookieCutter (struct feed* cur_ptr, FILE* cookies) {
 	int len = 0;
 	int cookienr = 0;
-	time_t tunix;
 	
 	// Get current time.
-	tunix = time(0);
+	time_t tunix = time (NULL);
 	
-	url = strdup (cur_ptr->feedurl);
-	freeme = url;
+	char* url = strdup (cur_ptr->feedurl);
+	char* freeme = url;
 	
 	strsep (&url, "/");
 	strsep (&url, "/");
-	tmphost = url;
+	char* tmphost = url;
 	strsep (&url, "/");
 	if (url == NULL) {
 		free (freeme);
@@ -63,22 +43,21 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 	}
 	
 	// If tmphost contains an '@' strip authinfo off url.
-	if (strchr (tmphost, '@') != NULL) {
+	if (strchr (tmphost, '@'))
 		strsep (&tmphost, "@");
-	}
 	
-	host = strdup (tmphost);
+	char* host = strdup (tmphost);	// Current feed hostname.
 	url--;
 	url[0] = '/';
-	if (url[strlen(url)-1] == '\n') {
+	if (url[strlen(url)-1] == '\n')
 		url[strlen(url)-1] = '\0';
-	}
 	
-	path = strdup (url);
+	char* path = strdup (url);	// Current feed path.
 	free (freeme);
 	freeme = NULL;
 	
 	while (!feof(cookies)) {
+		char buf [BUFSIZ];	// File read buffer.
 		if ((fgets (buf, sizeof(buf), cookies)) == NULL)
 			break;
 		
@@ -91,7 +70,7 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 		if (buf[0] == '#')
 			continue;
 				
-		cookie = strdup (buf);
+		char* cookie = strdup (buf);
 		freeme = cookie;
 		
 		// Munch trailing newline.
@@ -99,12 +78,16 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 			cookie[strlen(cookie)-1] = '\0';
 		
 		// Decode the cookie string.
-		for (i = 0; i <= 6; i++) {
-			tmpstr = strsep (&cookie, "\t");
-			
-			if (tmpstr == NULL)
+		char* cookiehost = NULL;
+		char* cookiepath = NULL;
+		char* cookiename = NULL;
+		char* cookievalue = NULL;
+		time_t cookieexpire = 0;
+		bool cookiesecure = false;
+		for (unsigned i = 0; i < 7; ++i) {
+			const char* tmpstr = strsep (&cookie, "\t");
+			if (!tmpstr)
 				break;
-			
 			switch (i) {
 				case 0:
 					// Cookie hostname.
@@ -120,11 +103,11 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 				case 3:
 					// Secure cookie?
 					if (strcasecmp (tmpstr, "TRUE") == 0)
-						cookiesecure = 1;
+						cookiesecure = true;
 					break;
 				case 4:
 					// Cookie expiration date.
-					cookieexpire = atoi (tmpstr);
+					cookieexpire = strtoul (tmpstr, NULL, 10);
 					break;
 				case 5:
 					// NAME
@@ -134,8 +117,6 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 					// VALUE
 					cookievalue = strdup (tmpstr);
 					break;
-				default:
-					break;
 			}
 		}
 		
@@ -143,10 +124,7 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 		// Hostname and path must match.
 		// Ignore secure cookies.
 		// Discard cookie if it has expired.
-		if ((strstr (host, cookiehost) != NULL) &&
-			(strstr (path, cookiepath) != NULL) &&
-			(!cookiesecure) &&
-			(cookieexpire > (int) tunix)) {	// Cast time_t tunix to int.
+		if (strstr (host, cookiehost) && strstr (path, cookiepath) && !cookiesecure && cookieexpire > tunix) {
 			cookienr++;
 			
 			// Construct and append cookiestring.
@@ -171,8 +149,9 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 					(strstr (path, cookiepath) != NULL) &&
 					(cookieexpire < (int) tunix)) {			// Cast time_t tunix to int.
 			// Print cookie expire warning.
-			snprintf (tmp, sizeof(tmp), _("Cookie for %s has expired!"), cookiehost);
-			UIStatus (tmp, 1, 1);
+			char expirebuf [PATH_MAX];
+			snprintf (expirebuf, sizeof(expirebuf), _("Cookie for %s has expired!"), cookiehost);
+			UIStatus (expirebuf, 1, 1);
 		}
 
 		free (freeme);
@@ -192,23 +171,14 @@ void CookieCutter (struct feed * cur_ptr, FILE * cookies) {
 		cur_ptr->cookies = realloc (cur_ptr->cookies, len+2);
 		strcat (cur_ptr->cookies, "\r\n");
 	}
-	
-	return;
 }
 
-
 void LoadCookies (struct feed * cur_ptr) {
-	char file[512];	// File locations.
-	FILE *cookies;	// Cookies file ptr.
-	
+	char file [PATH_MAX];	// File locations.
 	snprintf (file, sizeof(file), "%s/.snownews/cookies", getenv("HOME"));
-	cookies = fopen (file, "r");
-	if (cookies == NULL) {	// No cookies to load.
+	FILE* cookies = fopen (file, "r");
+	if (!cookies)	// No cookies to load.
 		return;
-	} else {
-		CookieCutter (cur_ptr, cookies);
-	}
+	CookieCutter (cur_ptr, cookies);
 	fclose (cookies);
-	
-	return;
 }

@@ -15,10 +15,6 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
-#include <libxml/parser.h>
+#include "config.h"
 
-void parse_rdf10_item(struct feed *feed, xmlDocPtr doc, xmlNodePtr node);
-void parse_rdf10_channel(struct feed * feed, xmlDocPtr doc, xmlNodePtr node);
-void parse_rdf20_channel(struct feed * feed, xmlDocPtr doc, xmlNodePtr node);
-int DeXML (struct feed * cur_ptr);
-void print_feed(struct feed * feed);
+int DeXML (struct feed* cur_ptr);
