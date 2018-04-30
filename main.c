@@ -99,7 +99,7 @@ static void make_pidfile_name (char* fnbuf, size_t fnbufsz)
 	if (rundir)
 		snprintf (fnbuf, fnbufsz, "%s/snownews.pid", rundir);
 	else
-		snprintf (fnbuf, fnbufsz, "%s/.snownews/pid", getenv("HOME"));
+		snprintf (fnbuf, fnbufsz, SNOWNEWS_CONFIG_DIR "pid", getenv("HOME"));
 }
 
 static void modifyPIDFile (enum EPIDAction action) {

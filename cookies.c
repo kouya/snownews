@@ -174,7 +174,7 @@ static void CookieCutter (struct feed* cur_ptr, FILE* cookies) {
 
 void LoadCookies (struct feed * cur_ptr) {
 	char file [PATH_MAX];	// File locations.
-	snprintf (file, sizeof(file), "%s/.snownews/cookies", getenv("HOME"));
+	snprintf (file, sizeof(file), SNOWNEWS_CONFIG_DIR "cookies", getenv("HOME"));
 	FILE* cookies = fopen (file, "r");
 	if (!cookies)	// No cookies to load.
 		return;

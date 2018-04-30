@@ -42,7 +42,7 @@ static void SetupBrowser (const char* filename) {
 void SaveBrowserSetting (void)
 {
 	char browserfilename [PATH_MAX];
-	snprintf (browserfilename, sizeof(browserfilename), "%s/.snownews/browser", getenv("HOME"));
+	snprintf (browserfilename, sizeof(browserfilename), SNOWNEWS_CONFIG_DIR "browser", getenv("HOME"));
 	FILE* browserfile = fopen (browserfilename, "w");
 	if (!browserfile)
 		MainQuit (_("Save settings (browser)"), strerror(errno));
@@ -447,37 +447,37 @@ unsigned Config (void) {
 
 	// Setup config directories.
 	char dirname [PATH_MAX];
-	snprintf (dirname, sizeof(dirname), "%s/.snownews", getenv("HOME"));
+	snprintf (dirname, sizeof(dirname), SNOWNEWS_CONFIG_DIR, getenv("HOME"));
 	struct stat dirtest;
 	if (0 > stat (dirname, &dirtest)) {
 		if (0 > mkdir (dirname, S_IRWXU| S_IRGRP| S_IXGRP| S_IROTH| S_IXOTH))
-			MainQuit ("Creating config directory ~/.snownews/", strerror(errno));
+			MainQuit ("Creating config directory " SNOWNEWS_CONFIG_DIR, strerror(errno));
 	} else if (!S_ISDIR(dirtest.st_mode))
-		MainQuit ("Creating config directory ~/.snownews/", "A file with the name \"~/.snownews/\" exists!");
+		MainQuit ("Creating config directory " SNOWNEWS_CONFIG_DIR, "A file with the name \"" SNOWNEWS_CONFIG_DIR "\" exists!");
 
-	snprintf (dirname, sizeof(dirname), "%s/.snownews/cache", getenv("HOME"));
+	snprintf (dirname, sizeof(dirname), SNOWNEWS_CACHE_DIR, getenv("HOME"));
 	if (0 > stat (dirname, &dirtest)) {
 		if (0 > mkdir (dirname, S_IRWXU| S_IRGRP| S_IXGRP| S_IROTH| S_IXOTH))
-			MainQuit (_("Creating config directory ~/.snownews/cache/"), strerror(errno));
+			MainQuit (_("Creating config directory " SNOWNEWS_CACHE_DIR), strerror(errno));
 	} else if (!S_ISDIR(dirtest.st_mode))
-		MainQuit ("Creating config directory ~/.snownews/cache/", "A file with the name \"~/.snownews/cache/\" exists!");
+		MainQuit ("Creating config directory " SNOWNEWS_CACHE_DIR, "A file with the name \"" SNOWNEWS_CACHE_DIR "\" exists!");
 
 	UIStatus (_("Reading configuration settings..."), 0, 0);
 
 	char filename [PATH_MAX];
-	snprintf (filename, sizeof(filename), "%s/.snownews/browser", getenv("HOME"));
+	snprintf (filename, sizeof(filename), SNOWNEWS_CONFIG_DIR "browser", getenv("HOME"));
 	SetupBrowser (filename);
 
-	snprintf (filename, sizeof(filename), "%s/.snownews/urls", getenv("HOME"));
+	snprintf (filename, sizeof(filename), SNOWNEWS_CONFIG_DIR "urls", getenv("HOME"));
 	unsigned numfeeds = SetupFeedList (filename);
 
-	snprintf (filename, sizeof(filename), "%s/.snownews/keybindings", getenv("HOME"));
+	snprintf (filename, sizeof(filename), SNOWNEWS_CONFIG_DIR "keybindings", getenv("HOME"));
 	SetupKeybindings (filename);
 
-	snprintf (filename, sizeof(filename), "%s/.snownews/colors", getenv("HOME"));
+	snprintf (filename, sizeof(filename), SNOWNEWS_CONFIG_DIR "colors", getenv("HOME"));
 	SetupColors (filename);
 
-	snprintf (filename, sizeof(filename), "%s/.snownews/html_entities", getenv("HOME"));
+	snprintf (filename, sizeof(filename), SNOWNEWS_CONFIG_DIR "html_entities", getenv("HOME"));
 	SetupEntities (filename);
 
 	return numfeeds;

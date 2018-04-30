@@ -239,7 +239,7 @@ void FeedInfo (const struct feed* current_feed) {
 
 	char cachefile [PATH_MAX];
 	char* hashme = Hashify (current_feed->feedurl);
-	snprintf (cachefile, sizeof(cachefile), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
+	snprintf (cachefile, sizeof(cachefile), SNOWNEWS_CACHE_DIR "%s", getenv("HOME"), hashme);
 	free (hashme);
 	struct stat cachestat;
 	if (stat (cachefile, &cachestat) < 0)

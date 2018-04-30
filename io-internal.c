@@ -195,7 +195,7 @@ int LoadFeed (struct feed * cur_ptr) {
 
 	char* hashme = Hashify(cur_ptr->feedurl);
 	char cachefilename [PATH_MAX];
-	snprintf (cachefilename, sizeof(cachefilename), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
+	snprintf (cachefilename, sizeof(cachefilename), SNOWNEWS_CACHE_DIR "%s", getenv("HOME"), hashme);
 	free (hashme);
 	FILE* cache = fopen (cachefilename, "r");
 	if (cache == NULL) {
@@ -277,7 +277,7 @@ static void WriteFeedUrls (void)
 
 	// Make a backup of urls.
 	char urlsfilename [PATH_MAX];
-	snprintf (urlsfilename, sizeof(urlsfilename), "%s/.snownews/urls", getenv("HOME"));
+	snprintf (urlsfilename, sizeof(urlsfilename), SNOWNEWS_CONFIG_DIR "urls", getenv("HOME"));
 
 	// Write urls
 	FILE* urlfile = fopen (urlsfilename, "w");
@@ -310,7 +310,7 @@ static void WriteFeedCache (const struct feed* feed)
 {
 	char* hashme = Hashify(feed->feedurl);
 	char cachefilename [PATH_MAX];
-	snprintf (cachefilename, sizeof(cachefilename), "%s/.snownews/cache/%s", getenv("HOME"), hashme);
+	snprintf (cachefilename, sizeof(cachefilename), SNOWNEWS_CACHE_DIR "%s", getenv("HOME"), hashme);
 	free (hashme);
 
 	// Check if the feed has been modified since last loaded from this file
