@@ -197,13 +197,29 @@ static void badOption (const char * arg) {
 	printf (_("Option %s requires an argument.\n"), arg);
 }
 
+inline static uint32_t ror32 (uint32_t v, unsigned n)
+    { return (v >> n)|(v << (32-n)); }
+
+// Randomly initializes the random number generator
+static void srandrand (void)
+{
+    struct timespec now;
+    clock_gettime (CLOCK_REALTIME, &now);
+    uint32_t seed = now.tv_sec;
+    seed ^= getppid();
+    seed = ror32 (seed, 16);
+    seed ^= getpid();
+    seed ^= now.tv_nsec;
+    srand (seed);
+}
+
 int main (int argc, char *argv[]) {
 	#ifdef LOCALEPATH
 		setlocale (LC_ALL, "");
 		bindtextdomain ("snownews", LOCALEPATH);
 		textdomain ("snownews");
 	#endif
-	srand (time(0));	// Init the pRNG. See about.c for usages of rand() ;)
+	srandrand();	// Init the pRNG. See about.c for usages of rand() ;)
 
 	bool autoupdate = false;	// Automatically update feeds on app start... or not if set to 0.
 	for (int i = 1; i < argc; ++i) {
