@@ -115,7 +115,7 @@ static void PrintUpdateError (const struct feed* cur_ptr) {
 			break;
 	}
 	UIStatus(errstr, 2, 1);
-	syslog (LOG_ERR, errstr);
+	syslog (LOG_ERR, "%s", errstr);
 }
 
 // Update given feed from server.

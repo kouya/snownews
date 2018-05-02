@@ -521,7 +521,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 				} else {
 					// second pass, give up on unknown error base class
 					cur_ptr->netio_error = NET_ERR_HTTP_NON_200;
-					syslog (LOG_ERR, servreply);
+					syslog (LOG_ERR, "%s", servreply);
 					fclose (stream);
 					return NULL;
 				}
