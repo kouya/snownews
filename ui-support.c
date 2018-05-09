@@ -141,7 +141,7 @@ void UISupportURLJump (const char* url) {
 	char browcall [PATH_MAX];
 	snprintf (browcall, sizeof(browcall), _settings.browser, escapedurl);
 
-	char execmsg [128];
+	char execmsg [sizeof(browcall)+strlen("Executing ")];
 	snprintf (execmsg, sizeof(execmsg), _("Executing %s"), browcall);
 	UIStatus (execmsg, 0, 0);
 
