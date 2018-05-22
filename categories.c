@@ -1,128 +1,92 @@
-/* Snownews - A lightweight console RSS newsreader
- * $Id: categories.c 1146 2005-09-10 10:05:21Z kiza $
- * 
- * Copyright 2003-2004 Oliver Feiler <kiza@kcore.de>
- * http://kiza.kcore.de/software/snownews/
- *
- * categories.c
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+// This file is part of Snownews - A lightweight console RSS newsreader
+//
+// Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+//
+// Snownews is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// Snownews is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "config.h"
+#include "main.h"
 #include "categories.h"
 
-struct categories *first_category = NULL;
-
-/* Compare global category list with string categoryname and return 1 if a
-   matching category was found. */
-int CategoryListItemExists (char * categoryname) {
-	struct categories *category;
-	
-	for (category = first_category; category != NULL; category = category->next_ptr) {
-		if (strcasecmp (category->name, categoryname) == 0) {
-			/* Matching category found. */
-			return 1;
-		}
-	}
-
-	return 0;
+// Compare global category list with string categoryname and return 1 if a
+// matching category was found.
+static bool CategoryListItemExists (const char* categoryname) {
+	for (const struct categories* category = _settings.global_categories; category; category = category->next)
+		if (strcasecmp (category->name, categoryname) == 0)
+			return true;	// Matching category found.
+	return false;
 }
 
-
-/* The following functions add items to/delete items from the global
-   category list. */
-void CategoryListAddItem (char * categoryname) {
-	int inserted = 0;
-	struct categories *category;
-	struct categories *before_ptr = NULL;
-	struct categories *new_ptr;
-		
+// The following functions add items to/delete items from the global category list.
+static void CategoryListAddItem (const char* categoryname) {
 	if (CategoryListItemExists (categoryname)) {
-		/* Only increase refcount */
-		for (category = first_category; category != NULL; category = category->next_ptr) {
+		// Only increase refcount
+		for (struct categories* category = _settings.global_categories; category; category = category->next)
 			if (strcasecmp (category->name, categoryname) == 0)
 				category->refcount++;
-		}
 	} else {
-		/* Otherwise add item to structure */
-		category = malloc (sizeof(struct categories));
+		// Otherwise add item to structure
+		struct categories* category = malloc (sizeof(struct categories));
 		category->name = strdup (categoryname);
-		category->next_ptr = NULL;
-		
-		if (first_category == NULL) {
-			/* Contains no elements */
-			category->next_ptr = first_category;
-			first_category = category;
+		category->next = NULL;
+
+		if (!_settings.global_categories) {	// Contains no elements
+			category->next = _settings.global_categories;
+			_settings.global_categories = category;
 		} else {
-			for (new_ptr = first_category; new_ptr != NULL; new_ptr = new_ptr->next_ptr) {
-				if (strcasecmp (category->name, new_ptr->name) > 0) {
-					/* New category still below current one. Move on. */
-					before_ptr = new_ptr;
-				} else {
-					if (before_ptr == NULL) {
-						/* Insert before first_ptr */
-						category->next_ptr = first_category;
-						first_category = category;
-					} else {
-						/* Insert after first_ptr */
-						before_ptr->next_ptr = category;
-						category->next_ptr = new_ptr;
+			bool inserted = false;
+			struct categories *before_ptr = NULL;
+			for (struct categories* new_ptr = _settings.global_categories; new_ptr; new_ptr = new_ptr->next) {
+				if (strcasecmp (category->name, new_ptr->name) > 0)
+					before_ptr = new_ptr;	// New category still below current one. Move on.
+				else {
+					if (!before_ptr) {	// Insert before _settings.global_categories
+						category->next = _settings.global_categories;
+						_settings.global_categories = category;
+					} else {		// Insert after category
+						before_ptr->next = category;
+						category->next = new_ptr;
 					}
-					inserted = 1;
-					/* Done with this loop. */
-					break;
+					inserted = true;
+					break;	// Done with this loop.
 				}
 			}
-			if (!inserted) {
-				/* No match from above. Insert new item at the end of the list. */
-				before_ptr->next_ptr = category;
-			}
+			if (!inserted) // No match from above. Insert new item at the end of the list.
+				before_ptr->next = category;
 		}
-		
-		/* Set refcount to 1 for newly added category. */
+		// Set refcount to 1 for newly added category.
 		category->refcount = 1;
 	}
 }
 
-/* Delete item from category list. Decrease refcount for each deletion.
-   If refcount hits 0, remove from list. */
-void CategoryListDeleteItem (char * categoryname) {
-	struct categories *category;
-	struct categories *before_ptr = NULL;	/* gcc complains ptr uninit with -O2 */
-	
-	for (category = first_category; category != NULL; category = category->next_ptr) {
+// Delete item from category list. Decrease refcount for each deletion.
+// If refcount hits 0, remove from list.
+static void CategoryListDeleteItem (const char* categoryname) {
+	for (struct categories *category = _settings.global_categories, *before_ptr = NULL; category; category = category->next) {
 		if (strcasecmp (category->name, categoryname) == 0) {
-			/* Check refcount */
+			// Check refcount
 			if (category->refcount > 1) {
-				/* Still at least one feed defining this category */
+				// Still at least one feed defining this category
 				category->refcount--;
 				break;
 			} else {
-				/* Last feed using this category removed, kill off the structure */
-				if (category == first_category) {
-					first_category = first_category->next_ptr;
+				// Last feed using this category removed, kill off the structure
+				if (category == _settings.global_categories) {
+					_settings.global_categories = _settings.global_categories->next;
 					free (category->name);
 					free (category);
 					break;
 				} else {
-					before_ptr->next_ptr = category->next_ptr;
+					before_ptr->next = category->next;
 					free (category->name);
 					free (category);
 					break;
@@ -133,68 +97,54 @@ void CategoryListDeleteItem (char * categoryname) {
 	}
 }
 
-/* The following two functions add items to/delete items from a feeds
-   category list. */
-void FeedCategoryAdd (struct feed * cur_ptr, char * categoryname) {
-	int inserted = 0;
-	struct feedcategories *category;
-	struct feedcategories *before_ptr = NULL;
-	struct feedcategories *new_ptr;
-	
-	category = malloc (sizeof(struct feedcategories));
+// The following two functions add items to/delete items from a feeds category list.
+void FeedCategoryAdd (struct feed* cur_ptr, const char* categoryname) {
+	struct feedcategories* category = malloc (sizeof(struct feedcategories));
 	category->name = strdup (categoryname);
-	category->next_ptr = NULL;
-	
-	
+	category->next = NULL;
+
 	if (cur_ptr->feedcategories == NULL) {
-		/* Contains no elements */
-		category->next_ptr = cur_ptr->feedcategories;
+		// Contains no elements
+		category->next = cur_ptr->feedcategories;
 		cur_ptr->feedcategories = category;
 	} else {
-		for (new_ptr = cur_ptr->feedcategories; new_ptr != NULL; new_ptr = new_ptr->next_ptr) {
+		bool inserted = false;
+		struct feedcategories *before_ptr = NULL;
+		for (struct feedcategories* new_ptr = cur_ptr->feedcategories; new_ptr != NULL; new_ptr = new_ptr->next) {
 			if (strcasecmp (category->name, new_ptr->name) > 0) {
-				/* New category still below current one. Move on. */
+				// New category still below current one. Move on.
 				before_ptr = new_ptr;
 			} else {
 				if (before_ptr == NULL) {
-					category->next_ptr = cur_ptr->feedcategories;
+					category->next = cur_ptr->feedcategories;
 					cur_ptr->feedcategories = category;
 				} else {
-					/* The new category is now > current one. Insert it here. */
-					before_ptr->next_ptr = category;
-					category->next_ptr = new_ptr;
+					// The new category is now > current one. Insert it here.
+					before_ptr->next = category;
+					category->next = new_ptr;
 				}
-				inserted = 1;
-				/* Done with this loop. */
-				break;
+				inserted = true;
+				break;	// Done with this loop.
 			}
 		}
-		if (!inserted) {
-			/* No match from above. Insert new item at the end of the list. */
-			before_ptr->next_ptr = category;
-		}
+		if (!inserted)	// No match from above. Insert new item at the end of the list.
+			before_ptr->next = category;
 	}
-	
 	CategoryListAddItem (category->name);
 }
 
-void FeedCategoryDelete (struct feed * cur_ptr, char * categoryname) {
-	struct feedcategories *category;
-	struct feedcategories *before_ptr = NULL;
-	char *tmpname;
-	
-	/* categoryname == category->name which will be freed by this function! */
-	tmpname = strdup (categoryname);
-	
-	for (category = cur_ptr->feedcategories; category != NULL; category = category->next_ptr) {
+void FeedCategoryDelete (struct feed* cur_ptr, const char* categoryname) {
+	// categoryname == category->name which will be freed by this function!
+	char* tmpname = strdup (categoryname);
+	for (struct feedcategories *category = cur_ptr->feedcategories, *before_ptr = NULL; category; category = category->next) {
 		if (strcasecmp (category->name, categoryname) == 0) {
 			if (category == cur_ptr->feedcategories) {
-				cur_ptr->feedcategories = cur_ptr->feedcategories->next_ptr;
+				cur_ptr->feedcategories = cur_ptr->feedcategories->next;
 				free (category->name);
 				free (category);
 				break;
 			} else {
-				before_ptr->next_ptr = category->next_ptr;
+				before_ptr->next = category->next;
 				free (category->name);
 				free (category);
 				break;
@@ -202,102 +152,47 @@ void FeedCategoryDelete (struct feed * cur_ptr, char * categoryname) {
 		}
 		before_ptr = category;
 	}
-	
-	/* Decrease refcount in global category list. */
+
+	// Decrease refcount in global category list.
 	CategoryListDeleteItem (tmpname);
-	
 	free (tmpname);
 }
 
-/* Compare a feeds category list with string categoryname and return 1 if a
-   matching category was found. */
-int FeedCategoryExists (struct feed * cur_ptr, char * categoryname) {
-	struct feedcategories *category;
-	
-	for (category = cur_ptr->feedcategories; category != NULL; category = category->next_ptr) {
-		if (strcasecmp (category->name, categoryname) == 0) {
-			/* Matching category found. */
-			return 1;
-		}
-	}
-
-	return 0;
+// Compare a feeds category list with string categoryname.
+// Return true if a matching category was found.
+bool FeedCategoryExists (const struct feed* cur_ptr, const char* categoryname) {
+	for (const struct feedcategories* category = cur_ptr->feedcategories; category; category = category->next)
+		if (strcasecmp (category->name, categoryname) == 0)
+			return true;
+	return false;
 }
 
-/* Set color label of category */
-void CategoryListColors (char * categoryname, char * label) {
-	struct categories *category;
-	
-	for (category = first_category; category != NULL; category = category->next_ptr) {
-		if (strcasecmp (category->name, categoryname) == 0) {
-			/* Matching category found. */
-			if (strlen(label) > 5) {
-				category->label = atoi (label+5);
-				if ((category->label == 12) ||
-					(category->label == 17))
-					category->labelbold = 1;
-				else
-					category->labelbold = 0;
-			}
-		}
+// Return a comma-separated list of categories defined for the provided feed,
+// NULL if no category is defined for the feed.
+//
+// The caller must free the list.
+char* GetCategoryList (const struct feed *feed) {
+	if (!feed->feedcategories)
+		return NULL;
+	char* categories = malloc (1);
+	categories[0] = 0;
+	size_t len = 1;
+	for (const struct feedcategories* category = feed->feedcategories; category; category = category->next) {
+		len += strlen(", ")+strlen(category->name);
+		categories = realloc (categories, len);
+		if (categories[0])
+			strcat (categories, ", ");
+		strcat (categories, category->name);
 	}
-}
-
-/* Return color label number and bold status of given category */
-int CategoryGetLabel (char * categoryname, int type) {
-	struct categories *category;
-	
-	for (category = first_category; category != NULL; category = category->next_ptr) {
-		if (strcasecmp (category->name, categoryname) == 0) {
-			/* Matching category found. */
-			if (type == 0)
-				return category->label;
-			else
-				return category->labelbold;
-		}
-	}
-	return -1;
-}
-
-/*
- * Return a comma-separated list of categories defined for the provided feed,
- * NULL if no category is defined for the feed.
- *
- * The caller must free the list.
- */
-char *GetCategoryList (struct feed *feed) {
-	struct feedcategories *category;
-	char *categories = NULL;
-	int len;
-
-	if (feed->feedcategories != NULL) {
-		categories = malloc(1);
-		memset (categories, 0, 1);
-		len = 0;
-		for (category = feed->feedcategories; category != NULL; category = category->next_ptr) {
-			len += strlen(category->name)+4;
-			categories = realloc (categories, len);
-			strncat (categories, category->name, len);
-			if (category->next_ptr != NULL)
-				strcat (categories, ", ");
-		}
-	}
-
 	return categories;
 }
 
-/*
- * Free and reset the filters list.
- */
+// Free and reset the filters list.
 void ResetFilters (char **filters) {
-	int i;
-
 	if (!filters)
 		return;
-
-	for (i = 0; i <= 7; i++) {
+	for (unsigned i = 0; i < 8; ++i) {
 		free (filters[i]);
 		filters[i] = NULL;
 	}
 }
-

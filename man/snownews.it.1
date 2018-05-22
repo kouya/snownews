@@ -184,22 +184,6 @@ successive verranno indirizzate direttamente alla nuova locazione.
 Una finestra d'aiuto �sempre accessibile premendo il tasto
 .B 'h'.
 .P
-Una volta per settimana, Snownews controlla automaticamente se �stata
-rilasciata una nuova versione: richiede un file di nome "version" dal
-sito web dell'autore e confronta il valore ottenuto con la versione
-del programma utilizzato. Se queste non sono uguali, l'utente viene
-informato della disponibilit�di una nuova versione.
-Questo controllo viene fatto quando si esce dal programma, in modo da
-risultare il meno fastidioso possibile.
-In questo modo, �possibile ignorare eventuali notifiche se non �possibile o non si vuole procedere ad aggiornare il programma.
-E' comunque possibile disabilitare completamente questo controllo, 
-lanciando Snownews con l'opzione "--disable-versioncheck". 
-Nota che in ogni caso non viene trasferita alcuna informazione al sito
-dell'autore. Infatti, il sistema di controllo automatico degli aggiornamenti
-trasferisce soltanto un file dal sito dell'autore al sito locale e
-confronta il numero di versione registrato in tale file con la
-versione del programma usata localmente.
-.P
 Se si utilizza un 
 .B proxy server
 server proxy per accedere a Internet, si deve impostare la variabile
@@ -221,9 +205,6 @@ disponibili ed esce.
 .P
 .B \-\-version or \-V,
 Stampa il numero di versione ed esce.
-.P
-.B \-\-disable\-versioncheck,
-Disabilita il controllo automatico degli aggiornamenti.
 .SH AMBIENTE
 .TP
 .B http_proxy

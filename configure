@@ -25,7 +25,7 @@ seds=[s/ -std=c/ -march=native -std=c/]
 }{
 name=[without-nls]
 desc=[	Disable translations]
-seds=[s/^#define \(LOCALEPATH\)/#undef \1 \/\/ /;s/ -lintl//]
+seds=[s/^#define \(LOCALEPATH\)/#undef \1 \/\/ /;s/^\(LOCALEPATH\)/#\1/;s/ -lintl//]
 }{
 name=[with-experimental]
 desc=[Enable experimental code]

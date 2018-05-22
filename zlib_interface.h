@@ -1,27 +1,21 @@
-/*
- *  $Id: zlib_interface.h 289 2004-10-30 13:26:49Z kiza $
- *  JaguarFoundation
- *  Copyright © 2004 René Puls <http://purl.org/net/kianga/>
- *
- *  Latest version: <http://purl.org/net/kianga/latest/jaguartools>
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public
- *  License version 3, as published by the Free Software Foundation.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+// This file is part of Snownews - A lightweight console RSS newsreader
+//
+// Copyright (c) 2004 René Puls <http://purl.org/net/kianga/>
+//
+// Snownews is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// Snownews is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef JG_ZLIB_INTERFACE
-#define JG_ZLIB_INTERFACE
+#pragma once
+#include "config.h"
 
 enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_OLDVERSION = -1,
@@ -32,11 +26,4 @@ enum JG_ZLIB_ERROR {
 	JG_ZLIB_ERROR_BAD_FLAGS = -6
 };
 
-int jg_zlib_uncompress(void const *in_buf, int in_size, 
-                       void **out_buf_ptr, int *out_size,
-                       int gzip);   
-
-int jg_gzip_uncompress(void const *in_buf, int in_size,
-                       void **out_buf_ptr, int *out_size);
-
-#endif
+int jg_gzip_uncompress(const void* in_buf, unsigned in_size, void** out_buf_ptr, unsigned* out_size);

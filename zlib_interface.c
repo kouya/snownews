@@ -1,32 +1,21 @@
-/*
- *  $Id: zlib_interface.c 289 2004-10-30 13:26:49Z kiza $
- *  JaguarFoundation
- *  Copyright © 2004 René Puls <http://purl.org/net/kianga/>
- *
- *  Latest version: <http://purl.org/net/kianga/latest/jaguartools>
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public
- *  License version 3, as published by the Free Software Foundation.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+// This file is part of Snownews - A lightweight console RSS newsreader
+//
+// Copyright (c) 2004 Rene Puls <rpuls@gmx.net>
+//
+// Snownews is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// Snownews is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "zlib_interface.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <zlib.h>
-#include <string.h>
-
-static const int JG_ZLIB_DEBUG = 0;
 
 struct gzip_header {
 	unsigned char magic[2];
@@ -42,49 +31,35 @@ struct gzip_footer {
 	unsigned char size[4];
 };
 
-int jg_zlib_uncompress(void const *in_buf, int in_size, 
-				       void **out_buf_ptr, int *out_size,
-					   int gzip)
+static int jg_zlib_uncompress(void const *in_buf, unsigned in_size, void **out_buf_ptr, unsigned* out_size, bool gzip)
 {
-	char tmpstring[1024];
-	z_stream stream;
-	char *out_buf = NULL;
-	int out_buf_bytes = 0;
-	unsigned char tmp_buf[4096];
-	int result;
-	int new_bytes;
+	// Prepare the stream structure.
+	z_stream stream = {};
 
-	/* Prepare the stream structure. */
-	stream.zalloc = NULL;
-	stream.zfree = NULL;
-	stream.opaque = NULL;
 	stream.next_in = (void*) in_buf;
 	stream.avail_in = in_size;
+
+	unsigned char tmp_buf [BUFSIZ];
 	stream.next_out = tmp_buf;
 	stream.avail_out = sizeof tmp_buf;
 
-	if (out_size != NULL)
+	if (out_size)
 		*out_size = 0;
 
-	if (gzip)
-		result = inflateInit2(&stream, MAX_WBITS + 32); /* UNTESTED */
-	else
-		result = inflateInit2(&stream, -MAX_WBITS);
-
-	if (result != 0) {
-		if (JG_ZLIB_DEBUG)
-			fprintf(stderr, "inflateInit2 failed: %d\n", result);
+	int result = inflateInit2 (&stream, gzip ? MAX_WBITS + 32 : -MAX_WBITS);
+	if (result)
 		return JG_ZLIB_ERROR_OLDVERSION;
-	}
 
+	char *out_buf = NULL;
+	unsigned out_buf_bytes = 0;
 	do {
-		/* Should be Z_FINISH? */
+		// Should be Z_FINISH?
 		result = inflate(&stream, Z_NO_FLUSH);
 		switch (result) {
 			case Z_BUF_ERROR:
 				if (stream.avail_in == 0)
-					goto DONE; /* zlib bug */
-				/* fallthrough */
+					goto DONE; // zlib bug
+				// fallthrough
 			case Z_ERRNO:
 			case Z_NEED_DICT:
 			case Z_MEM_ERROR:
@@ -92,95 +67,55 @@ int jg_zlib_uncompress(void const *in_buf, int in_size,
 			case Z_VERSION_ERROR:
 				inflateEnd(&stream);
 				free(out_buf);
-				if (JG_ZLIB_DEBUG) {
-					snprintf (tmpstring, sizeof(tmpstring), "ERROR: zlib_uncompress: %d %s\n", result, stream.msg);
-					fprintf(stderr, tmpstring);
-				}
 				return JG_ZLIB_ERROR_UNCOMPRESS;
 		}
-		if (stream.avail_out < sizeof tmp_buf) {
-			/* Add the new uncompressed data to our output buffer. */
-			new_bytes = sizeof tmp_buf - stream.avail_out;
+		if (stream.avail_out < sizeof(tmp_buf)) {
+			// Add the new uncompressed data to our output buffer.
+			unsigned new_bytes = sizeof(tmp_buf) - stream.avail_out;
 			out_buf = realloc(out_buf, out_buf_bytes + new_bytes);
 			memcpy(out_buf + out_buf_bytes, tmp_buf, new_bytes);
 			out_buf_bytes += new_bytes;
 			stream.next_out = tmp_buf;
-			stream.avail_out = sizeof tmp_buf;
+			stream.avail_out = sizeof(tmp_buf);
 		} else {
-			/* For some reason, inflate() didn't write out a single byte. */
+			// For some reason, inflate() didn't write out a single byte.
 			inflateEnd(&stream);
 			free(out_buf);
-			if (JG_ZLIB_DEBUG)
-				fprintf(stderr, "ERROR: No output during decompression\n");
 			return JG_ZLIB_ERROR_NODATA;
 		}
 	} while (result != Z_STREAM_END);
-
 DONE:
+	inflateEnd (&stream);
 
-	inflateEnd(&stream);
-
-	/* Null-terminate the output buffer so it can be handled like a string. */
-	out_buf = realloc(out_buf, out_buf_bytes + 1);
+	// Null-terminate the output buffer so it can be handled like a string.
+	out_buf = realloc (out_buf, out_buf_bytes + 1);
 	out_buf[out_buf_bytes] = 0;
 
-	/* The returned size does NOT include the additionall null byte! */
-	if (out_size != NULL)
+	// The returned size does NOT include the additionall null byte!
+	if (out_size)
 		*out_size = out_buf_bytes;
-
 	*out_buf_ptr = out_buf;
-
 	return 0;
 }
 
-/* Decompressed gzip,deflate compressed data. This is what the webservers usually send. */
-
-int jg_gzip_uncompress(void const *in_buf, int in_size, 
-					   void **out_buf_ptr, int *out_size) 
+// Decompressed gzip,deflate compressed data. This is what the webservers usually send.
+int jg_gzip_uncompress (const void* in_buf, unsigned in_size, void** out_buf_ptr, unsigned* out_size)
 {
-	char tmpstring[1024];
-	struct gzip_header const *header;
-	char *data_start;
-	int offset = sizeof *header;
-
-	header = in_buf;
-
-	if (out_size != NULL)
+	if (out_size)
 		*out_size = 0;
 
-	if ((header->magic[0] != 0x1F) || (header->magic[1] != 0x8B)) {
-		if (JG_ZLIB_DEBUG)
-			fprintf(stderr, "ERROR: Invalid magic bytes for GZIP data\n");
+	const struct gzip_header* header = in_buf;
+	if ((header->magic[0] != 0x1F) || (header->magic[1] != 0x8B))
 		return JG_ZLIB_ERROR_BAD_MAGIC;
-	}
-
-	if (header->method != 8) {
-		if (JG_ZLIB_DEBUG)
-			fprintf(stderr, "ERROR: Compression method is not deflate\n");
+	if (header->method != 8)
 		return JG_ZLIB_ERROR_BAD_METHOD;
-	}
-
-	if (header->flags != 0 && header->flags != 8) {
-		if (JG_ZLIB_DEBUG) {
-			snprintf (tmpstring, sizeof(tmpstring), "ERROR: Unsupported flags %d", header->flags);
-			fprintf(stderr, "ERROR: %s\n", tmpstring);
-		}
+	if (header->flags != 0 && header->flags != 8)
 		return JG_ZLIB_ERROR_BAD_FLAGS;
-	}
 
-	if (header->flags & 8) {
-		/* skip the file name */
-		while (offset < in_size) {
-			if (((char *)in_buf)[offset] == 0) {
-				offset++;
+	unsigned offset = sizeof(*header);
+	if (header->flags & 8)	// skip the file name
+		while (offset < in_size)
+			if (((char *)in_buf)[offset++] == 0)
 				break;
-			}
-			offset++;
-		}
-	}
-
-	data_start = (char *)in_buf + offset;
-
-	return jg_zlib_uncompress(data_start, in_size - offset - 8, 
-							  out_buf_ptr, out_size, 0);
+	return jg_zlib_uncompress ((char*)in_buf + offset, in_size - offset - 8, out_buf_ptr, out_size, 0);
 }
