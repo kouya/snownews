@@ -214,9 +214,6 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		} else
 			attroff (WA_BOLD);
 
-		// Set current item to read.
-		current_item->data->readstatus = true;
-
 		char keyinfostr [128];
 		snprintf (keyinfostr, sizeof(keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), _settings.keybindings.prevmenu, _settings.keybindings.help);
 		UIStatus (keyinfostr, 0, 0);
@@ -518,6 +515,7 @@ static int UIDisplayFeed (struct feed* current_feed) {
 		move (highlightline, 0);
 		int uiinput = getch();
 
+		time_t curtime = time (NULL);
 		if (typeahead) {
 			// Only match real characters.
 			if (uiinput >= ' ' && uiinput <= '~') {
@@ -612,12 +610,15 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			else if (uiinput == _settings.keybindings.urljump2 && highlighted)
 				UISupportURLJump (highlighted->data->link);
 			else if (uiinput == _settings.keybindings.markread) {	// Mark everything read.
-				for (struct newsitem* i = current_feed->items; i; i = i->next)
-					i->data->readstatus = true;
-				current_feed->mtime = time(NULL);
+				for (struct newsitem* i = current_feed->items; i; i = i->next) {
+					if (!i->data->readstatus) {
+						i->data->readstatus = true;
+						current_feed->mtime = curtime;
+					}
+				}
 			} else if (uiinput == _settings.keybindings.markunread && highlighted) {
 				highlighted->data->readstatus = !highlighted->data->readstatus;
-				current_feed->mtime = time(NULL);
+				current_feed->mtime = curtime;
 				reloaded = true;
 			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
@@ -643,7 +644,10 @@ static int UIDisplayFeed (struct feed* current_feed) {
 			// Don't even try to view a non existant item.
 			if (highlighted) {
 				UIDisplayItem (highlighted, current_feed, categories);
-				current_feed->mtime = time(NULL);
+				if (!highlighted->data->readstatus) {
+					highlighted->data->readstatus = true;
+					current_feed->mtime = curtime;
+				}
 				tmp_highlighted = highlighted;
 				tmp_first = first_scr_ptr;
 
@@ -1172,10 +1176,14 @@ void UIMainInterface (void) {
 				// This function is safe for using in filter mode, because it only
 				// changes int values. It automatically marks the correct ones read
 				// if a filter is applied since we are using a copy of the main data.
+				time_t curtime = time (NULL);
 				for (struct feed* f = _feed_list; f; f = f->next) {
-					for (struct newsitem* i = f->items; i; i = i->next)
-						i->data->readstatus = true;
-					f->mtime = time(NULL);
+					for (struct newsitem* i = f->items; i; i = i->next) {
+						if (!i->data->readstatus) {
+							i->data->readstatus = true;
+							f->mtime = curtime;
+						}
+					}
 				}
 			} else if (uiinput == _settings.keybindings.about)
 				UIAbout();
