@@ -36,9 +36,9 @@ seds=[s/^#undef \(USE_UNSUPPORTED_AND_BROKEN_CODE\)/#define \1/]
 PROGS="CC=gcc CC=clang INSTALL=install MSGFMT=msgfmt"
 
 # Libs found using pkg-config
-LIBS="libcrypto libxml-2.0 ncurses zlib"
+LIBS="libxml-2.0 ncurses zlib"
 # Defaults to substitute with pkg-config --libs output
-DEFLIBS="-lcrypto -lxml2 -lncursesw -lz"
+DEFLIBS="-lxml2 -lncursesw -lz"
 # Defaults to substitute with pkg-config --cflags output
 DEFINCS="-I\/usr\/include\/libxml2"
 

@@ -38,8 +38,7 @@ You will need the following:
 - GCC compiler 5+
 - ncurses 5.0+
 - libxml2
-- openssl 1.1+
-- Perl (any recent version will do)
+- Perl (for extension scripts)
 - gettext (lib and msgfmt tool)
 
 Simply do the following steps:
@@ -93,6 +92,7 @@ Snownews and its documentation is currently available in the following languages
 * German
 * Italian
 * Japanese
+* Korean
 * Polish
 * Portuguese, Brazilian
 * Russian

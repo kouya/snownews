@@ -19,38 +19,31 @@
 // MD5 implementation rather than using RSA's.
 
 #include "digcalc.h"
-#include <openssl/evp.h>
 
 // calculate H(A1) as per spec
 void DigestCalcHA1 (const char* pszAlg, const char* pszUserName, const char* pszRealm,
 	const char* pszPassword, const char* pszNonce, const char* pszCNonce,
 	HASHHEX SessionKey)
 {
-	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
-	EVP_DigestInit (mdctx, EVP_md5());
-	EVP_DigestUpdate (mdctx, pszUserName, strlen(pszUserName));
-	EVP_DigestUpdate (mdctx, ":", 1);
-	EVP_DigestUpdate (mdctx, pszRealm, strlen(pszRealm));
-	EVP_DigestUpdate (mdctx, ":", 1);
-	EVP_DigestUpdate (mdctx, pszPassword, strlen(pszPassword));
-	unsigned char md_value [EVP_MAX_MD_SIZE];
-	unsigned md_len;
-	EVP_DigestFinal_ex (mdctx, md_value, &md_len);
-
-	if (strcmp(pszAlg, "md5-sess") == 0) {
-		EVP_DigestInit (mdctx, EVP_md5());
-		EVP_DigestUpdate (mdctx, md_value, md_len);
-		EVP_DigestUpdate (mdctx, ":", 1);
-		EVP_DigestUpdate (mdctx, pszNonce, strlen(pszNonce));
-		EVP_DigestUpdate (mdctx, ":", 1);
-		EVP_DigestUpdate (mdctx, pszCNonce, strlen(pszCNonce));
-		EVP_DigestFinal_ex (mdctx, md_value, &md_len);
+	struct HashMD5 hash;
+	hash_md5_init (&hash);
+	hash_md5_data (&hash, pszUserName, strlen(pszUserName));
+	hash_md5_data (&hash, ":", 1);
+	hash_md5_data (&hash, pszRealm, strlen(pszRealm));
+	hash_md5_data (&hash, ":", 1);
+	hash_md5_data (&hash, pszPassword, strlen(pszPassword));
+	hash_md5_finish (&hash);
+	if (strcmp (pszAlg, "md5-sess") == 0) {
+		hash_md5_init (&hash);
+		hash_md5_data (&hash, hash.hash, sizeof(hash.hash));
+		hash_md5_data (&hash, ":", 1);
+		hash_md5_data (&hash, pszNonce, strlen(pszNonce));
+		hash_md5_data (&hash, ":", 1);
+		hash_md5_data (&hash, pszCNonce, strlen(pszCNonce));
+		hash_md5_finish (&hash);
 	}
-	EVP_MD_CTX_free (mdctx);
-
-	for (unsigned i = 0; i < md_len; ++i)
-		sprintf (&SessionKey[2*i], "%02x", md_value[i]);
-};
+	hash_md5_to_text (&hash, SessionKey);
+}
 
 // calculate request-digest/response-digest as per HTTP Digest spec
 void DigestCalcResponse(
@@ -66,41 +59,34 @@ void DigestCalcResponse(
     )
 {
 	// calculate H(A2)
-	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
-	EVP_DigestInit (mdctx, EVP_md5());
-	EVP_DigestUpdate (mdctx, pszMethod, strlen(pszMethod));
-	EVP_DigestUpdate (mdctx, ":", 1);
-	EVP_DigestUpdate (mdctx, pszDigestUri, strlen(pszDigestUri));
-	if (strcmp(pszQop, "auth-int") == 0) {
-		EVP_DigestUpdate (mdctx, ":", 1);
-		EVP_DigestUpdate (mdctx, HEntity, HASHHEXLEN);
+	struct HashMD5 hash;
+	hash_md5_init (&hash);
+	hash_md5_data (&hash, pszMethod, strlen(pszMethod));
+	hash_md5_data (&hash, ":", 1);
+	hash_md5_data (&hash, pszDigestUri, strlen(pszDigestUri));
+	if (strcmp (pszQop, "auth-int") == 0) {
+		hash_md5_data (&hash, ":", 1);
+		hash_md5_data (&hash, HEntity, HASHHEXLEN);
 	}
-	unsigned char md_value [EVP_MAX_MD_SIZE];
-	unsigned md_len = 0;
-	EVP_DigestFinal_ex (mdctx, md_value, &md_len);
-
+	hash_md5_finish (&hash);
 	HASHHEX HA2Hex;
-	for (unsigned i = 0; i < md_len; ++i)
-		sprintf (&HA2Hex[2*i], "%02x", md_value[i]);
+	hash_md5_to_text (&hash, HA2Hex);
 
 	// calculate response
-	EVP_DigestInit (mdctx, EVP_md5());
-	EVP_DigestUpdate (mdctx, HA1, HASHHEXLEN);
-	EVP_DigestUpdate (mdctx, ":", 1);
-	EVP_DigestUpdate (mdctx, pszNonce, strlen(pszNonce));
-	EVP_DigestUpdate (mdctx, ":", 1);
+	hash_md5_init (&hash);
+	hash_md5_data (&hash, HA1, HASHHEXLEN);
+	hash_md5_data (&hash, ":", 1);
+	hash_md5_data (&hash, pszNonce, strlen(pszNonce));
+	hash_md5_data (&hash, ":", 1);
 	if (*pszQop) {
-		EVP_DigestUpdate (mdctx, pszNonceCount, strlen(pszNonceCount));
-		EVP_DigestUpdate (mdctx, ":", 1);
-		EVP_DigestUpdate (mdctx, pszCNonce, strlen(pszCNonce));
-		EVP_DigestUpdate (mdctx, ":", 1);
-		EVP_DigestUpdate (mdctx, pszQop, strlen(pszQop));
-		EVP_DigestUpdate (mdctx, ":", 1);
+		hash_md5_data (&hash, pszNonceCount, strlen(pszNonceCount));
+		hash_md5_data (&hash, ":", 1);
+		hash_md5_data (&hash, pszCNonce, strlen(pszCNonce));
+		hash_md5_data (&hash, ":", 1);
+		hash_md5_data (&hash, pszQop, strlen(pszQop));
+		hash_md5_data (&hash, ":", 1);
 	};
-	EVP_DigestUpdate (mdctx, HA2Hex, HASHHEXLEN);
-	EVP_DigestFinal_ex (mdctx, md_value, &md_len);
-	EVP_MD_CTX_free (mdctx);
-
-	for (unsigned i = 0; i < md_len; ++i)
-		sprintf (&Response[2*i], "%02x", md_value[i]);
-};
+	hash_md5_data (&hash, HA2Hex, HASHHEXLEN);
+	hash_md5_finish (&hash);
+	hash_md5_to_text (&hash, Response);
+}

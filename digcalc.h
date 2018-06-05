@@ -19,9 +19,9 @@
 // MD5 implementation rather than using RSA's.
 
 #pragma once
-#include "config.h"
+#include "md5.h"
 
-enum { HASHHEXLEN = 32 };
+enum { HASHHEXLEN = HASH_SIZE_MD5*2 };
 typedef char HASHHEX [HASHHEXLEN+1];
 
 // calculate H(A1) as per HTTP Digest spec
