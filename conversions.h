@@ -23,7 +23,7 @@ char* WrapText (const char* text, unsigned width);
 char* base64encode(const char* inbuf, unsigned int inbuf_size);
 void CleanupString (char * string, int tidyness);
 char * Hashify (const char * url);
-char* genItemHash (const char* const* hashitems, int items);
+char* genItemHash (const char* const* hashitems, unsigned items);
 time_t ISODateToUnix (const char* ISODate);
 time_t pubDateToUnix (const char* pubDate);
 char* unixToPostDateString (time_t unixDate);

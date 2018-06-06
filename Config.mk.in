@@ -29,7 +29,7 @@ O		:= .o/
 
 CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow \
 		   -std=c11 -I/usr/include/libxml2
-LDFLAGS		:= -liconv -lintl -lcrypto -lxml2 -lncurses -lz
+LDFLAGS		:= -liconv -lintl -lxml2 -lncurses -lz
 ifdef DEBUG
     CFLAGS	+= -O0 -ggdb3
     LDFLAGS	+= -g -rdynamic

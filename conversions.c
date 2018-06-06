@@ -21,11 +21,10 @@
 #include "main.h"
 #include "conversions.h"
 #include "os-support.h"
+#include "md5.h"
 #include <iconv.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
-#include <openssl/evp.h>
-#include <openssl/md5.h>
 
 //----------------------------------------------------------------------
 
@@ -492,23 +491,16 @@ char * Hashify (const char * url) {
 	return hashed_url;
 }
 
-char * genItemHash (const char* const* hashitems, int items) {
-	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
-	EVP_DigestInit(mdctx, EVP_md5());
-
-	for (int i = 0; i < items; ++i)
+char* genItemHash (const char* const* hashitems, unsigned items) {
+	struct HashMD5 hash;
+	hash_md5_init (&hash);
+	for (unsigned i = 0; i < items; ++i)
 		if (hashitems[i])
-			EVP_DigestUpdate (mdctx, hashitems[i], strlen(hashitems[i]));
-
-	unsigned char md_value [EVP_MAX_MD_SIZE];
-	unsigned md_len = 0;
-	EVP_DigestFinal_ex (mdctx, md_value, &md_len);
-	EVP_MD_CTX_free (mdctx);
-
-	char md5_hex [MD5_DIGEST_LENGTH*2+1];
-	for (unsigned i = 0; i < md_len; ++i)
-		sprintf (&md5_hex[2*i], "%02x", md_value[i]);
-	return strdup(md5_hex);
+			hash_md5_data (&hash, hashitems[i], strlen(hashitems[i]));
+	hash_md5_finish (&hash);
+	char hashtext [HASH_SIZE_MD5*2+1];
+	hash_md5_to_text (&hash, hashtext);
+	return strdup (hashtext);
 }
 
 // Date conversion
