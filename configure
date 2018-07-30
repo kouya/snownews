@@ -4,7 +4,7 @@
 ######################################################################
 
 PKG_NAME="snownews"
-PKG_VERSTR="v1.5.13"
+PKG_VERSTR="v1.6.0"
 
 MNT_NAME="Oliver Feiler"
 MNT_MAIL="kiza@kcore.de"
