@@ -34,6 +34,7 @@ seds=[s/^#undef \(USE_UNSUPPORTED_AND_BROKEN_CODE\)/#define \1/]
 
 # First pair is used if nothing matches
 PROGS="CC=gcc CC=clang INSTALL=install MSGFMT=msgfmt"
+ENVIRONS="CFLAGS LDFLAGS"
 
 # Libs found using pkg-config
 LIBS="libxml-2.0 ncurses zlib"
@@ -194,10 +195,7 @@ done
 # And, finally, the environment variables
 for i in $ENVIRONS; do
     esciv="`eval echo '"'\$\{$i\}'"'|sed 's/\//\\\&/g'`"
-    ppath=`eval echo \$\{$pname\}`
-    ppath=`escpath "$ppath"`
-    [ ! -z "$ppath" ] && ppath=" $ppath"
-    sub "s/ @$i@/$ppath/g"
+    sub "s/@$i@/$esciv/g"
 done
 
 sub "$CUSTSUBS"

@@ -27,9 +27,9 @@ O		:= .o/
 
 ################ Compiler options ####################################
 
-CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow \
+CFLAGS		:= @CFLAGS@ -Wall -Wextra -Wredundant-decls -Wshadow \
 		   -std=c11 -I/usr/include/libxml2
-LDFLAGS		:= -liconv -lintl -lxml2 -lncurses -lz
+LDFLAGS		:= @LDFLAGS@ -liconv -lintl -lxml2 -lncurses -lz
 ifdef DEBUG
     CFLAGS	+= -O0 -ggdb3
     LDFLAGS	+= -g -rdynamic
