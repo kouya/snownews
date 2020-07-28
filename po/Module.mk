@@ -1,39 +1,54 @@
 ################ Source files ##########################################
 
-po/SRCS	:= $(filter-out po/messages.po,$(wildcard po/*.po))
-po/OBJS	:= $(addprefix $O,$(po/SRCS:.po=.mo))
-LOCALES	:= $(notdir $(po/SRCS:.po=))
+po/srcs	:= $(filter-out po/messages.po,$(wildcard po/*.po))
+po/objs	:= $(addprefix $O,$(po/srcs:.po=.mo))
+locales	:= $(notdir $(po/srcs:.po=))
 
 ################ Installation ##########################################
-ifdef LOCALEPATH
-.PHONY:	po/install po/uninstall po/clean
 
-po/IPREFIX	:= ${PKGDIR}${LOCALEPATH}/
-po/ISUFFIX	:= /LC_MESSAGES/${NAME}.mo
-po/OBJSI	:= $(foreach l,${LOCALES},${po/IPREFIX}${l}${po/ISUFFIX})
+ifdef localedir
+.PHONY:	po/all po/install po/uninstall po/clean
 
-${po/OBJSI}:	${po/IPREFIX}%${po/ISUFFIX}:	po/%.po
+all:	po/all
+po/all:	${po/objs}
+
+pod		:= ${DESTDIR}${localedir}
+polds		:= $(foreach l,${locales},${pod}/${l}/LC_MESSAGES)
+po/objsi	:= $(foreach l,${polds},${l}/${name}.mo)
+
+${pod}:
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+${polds}: | ${pod}
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+${po/objsi}:	${pod}/%/LC_MESSAGES/${name}.mo:	$Opo/%.mo | ${polds}
 	@echo "Installing $@ ..."
-	@${MSGFMT} -o $Opo/$*.mo $<
-	@${INSTALLDATA} $Opo/$*.mo $@
+	@${INSTALL_DATA} $< $@
 
+installdirs:	${polds}
 install:	po/install
-po/install:	${po/OBJSI}
+po/install:	${po/objsi}
 
 uninstall:	po/uninstall
 po/uninstall:
-	@if [ -f ${po/IPREFIX}de${po/ISUFFIX} ]; then\
-	    echo "Uninstalling ${NAME} locales ...";\
-	    rm -f ${po/OBJSI};\
+	@if [ -f ${po/pod}/de/${po/suffix} ]; then\
+	    echo "Uninstalling ${name} locales ...";\
+	    rm -f ${po/objsi};\
 	fi
+
+$O%.mo:	%.po
+	@echo "    Compiling $< ..."
+	@${MSGFMT} -o $@ $<
 endif
+
 ################ Maintenance ###########################################
 
 clean:	po/clean
 po/clean:
-	@if [ -d $Opo ]; then\
-	    rm -f ${po/OBJS} $Opo/.d;\
-	    rmdir ${BUILDDIR}/po;\
+	@if [ -d ${builddir}/po ]; then\
+	    rm -f ${po/objs} $Opo/.d;\
+	    rmdir ${builddir}/po;\
 	fi
 
-${po/OBJSI}: |Makefile po/Module.mk ${CONFS} $Opo/.d
+${po/objs}: Makefile po/Module.mk ${confs} | $Opo/.d
