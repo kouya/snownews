@@ -1,141 +1,108 @@
-include Config.mk
+-include Config.mk
 
 ################ Source files ##########################################
 
-EXE	:= $O${NAME}
-SRCS	:= $(wildcard *.c)
-OBJS	:= $(addprefix $O,$(SRCS:.c=.o))
-DEPS	:= ${OBJS:.o=.d}
-CONFS	:= Config.mk config.h
-ONAME   := $(notdir $(abspath $O))
+exe	:= $O${name}
+srcs	:= $(wildcard *.c)
+objs	:= $(addprefix $O,$(srcs:.c=.o))
+deps	:= ${objs:.o=.d}
+confs	:= Config.mk config.h
+oname   := $(notdir $(abspath $O))
 
 ################ Compilation ###########################################
 
+.SUFFIXES:
 .PHONY:	all run
 
-all:	${EXE}
+all:	${exe}
 
-run:	${EXE}
-	@${EXE}
+run:	${exe}
+	@${exe}
 
-${EXE}:	${OBJS}
+${exe}:	${objs}
 	@echo "Linking $@ ..."
-	@${CC} -o $@ $^ ${LDFLAGS}
+	@${CC} ${ldflags} -o $@ $^ ${libs}
 
-${EXE}-static: ${SRCS}
-	${CC} -s -static -o $@ ${CFLAGS} ${SRCS} ${LDFLAGS}
+${exe}-static: ${srcs}
+	@echo "Statically linking $@ ..."
+	@${CC} ${cflags} ${ldflags} -s -static -o $@ $^
 
 $O%.o:	%.c
 	@echo "    Compiling $< ..."
-	@${CC} ${CFLAGS} -MMD -MT "$(<:.c=.s) $@" -o $@ -c $<
+	@${CC} ${cflags} -MMD -MT "$(<:.c=.s) $@" -o $@ -c $<
 
 %.s:	%.c
 	@echo "    Compiling $< to assembly ..."
-	@${CC} ${CFLAGS} -S -o $@ -c $<
+	@${CC} ${cflags} -S -o $@ -c $<
 
 include man/Module.mk
 include po/Module.mk
 
 ################ Installation ##########################################
-ifdef BINDIR
 
-.PHONY:	install uninstall install-bin uninstall-bin
+ifdef bindir
+.PHONY:	install installdirs uninstall uninstall-bin
 
-EXEI	:= ${BINDIR}/$(notdir ${EXE})
-O2SI	:= ${BINDIR}/opml2snow
-S2OI	:= ${BINDIR}/snow2opml
+exed	:= ${DESTDIR}${bindir}
+exei	:= ${exed}/$(notdir ${exe})
+o2si	:= ${exed}/opml2snow
+s2oi	:= ${exed}/snow2opml
 
-install:	install-bin
-install-bin:	${EXEI} ${O2SI} ${S2OI}
-
-${EXEI}:	${EXE}
+${exed}:
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+${exei}:	${exe} | ${exed}
 	@echo "Installing $@ ..."
-	@${INSTALLEXE} $< $@
-${O2SI}:	opml2snow
+	@${INSTALL_PROGRAM} $< $@
+${o2si}:	opml2snow | ${exed}
 	@echo "Installing $@ ..."
-	@${INSTALLSCR} $< $@
-${S2OI}:	${O2SI}
+	@${INSTALL_PROGRAM} $< $@
+${s2oi}:	${o2si} | ${exed}
 	@echo "Installing $@ ..."
-	@(cd ${BINDIR}; rm -f $@; ln -s $(notdir $<) $(notdir $@))
+	@(cd ${exed}; rm -f $@; ln -s $(notdir $<) $(notdir $@))
 
+installdirs:	${exed}
+install:	${exei} ${o2si} ${s2oi}
 uninstall:	uninstall-bin
 uninstall-bin:
-	@if [ -f ${EXEI} ]; then\
-	    echo "Uninstalling ${EXEI} ...";\
-	    rm -f ${EXEI} ${O2SI} ${S2OI};\
+	@if [ -f ${exei} ]; then\
+	    echo "Removing ${exei} ...";\
+	    rm -f ${exei} ${o2si} ${s2oi};\
 	fi
-
 endif
+
 ################ Maintenance ###########################################
 
-.PHONY:	clean distclean maintainer-clean dist dist-binary
+.PHONY:	clean distclean maintainer-clean
 
 clean:
-	@if [ -h ${ONAME} ]; then\
-	    rm -f ${EXE} ${EXE}-static ${OBJS} ${DEPS} $O.d ${ONAME};\
-	    rmdir ${BUILDDIR};\
+	@if [ -d ${builddir} ]; then\
+	    rm -f ${exe} ${exe}-static ${objs} ${deps} $O.d;\
+	    rmdir ${builddir};\
 	fi
 
 distclean:	clean
-	@rm -f ${CONFS} config.status
+	@rm -f ${oname} ${confs} config.status
 
 maintainer-clean: distclean
 
-$O.d:	${BUILDDIR}/.d
-	@[ -h ${ONAME} ] || ln -sf ${BUILDDIR} ${ONAME}
+$O.d:	${builddir}/.d
+	@[ -h ${oname} ] || ln -sf ${builddir} ${oname}
 $O%/.d:	$O.d
 	@[ -d $(dir $@) ] || mkdir $(dir $@)
 	@touch $@
-${BUILDDIR}/.d:	Makefile
+${builddir}/.d:	Makefile
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	@touch $@
 
 Config.mk:	Config.mk.in
-config.h:	config.h.in
-${OBJS}:	Makefile ${CONFS} $O.d
-${CONFS}:	configure
+config.h:	config.h.in | Config.mk
+${objs}:	Makefile ${confs} | $O.d
+${confs}:	configure
 	@if [ -x config.status ]; then echo "Reconfiguring ...";\
 	    ./config.status;\
 	else echo "Running configure ...";\
 	    ./configure;\
 	fi
 
--include ${DEPS}
-
-################ Dist ##################################################
-
-.PHONY:	dist dist-binary
-
-DISTDIR		:= ${NAME}-${VERSION}
-DISTFILES	:= AUTHOR COPYING CREDITS Changelog README README.de README.patching opml2snow \
-	Makefile configure doc po scripts ${SRCS} $(wildcard *.h) config.h
-
-dist: clean
-	./configure
-	mkdir ${DISTDIR}
-	cp -R ${DISTFILES} ${DISTDIR}
-	tar -czf ${DISTDIR}.tar.gz ${DISTDIR}
-	rm -rf ${DISTDIR}
-
-dist-binary: clean ${EXE}-static
-	DISTDIR=${NAME}-i386-${VERSION}
-	mkdir ${DISTDIR}
-	mkdir ${DISTDIR}/man
-	mkdir ${DISTDIR}/man/de
-	mkdir ${DISTDIR}/man/nl
-	mkdir ${DISTDIR}/man/fr
-	mkdir ${DISTDIR}/man/it
-	mkdir ${DISTDIR}/man/ru_RU.KOI8-R
-	mkdir ${DISTDIR}/po
-	cp AUTHOR COPYING CREDITS Changelog README README.de scripts/INSTALL.binary opml2snow ${DISTDIR}
-	cp ${EXE}-static ${DISTDIR}/${NAME}
-	cp doc/man/de/${NAME}.1 ${DISTDIR}/man/de
-	cp doc/man/nl/${NAME}.1 ${DISTDIR}/man/nl
-	cp doc/man/fr/${NAME}.1 ${DISTDIR}/man/fr
-	cp doc/man/it/${NAME}.1 ${DISTDIR}/man/it
-	cp doc/man/ru_RU.KOI8-R/${NAME}.1 ${DISTDIR}/man/ru_RU.KOI8-R
-	cp doc/man/${NAME}.1 ${DISTDIR}/man
-	cp po/*.mo ${DISTDIR}/po
-	cp scripts/install.sh ${DISTDIR}
-	tar -cjf ${DISTDIR}.i386.tar.bz2 ${DISTDIR}
-	rm -rf ${DISTDIR}
+-include ${deps}
