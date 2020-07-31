@@ -1,36 +1,47 @@
 ################ Source files ##########################################
 
-man/LMANS	:= $(wildcard man/snownews.*.1)
-man/MANS	:= $(filter-out ${man/LMANS},$(wildcard man/*.1))
-man/LANGS	:= $(subst man/snownews.,,$(man/LMANS:.1=))
+man/lmans	:= $(wildcard man/snownews.*.1)
+man/mans	:= $(filter-out ${man/lmans},$(wildcard man/*.1))
+man/langs	:= $(subst man/snownews.,,$(man/lmans:.1=))
 
 ################ Installation ##########################################
-ifdef MANPATH
+ifdef man1dir
 .PHONY:	man/install man/uninstall
 
-man/IPREFIX	:= ${PKGDIR}${MANPATH}
-man/MANSI	:= $(subst man/,${man/IPREFIX}/man1/,${man/MANS})
-man/LMANSI	:= $(foreach l,${man/LANGS},${man/IPREFIX}/${l}/man1/snownews.1)
+mand		:= ${DESTDIR}${mandir}
+man1d		:= ${DESTDIR}${man1dir}
+lmand		:= $(foreach l,${man/langs},${mand}/${l}/man1)
+man/emani	:= $(subst man/,${man1d}/,${man/mans})
+man/lmani	:= $(foreach l,${man/langs},${mand}/${l}/man1/snownews.1)
 
-man/MANI	:= ${man/MANSI}
-${man/MANSI}:	${man/IPREFIX}/man1/%:	man/%
+${mand}:
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+${man1d}: | ${mand}
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+${lmand}: | ${mand}
+	@echo "Creating $@ ..."
+	@${INSTALL} -d $@
+man/mani	:= ${man/emani}
+${man/emani}:	${man1d}/%:	man/%	| ${man1d}
 	@echo "Installing $@ ..."
-	@${INSTALLDATA} $< $@
-
-ifdef LOCALEPATH
-man/MANI	+= ${man/LMANSI}
-${man/LMANSI}:	${man/IPREFIX}/%/man1/snownews.1:	man/snownews.%.1
+	@${INSTALL_DATA} $< $@
+ifdef localedir
+man/mani	+= ${man/lmani}
+${man/lmani}:	${mand}/%/man1/snownews.1:	man/snownews.%.1 | ${lmand}
 	@echo "Installing $@ ..."
-	@${INSTALLDATA} $< $@
+	@${INSTALL_DATA} $< $@
 endif
 
+installdirs:	${mand} ${man1d}
 install:	man/install
-man/install:	${man/MANI}
+man/install:	${man/mani}
 
 uninstall:	man/uninstall
 man/uninstall:
-	@if [ -f ${man/IPREFIX}/man1/${NAME}.1 ]; then\
-	    echo "Uninstalling ${NAME} man pages ...";\
-	    rm -f ${man/MANI};\
+	@if [ -f ${man1d}/${name}.1 ]; then\
+	    echo "Uninstalling ${name} man pages ...";\
+	    rm -f ${man/mani};\
 	fi
 endif

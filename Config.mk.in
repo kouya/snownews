@@ -1,39 +1,39 @@
 ################ Package information #################################
 
-NAME		:= @PKG_NAME@
-VERSION		:= @PKG_VERSION@
-
-#DEBUG		:= 1
+name		:= @pkg_name@
+version		:= @pkg_verstr@
 
 ################ Programs ############################################
 
 CC		:= @CC@
 MSGFMT		:= @MSGFMT@
 INSTALL		:= @INSTALL@
-
-INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
-INSTALLSCR	:= ${INSTALL} -D -p -m 755
-INSTALLDATA	:= ${INSTALL} -D -p -m 644
+INSTALL_DATA	:= ${INSTALL} -m 644
+INSTALL_PROGRAM	:= ${INSTALL} -m 755
 
 ################ Destination #########################################
 
-PREFIX		:= @prefix@
-BINDIR		:= @bindir@
-LOCALEPATH	:= @localedir@
-MANPATH		:= @mandir@
-BUILDDIR	:= @builddir@/${NAME}
-PKGDIR		:= @pkgdir@
+prefix		:= @prefix@
+bindir		:= @bindir@
+datadir		:= @datadir@
+mandir		:= @mandir@
+man1dir		:= @man1dir@
+localedir	:= @localedir@
+TMPDIR		:= @TMPDIR@
+builddir	:= @builddir@/${name}
 O		:= .o/
 
 ################ Compiler options ####################################
 
-CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow \
-		   -std=c11 -I/usr/include/libxml2
-LDFLAGS		:= -liconv -lintl -lxml2 -lncurses -lz
-ifdef DEBUG
-    CFLAGS	+= -O0 -ggdb3
-    LDFLAGS	+= -g -rdynamic
+#debug		:= 1
+libs		:= @pkg_libs@ -liconv -lintl
+ifdef debug
+    cflags	:= -O0 -ggdb3
+    ldflags	:= -g -rdynamic
 else
-    CFLAGS	+= -Os -g0 -DNDEBUG=1
-    LDFLAGS	+= -s
+    cflags	:= -Os -g0 -DNDEBUG=1
+    ldflags	:= -s
 endif
+CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow
+cflags		+= -std=c11 @pkg_cflags@ ${CFLAGS}
+ldflags		+= @pkg_ldflags@ ${LDFLAGS}

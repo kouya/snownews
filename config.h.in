@@ -17,16 +17,16 @@
 #pragma once
 
 // Define to the one symbol short name of this package
-#define @PKG_UNAME@_NAME		"@PKG_NAME@"
+#define @pkg_uname@_NAME		"@pkg_name@"
 // Define to the version of this package
-#define @PKG_UNAME@_VERSION	"@PKG_VERSION@"
+#define @pkg_uname@_VERSION	"@pkg_version@"
 // Define to the version string of this package
-#define @PKG_UNAME@_VERSTRING	"@PKG_VERSTR@"
+#define @pkg_uname@_VERSTRING	"@pkg_verstr@"
 // Define to the address where bug reports for this package should be sent
-#define @PKG_UNAME@_BUGREPORT	"@PKG_BUGREPORT@"
+#define @pkg_uname@_BUGREPORT	"@pkg_bugreport@"
 
 // Define to the value of LOCALEPATH environment variable
-#define LOCALEPATH	"@localedir@"
+#define LOCALEPATH		"@localepath@"
 
 // Snownews configuration files directory, starts with %s for $HOME
 #define SNOWNEWS_CONFIG_DIR	"%s/.snownews/"
