@@ -1,6 +1,8 @@
 Snownews
 ========
 
+_Please note that I can no longer maintain this software. It is provided as is, if you want to fork it, but I will not be able to add any more things to it, nor merge patches you submit._
+
 What it is
 ------------
 
