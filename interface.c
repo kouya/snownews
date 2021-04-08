@@ -180,15 +180,17 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 					rewrap = false;
 				}
 
-				// We sould now have the linked list setup'ed... hopefully.
-				unsigned ientry = 0, ypos = 6;
-				for (const struct scrolltext* l = first_line; l; ++ientry, ++ypos, l = l->next) {
-					if (ientry < linenumber)
-						continue;	// Skip lines before linenumber
-					if (ypos > LINES-4u)
-						break;		// Further lines are below visible area
-					mvaddstr (ypos, 2, l->line);
+				// Skip to the first visible line
+				unsigned ientry = 0;
+				const struct scrolltext* l = first_line;
+				while (ientry < linenumber && l) {
+				    ++ientry;
+				    l = l->next;
 				}
+				// We sould now have the linked list setup'ed... hopefully.
+				unsigned ypos = 6;
+				for (; ypos <= LINES-4u && l; ++ientry, ++ypos, l = l->next)
+					mvaddstr (ypos, 2, l->line);
 			}
 		}
 
