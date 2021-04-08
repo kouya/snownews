@@ -24,6 +24,7 @@ void InitCurses (void) {
 	keypad (stdscr, TRUE);	// Activate keypad so we can read function keys with getch.
 	cbreak();		// No buffering.
 	noecho();		// Do not echo typed chars onto the screen.
+	ESCDELAY = 10;		// Only wait 10ms after ESC
 	clear();
 	curs_set (_settings.cursor_always_visible);
 }
