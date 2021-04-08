@@ -155,7 +155,7 @@ _Noreturn void MainQuit (const char* func, const char* error) {
 		printf ("Exiting via signal %d.\n", last_signal);
 	if (error) {
 		printf (_("Aborting program execution!\nAn internal error occured. Snownews has quit, no changes has been saved!\n"));
-		printf (_("Please submit a bugreport at https://github.com/kouya/snownews/issues\n"));
+		printf (_("Please submit a bugreport at https://github.com/msharov/snownews/issues\n"));
 		printf ("----\n");
 		// Please don't localize! I don't want to receive Japanese error messages.
 		// Thanks. :)
