@@ -41,6 +41,20 @@
 // Define on SunOS and Solaris
 #undef SUN
 
+// Various switches for enabling definitions
+#ifndef _GNU_SOURCE
+	#define _GNU_SOURCE 1
+#endif
+// OS X needs this, otherwise socklen_t is not defined.
+#ifdef __APPLE__
+	#define _BSD_SOCKLEN_T_
+#endif
+// BeOS does not define socklen_t. Using uint as suggested by port creator.
+#ifdef __BEOS__
+	#define socklen_t unsigned int
+#endif
+
+// Common header files
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -50,7 +64,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
-
+#include "os-support.h"
 #ifdef LOCALEPATH
 	#include <libintl.h>
 	#include <locale.h>
@@ -58,7 +72,4 @@
 #else
 	#define _(String) (String)
 	#define ngettext(Singular, Plural, n) (Plural)
-#endif
-#ifdef SUN
-	#include "os-support.h"
 #endif

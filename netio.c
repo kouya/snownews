@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-// OS X needs this, otherwise socklen_t is not defined.
-#ifdef __APPLE__
-	#define _BSD_SOCKLEN_T_
-#endif
-// BeOS does not define socklen_t. Using uint as suggested by port creator.
-#ifdef __BEOS__
-	#define socklen_t unsigned int
-#endif
 #include "netio.h"
 #include "io-internal.h"
 #include "net-support.h"

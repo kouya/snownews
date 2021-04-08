@@ -21,7 +21,6 @@
 #include "conversions.h"
 #include "dialog.h"
 #include "io-internal.h"
-#include "os-support.h"
 #include "setup.h"
 #include "ui-support.h"
 #include <ncurses.h>

@@ -15,12 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#ifndef _GNU_SOURCE
-	#define _GNU_SOURCE
-#endif
 #include "main.h"
 #include "conversions.h"
-#include "os-support.h"
 #include "md5.h"
 #include <iconv.h>
 #include <libxml/HTMLparser.h>
