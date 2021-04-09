@@ -343,76 +343,55 @@ static void WriteFeedCache (const struct feed* feed)
 
     fputs ("<?xml version=\"1.0\" ?>\n\n<rdf:RDF\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns=\"http://purl.org/rss/1.0/\"\n  xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
 
-    if (feed->lastmodified != NULL) {
-	fputs ("<snow:lastmodified>", cache);
-	fputs (feed->lastmodified, cache);
-	fputs ("</snow:lastmodified>\n", cache);
-    }
+    if (feed->lastmodified)
+	fprintf (cache, "<snow:lastmodified>%s</snow:lastmodified>\n", feed->lastmodified);
 
-    fputs ("<channel rdf:about=\"", cache);
-
-    char* encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->feedurl);
-    fputs (encoded, cache);
+    char* encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) feed->feedurl);
+    fprintf (cache, "<channel rdf:about=\"%s\">\n<title>", encoded);
     free (encoded);
 
-    fputs ("\">\n<title>", cache);
-    if (feed->original != NULL) {
-	encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->original);
-	fputs (encoded, cache);
-	free (encoded);
-    } else if (feed->title != NULL) {
-	encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->title);
-	fputs (encoded, cache);
-	free (encoded);
-    }
+    if (feed->original)
+	fprintf (cache, "<![CDATA[%s]]>", feed->original);
+    else if (feed->title)
+	fprintf (cache, "<![CDATA[%s]]>", feed->title);
     fputs ("</title>\n<link>", cache);
-    if (feed->link != NULL) {
+    if (feed->link) {
 	encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->link);
 	fputs (encoded, cache);
 	free (encoded);
     }
     fputs ("</link>\n<description>", cache);
-    if (feed->description != NULL) {
-	encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->description);
-	fputs (encoded, cache);
-	free (encoded);
-    }
+    if (feed->description)
+	fprintf (cache, "<![CDATA[%s]]>", feed->description);
     fputs ("</description>\n</channel>\n\n", cache);
 
     for (const struct newsitem * item = feed->items; item; item = item->next) {
 	fputs ("<item rdf:about=\"", cache);
-
-	if (item->data->link != NULL) {
-	    encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) item->data->link);
+	if (item->data->link) {
+	    encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) item->data->link);
 	    fputs (encoded, cache);
 	    free (encoded);
 	}
 	fputs ("\">\n<title>", cache);
-	if (item->data->title != NULL) {
-	    encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) item->data->title);
-	    fputs (encoded, cache);
-	    free (encoded);
-	}
+	if (item->data->title)
+	    fprintf (cache, "<![CDATA[%s]]>", item->data->title);
 	fputs ("</title>\n<link>", cache);
-	if (item->data->link != NULL) {
-	    encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) item->data->link);
+	if (item->data->link) {
+	    encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) item->data->link);
 	    fputs (encoded, cache);
 	    free (encoded);
 	}
 	fputs ("</link>\n<description>", cache);
-	if (item->data->description != NULL) {
-	    encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) item->data->description);
-	    fputs (encoded, cache);
-	    free (encoded);
-	}
+	if (item->data->description)
+	    fprintf (cache, "<![CDATA[%s]]>", item->data->description);
 	fputs ("</description>\n<snow:readstatus>", cache);
 	putc ('0' + item->data->readstatus, cache);
 	fputs ("</snow:readstatus>\n<snow:hash>", cache);
 	if (item->data->hash)
 	    fputs (item->data->hash, cache);
-	fputs ("</snow:hash>\n<snow:date>", cache);
-	fprintf (cache, "%u", item->data->date);
-	fputs ("</snow:date>\n</item>\n\n", cache);
+	fputs ("</snow:hash>\n", cache);
+	fprintf (cache, "<snow:date>%u</snow:date>\n", item->data->date);
+	fputs ("</item>\n\n", cache);
     }
     fputs ("</rdf:RDF>", cache);
     fclose (cache);
