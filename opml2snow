@@ -41,7 +41,7 @@ if (index($ARGV[0], "-h") >= 0) {
 		  "       opml2snow --export [urls file] >MySubscriptions.opml\n".
 		  "       Alternatively you may run snow2opml [urls file] >file.opml\n\n".
 		  "The program will print to stdout by default. If you want to append the output\n".
-		  "to your subsription list, redirect to >>~/.snownews/url instead.\n";
+		  "to your subsription list, redirect to >>~/.snownews/urls instead.\n";
 	exit (0);
 }
 
