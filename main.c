@@ -19,14 +19,14 @@
 #include "io-internal.h"
 #include "setup.h"
 #include "ui-support.h"
+#include <fcntl.h>
 #include <ncurses.h>
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-//----------------------------------------------------------------------
-// Global variables
+//{{{ Global variables -------------------------------------------------
 
 struct feed* _feed_list = NULL;
 struct feed* _unfiltered_feed_list = NULL;	// Backup first pointer for filter mode.
@@ -36,8 +36,9 @@ bool _feed_list_changed = false;
 
 struct settings _settings = {
 	.keybindings = {
-		// Define default values for keybindings. If some are defined differently
-		// in the keybindings file they will be overwritten. If some are missing or broken/wrong
+		//{{{2 Default values for keybindings.
+		// If some are defined differently in the keybindings file
+		// they will be overwritten. If some are missing or broken
 		// these are sane defaults.
 		.about		= 'A',
 		.addfeed	= 'a',
@@ -74,6 +75,7 @@ struct settings _settings = {
 		.typeahead	= '/',
 		.urljump	= 'o',
 		.urljump2	= 'O'
+		//}}}2
 	},
 	.color = {
 		.feedtitle	= -1,
@@ -89,7 +91,8 @@ struct settings _settings = {
 
 static int last_signal = 0;
 
-//----------------------------------------------------------------------
+//}}}-------------------------------------------------------------------
+//{{{ PID file management
 
 enum EPIDAction { pid_file_delete, pid_file_create };
 
@@ -144,6 +147,48 @@ static void checkPIDFile (void) {
 	}
 }
 
+//}}}-------------------------------------------------------------------
+//{{{ stderr log redirection
+
+static int MakeStderrLogFileName (char* logfile, size_t logfilesz)
+{
+    const char* tmpdir = getenv ("TMPDIR");
+    if (!tmpdir)
+	tmpdir = "/tmp";
+    unsigned r = snprintf (logfile, logfilesz, "%s/" SNOWNEWS_NAME ".log", tmpdir);
+    return r >= logfilesz ? -1 : 0;
+}
+
+// If the log file is empty at exit, delete it
+static void CleanupStderrLog (void)
+{
+    char logfile [PATH_MAX];
+    if (0 == MakeStderrLogFileName (logfile, sizeof(logfile))) {
+	struct stat st;
+	if (0 == stat (logfile, &st) && st.st_size == 0)
+	    unlink (logfile);
+    }
+}
+
+// Redirects stderr into a log file in /tmp
+void RedirectStderrToLog (void)
+{
+    char logfile [PATH_MAX];
+    if (0 > MakeStderrLogFileName (logfile, sizeof(logfile)))
+	return;
+
+    int fd = open (logfile, O_WRONLY| O_APPEND| O_CREAT, S_IRUSR| S_IWUSR);
+    if (fd < 0)
+	return;
+
+    dup2 (fd, STDERR_FILENO);
+    close (fd);
+    atexit (CleanupStderrLog);
+}
+
+//}}}-------------------------------------------------------------------
+//{{{ Signal handling
+
 // Deinit ncurses and quit.
 _Noreturn void MainQuit (const char* func, const char* error) {
 	if (!error)	// Only save settings if we didn't exit on error.
@@ -183,6 +228,25 @@ static void sigChildHandler (int sig __attribute__((unused))) {
 	waitpid (-1, NULL, WNOHANG);
 }
 
+static void InstallSignalHandlers (void)
+{
+    signal (SIGHUP, MainSignalHandler);
+    signal (SIGINT, MainSignalHandler);
+    signal (SIGTERM, MainSignalHandler);
+    signal (SIGABRT, MainSignalHandler);
+    signal (SIGSEGV, MainSignalHandler);
+
+    // Un-broken pipify
+    signal (SIGPIPE, SIG_IGN);
+    signal (SIGCHLD, sigChildHandler);
+    #ifdef SIGWINCH
+	signal (SIGWINCH, sig_winch);
+    #endif
+}
+
+//}}}-------------------------------------------------------------------
+//{{{ Command line options help
+
 static void printHelp (void) {
 	printf (_("Snownews %s\n\n"), SNOWNEWS_VERSTRING);
 	printf (_("usage: snownews [-huV] [--help|--update|--version]\n\n"));
@@ -196,6 +260,9 @@ static void printHelp (void) {
 static void badOption (const char * arg) {
 	printf (_("Option %s requires an argument.\n"), arg);
 }
+
+//}}}-------------------------------------------------------------------
+//{{{ srandrand
 
 inline static uint32_t ror32 (uint32_t v, unsigned n)
     { return (v >> n)|(v << (32-n)); }
@@ -213,13 +280,17 @@ static void srandrand (void)
     srand (seed);
 }
 
+//}}}-------------------------------------------------------------------
+
 int main (int argc, char *argv[]) {
+	InstallSignalHandlers();
+	srandrand();	// Init the pRNG. See about.c for usages of rand() ;)
 	#ifdef LOCALEPATH
 		setlocale (LC_ALL, "");
 		bindtextdomain ("snownews", LOCALEPATH);
 		textdomain ("snownews");
 	#endif
-	srandrand();	// Init the pRNG. See about.c for usages of rand() ;)
+	RedirectStderrToLog();
 
 	bool autoupdate = false;	// Automatically update feeds on app start... or not if set to 0.
 	for (int i = 1; i < argc; ++i) {
@@ -252,19 +323,6 @@ int main (int argc, char *argv[]) {
 	// Create PID file.
 	checkPIDFile();
 	modifyPIDFile (pid_file_create);
-
-	signal (SIGHUP, MainSignalHandler);
-	signal (SIGINT, MainSignalHandler);
-	signal (SIGTERM, MainSignalHandler);
-	signal (SIGABRT, MainSignalHandler);
-	signal (SIGSEGV, MainSignalHandler);
-
-	// Un-broken pipify
-	signal (SIGPIPE, SIG_IGN);
-	signal (SIGCHLD, sigChildHandler);
-	#ifdef SIGWINCH
-		signal (SIGWINCH, sig_winch);
-	#endif
 
 	InitCurses();
 
