@@ -17,5 +17,5 @@
 #pragma once
 #include "main.h"
 
-int FilterExecURL (struct feed * cur_ptr);
-int FilterPipeNG (struct feed * cur_ptr);
+int FilterExecURL (struct feed* cur_ptr);
+int FilterPipeNG (struct feed* cur_ptr);

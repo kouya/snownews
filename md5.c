@@ -17,13 +17,18 @@
 #include "md5.h"
 
 static inline uint32_t remove_bits (uint32_t v, uint8_t f, uint8_t n)
-    { return ((v>>(f+n))<<f)|(v&((1<<f)-1)); }
+{
+    return ((v >> (f + n)) << f) | (v & ((1 << f) - 1));
+}
+
 static inline uint32_t Rol (uint32_t v, uint32_t n)
-    { return (v<<n)|(v>>(32-n)); }
+{
+    return (v << n) | (v >> (32 - n));
+}
 
 static void hash_md5_block (struct HashMD5* h)
 {
-    static const uint8_t r[16] = { 7, 12, 17, 22, 5,  9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21 };
+    static const uint8_t r[16] = { 7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21 };
     //{{{ K table
     static const uint32_t K[64] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
@@ -51,26 +56,33 @@ static void hash_md5_block (struct HashMD5* h)
 	    g = i;
 	} else if (i < 32) {
 	    f = c ^ (d & (b ^ c));
-	    g = (5*i + 1) % 16;
+	    g = (5 * i + 1) % 16;
 	} else if (i < 48) {
 	    f = b ^ c ^ d;
-	    g = (3*i + 5) % 16;
+	    g = (3 * i + 5) % 16;
 	} else {
 	    f = c ^ (b | ~d);
-	    g = (7*i) % 16;
+	    g = (7 * i) % 16;
 	}
-	f = Rol (a + f + K[i] + h->words[g], r[remove_bits(i,2,2)]);
-	g = d; d = c; c = b; b += f; a = g;
+	f = Rol (a + f + K[i] + h->words[g], r[remove_bits (i, 2, 2)]);
+	g = d;
+	d = c;
+	c = b;
+	b += f;
+	a = g;
     }
-    h->hash[0] += a; h->hash[1] += b; h->hash[2] += c; h->hash[3] += d;
+    h->hash[0] += a;
+    h->hash[1] += b;
+    h->hash[2] += c;
+    h->hash[3] += d;
 }
 
 void hash_md5_init (struct HashMD5* h)
 {
-    memset (h, 0, sizeof(*h));
-    static const uint32_t hash_md5_initial_value [HASH_SIZE_MD5_WORDS]
-	= { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
-    memcpy (h->hash, hash_md5_initial_value, sizeof(h->hash));
+    memset (h, 0, sizeof (*h));
+    static const uint32_t hash_md5_initial_value[HASH_SIZE_MD5_WORDS]
+    = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
+    memcpy (h->hash, hash_md5_initial_value, sizeof (h->hash));
 }
 
 void hash_md5_data (struct HashMD5* h, const void* d, size_t n)
@@ -80,8 +92,8 @@ void hash_md5_data (struct HashMD5* h, const void* d, size_t n)
 	uint32_t copied = HASH_BLOCK_SIZE_MD5 - blockOffset;
 	if (copied > n)
 	    copied = n;
-	memcpy (h->bytes+blockOffset, d, copied);
-	d = (const char*)d + copied;
+	memcpy (h->bytes + blockOffset, d, copied);
+	d = (const char *) d + copied;
 	n -= copied;
 	h->offset += copied;
 	blockOffset = (blockOffset + copied) % HASH_BLOCK_SIZE_MD5;
@@ -93,12 +105,12 @@ void hash_md5_data (struct HashMD5* h, const void* d, size_t n)
 void hash_md5_finish (struct HashMD5* h)
 {
     uint64_t size = h->offset;
-    uint8_t pad = 0x80;	// End message with one bit
+    uint8_t pad = 0x80;		// End message with one bit
     do {
-	hash_md5_data (h, &pad, sizeof(pad));
-	pad = 0;	// Pad with zeroes until there is enough space for offset at the end
-    } while (h->offset % HASH_BLOCK_SIZE_MD5 != HASH_BLOCK_SIZE_MD5-sizeof(h->offset));
-    h->quads[7] = size*8;	// Write size in bits at end of block
+	hash_md5_data (h, &pad, sizeof (pad));
+	pad = 0;	       // Pad with zeroes until there is enough space for offset at the end
+    } while (h->offset % HASH_BLOCK_SIZE_MD5 != HASH_BLOCK_SIZE_MD5 - sizeof (h->offset));
+    h->quads[7] = size * 8;    // Write size in bits at end of block
     hash_md5_block (h);
 }
 
@@ -106,5 +118,5 @@ void hash_md5_to_text (const struct HashMD5* h, char* text)
 {
     for (unsigned i = 0; i < HASH_SIZE_MD5_WORDS; ++i)
 	for (unsigned j = 0; j < 4; ++j)
-	    sprintf (&text[i*8+j*2], "%02hhx", (uint8_t)(h->hash[i]>>(j*8)));
+	    sprintf (&text[i * 8 + j * 2], "%02hhx", (uint8_t) (h->hash[i] >> (j * 8)));
 }

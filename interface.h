@@ -16,5 +16,5 @@
 
 #pragma once
 
-void sig_winch(int p);
+void sig_winch (int p);
 void UIMainInterface (void);

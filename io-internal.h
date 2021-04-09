@@ -17,9 +17,9 @@
 #pragma once
 #include "main.h"
 
-struct feed * newFeedStruct (void);
-int UpdateFeed (struct feed * cur_ptr);
+struct feed* newFeedStruct (void);
+int UpdateFeed (struct feed* cur_ptr);
 int UpdateAllFeeds (void);
-int LoadFeed (struct feed * cur_ptr);
+int LoadFeed (struct feed* cur_ptr);
 int LoadAllFeeds (unsigned numfeeds);
 void WriteCache (void);

@@ -16,4 +16,4 @@
 
 #pragma once
 
-void LoadCookies (struct feed * cur_ptr);
+void LoadCookies (struct feed* cur_ptr);

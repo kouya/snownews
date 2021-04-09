@@ -18,7 +18,7 @@
 
 #ifdef SUN
 char* strsep (char** str, const char* delims);
-time_t timegm (struct tm *t);
+time_t timegm (struct tm* t);
 #endif
 
 const char* s_strcasestr (const char* a, const char* b);

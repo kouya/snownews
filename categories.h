@@ -21,4 +21,4 @@ void FeedCategoryAdd (struct feed* cur_ptr, const char* categoryname);
 void FeedCategoryDelete (struct feed* cur_ptr, const char* categoryname);
 bool FeedCategoryExists (const struct feed* cur_ptr, const char* categoryname);
 char* GetCategoryList (const struct feed* feed);
-void ResetFilters (char **filters);
+void ResetFilters (char** filters);

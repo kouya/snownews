@@ -18,19 +18,19 @@
 #include "main.h"
 
 typedef enum {
-	NORMAL,
-	INVERSE
+    NORMAL,
+    INVERSE
 } clear_line;
 
 void InitCurses (void);
-void UIStatus (const char * text, int delay, int warning);
-void SwapPointers (struct feed * one, struct feed * two);
+void UIStatus (const char* text, int delay, int warning);
+void SwapPointers (struct feed* one, struct feed* two);
 void SnowSort (void);
 void UISupportDrawBox (int x1, int y1, int x2, int y2);
-void UISupportDrawHeader (const char * headerstring);
-void UISupportURLJump (const char * url);
+void UISupportDrawHeader (const char* headerstring);
+void UISupportURLJump (const char* url);
 void SmartFeedsUpdate (void);
-void SmartFeedNewitems (struct feed * smart_feed);
-bool SmartFeedExists (const char * smartfeed);
+void SmartFeedNewitems (struct feed* smart_feed);
+bool SmartFeedExists (const char* smartfeed);
 void DrawProgressBar (int numobjects, int titlestrlen);
 void clearLine (int line, clear_line how);

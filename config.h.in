@@ -43,15 +43,15 @@
 
 // Various switches for enabling definitions
 #ifndef _GNU_SOURCE
-	#define _GNU_SOURCE 1
+    #define _GNU_SOURCE 1
 #endif
 // OS X needs this, otherwise socklen_t is not defined.
 #ifdef __APPLE__
-	#define _BSD_SOCKLEN_T_
+    #define _BSD_SOCKLEN_T_
 #endif
 // BeOS does not define socklen_t. Using uint as suggested by port creator.
 #ifdef __BEOS__
-	#define socklen_t unsigned int
+    #define socklen_t unsigned int
 #endif
 
 // Common header files
@@ -66,10 +66,10 @@
 #include <time.h>
 #include "os-support.h"
 #ifdef LOCALEPATH
-	#include <libintl.h>
-	#include <locale.h>
-	#define _(String) gettext (String)
+    #include <libintl.h>
+    #include <locale.h>
+    #define _(String) gettext (String)
 #else
-	#define _(String) (String)
-	#define ngettext(Singular, Plural, n) (Plural)
+    #define _(String) (String)
+    #define ngettext(Singular, Plural, n) (Plural)
 #endif

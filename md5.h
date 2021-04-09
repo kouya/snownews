@@ -19,17 +19,17 @@
 
 enum {
     HASH_SIZE_MD5 = 16,
-    HASH_SIZE_MD5_WORDS = HASH_SIZE_MD5/sizeof(uint32_t),
+    HASH_SIZE_MD5_WORDS = HASH_SIZE_MD5 / sizeof (uint32_t),
     HASH_BLOCK_SIZE_MD5 = 64
 };
 
 struct HashMD5 {
-    uint32_t	hash [HASH_SIZE_MD5_WORDS];
-    uint64_t	offset;
+    uint32_t hash[HASH_SIZE_MD5_WORDS];
+    uint64_t offset;
     union {
-	uint8_t	 bytes [HASH_BLOCK_SIZE_MD5];
-	uint32_t words [HASH_BLOCK_SIZE_MD5/sizeof(uint32_t)];
-	uint64_t quads [HASH_BLOCK_SIZE_MD5/sizeof(uint64_t)];
+	uint8_t bytes[HASH_BLOCK_SIZE_MD5];
+	uint32_t words[HASH_BLOCK_SIZE_MD5 / sizeof (uint32_t)];
+	uint64_t quads[HASH_BLOCK_SIZE_MD5 / sizeof (uint64_t)];
     };
 };
 
