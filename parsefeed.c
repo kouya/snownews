@@ -117,6 +117,11 @@ static void parse_rdf10_item (struct feed* feed, xmlDocPtr doc, xmlNodePtr node)
 	    xmlChar* date_str = xmlNodeListGetString (doc, cur->children, 1);
 	    item->data->date = pubDateToUnix ((const char*) date_str);
 	    xmlFree (date_str);
+	} else if (cur->ns && xmlStrcmp (cur->ns->href, (const xmlChar*) "http://purl.org/rss/1.0/modules/content/") == 0 && xmlStrcmp (cur->name, (const xmlChar*) "encoded") == 0) {
+	    if (item->data->description)
+		xmlFree (item->data->description);
+	    item->data->description = (char*) xmlNodeListGetString (doc, cur->children, 1);
+	    CleanupString (item->data->description, 0);
 	    // Dublin Core
 	    // dc:date
 	} else if (cur->ns && xmlStrcmp (cur->ns->href, dcNs) == 0 && xmlStrcmp (cur->name, (const xmlChar*) "date") == 0) {
