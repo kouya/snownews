@@ -1,6 +1,7 @@
 // This file is part of Snownews - A lightweight console RSS newsreader
 //
 // Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+// Copyright (c) 2021 Mike Sharov <msharov@users.sourceforge.net>
 //
 // Snownews is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License version 3
@@ -74,7 +75,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 	    int columns = COLS - 10;
 	    mvaddn_utf8 (2, 1, converted, columns);
-	    if (xmlStrlen ((xmlChar *) converted) > columns)
+	    if (xmlStrlen ((xmlChar*) converted) > columns)
 		mvaddstr (2, columns + 1, "...");
 
 	    free (converted);
@@ -89,7 +90,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 		int columns = COLS - 10;
 		mvaddn_utf8 (2, 1, converted, columns);
-		if (xmlStrlen ((xmlChar *) converted) > columns)
+		if (xmlStrlen ((xmlChar*) converted) > columns)
 		    mvaddstr (2, columns + 1, "...");
 
 		free (converted);
@@ -121,12 +122,12 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 	    free (newtext);
 
 	    int columns = COLS - 6;
-	    if (xmlStrlen ((xmlChar *) converted) > columns) {
+	    if (xmlStrlen ((xmlChar*) converted) > columns) {
 		mvaddn_utf8 (4, 1, converted, columns);
-		if (xmlStrlen ((xmlChar *) converted) > columns)
+		if (xmlStrlen ((xmlChar*) converted) > columns)
 		    mvaddstr (4, columns + 1, "...");
 	    } else
-		mvadd_utf8 (4, (COLS / 2) - (xmlStrlen ((xmlChar *) converted) / 2), converted);
+		mvadd_utf8 (4, (COLS / 2) - (xmlStrlen ((xmlChar*) converted) / 2), converted);
 
 	    free (converted);
 	} else
@@ -394,7 +395,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 
 	    int columns = COLS - 10;
 	    mvaddn_utf8 (2, 1, converted, columns);
-	    if (xmlStrlen ((xmlChar *) converted) > columns)
+	    if (xmlStrlen ((xmlChar*) converted) > columns)
 		mvaddstr (2, columns + 1, "...");
 
 	    free (converted);
@@ -450,7 +451,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 
 		int columns = COLS - 6;	// Cut max item length.
 		mvaddn_utf8 (ypos, 1, converted, columns);
-		if (xmlStrlen ((xmlChar *) converted) > columns)
+		if (xmlStrlen ((xmlChar*) converted) > columns)
 		    mvaddstr (ypos, columns + 1, "...");
 
 		free (converted);
@@ -897,7 +898,7 @@ void UIMainInterface (void)
 		columns = COLS - 9 - strlen (_("new"));
 
 	    mvaddn_utf8 (ypos, 1, cur_ptr->title, columns);
-	    if (xmlStrlen ((xmlChar *) cur_ptr->title) > columns)
+	    if (xmlStrlen ((xmlChar*) cur_ptr->title) > columns)
 		mvaddstr (ypos, columns + 1, "...");
 
 	    if (cur_ptr->problem)

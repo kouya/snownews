@@ -104,7 +104,7 @@ static int NetConnect (int* my_socket, const char* host, struct feed* cur_ptr, b
 	memcpy (&address.sin_addr.s_addr, remotehost->h_addr_list[0], remotehost->h_length);
 
 	// Connect socket.
-	cur_ptr->connectresult = connect (*my_socket, (struct sockaddr *) &address, sizeof (address));
+	cur_ptr->connectresult = connect (*my_socket, (struct sockaddr*) &address, sizeof (address));
 
 	// Check if we're already connected.
 	// BSDs will return 0 on connect even in nonblock if connect was fast enough.
@@ -149,7 +149,7 @@ static int NetConnect (int* my_socket, const char* host, struct feed* cur_ptr, b
 	memcpy (&address.sin_addr.s_addr, remotehost->h_addr_list[0], remotehost->h_length);
 
 	// Connect socket.
-	cur_ptr->connectresult = connect (*my_socket, (struct sockaddr *) &address, sizeof (address));
+	cur_ptr->connectresult = connect (*my_socket, (struct sockaddr*) &address, sizeof (address));
 
 	// Check if we're already connected.
 	// BSDs will return 0 on connect even in nonblock if connect was fast enough.
@@ -255,7 +255,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 	fclose (stream);
 	return NULL;
     }
-    if (checkValidHTTPHeader ((unsigned char *) servreply, sizeof (servreply)) != 0) {
+    if (checkValidHTTPHeader ((unsigned char*) servreply, sizeof (servreply)) != 0) {
 	cur_ptr->netio_error = NET_ERR_HTTP_PROTO_ERR;
 	fclose (stream);
 	return NULL;
@@ -322,7 +322,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 			return NULL;
 		    }
 
-		    if (checkValidHTTPHeader ((unsigned char *) netbuf, sizeof (netbuf)) != 0) {
+		    if (checkValidHTTPHeader ((unsigned char*) netbuf, sizeof (netbuf)) != 0) {
 			cur_ptr->netio_error = NET_ERR_HTTP_PROTO_ERR;
 			fclose (stream);
 			return NULL;
@@ -377,7 +377,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 			// Change cur_ptr->feedurl on 301.
 			if (cur_ptr->lasthttpstatus == 301) {
 			    // Check for valid redirection URL
-			    if (checkValidHTTPURL ((unsigned char *) newlocation) != 0) {
+			    if (checkValidHTTPURL ((unsigned char*) newlocation) != 0) {
 				cur_ptr->problem = true;
 				cur_ptr->netio_error = NET_ERR_REDIRECT_ERR;
 				fclose (stream);
@@ -508,7 +508,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 	if ((fgets (netbuf, sizeof (netbuf), stream)) == NULL)
 	    break;
 
-	if (checkValidHTTPHeader ((unsigned char *) netbuf, sizeof (netbuf)) != 0) {
+	if (checkValidHTTPHeader ((unsigned char*) netbuf, sizeof (netbuf)) != 0) {
 	    cur_ptr->netio_error = NET_ERR_HTTP_PROTO_ERR;
 	    fclose (stream);
 	    return NULL;
@@ -708,7 +708,7 @@ static char* NetIO (int* my_socket, char* host, char* url, struct feed* cur_ptr,
 // Set suppressoutput=1 to disable ncurses calls.
 char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput)
 {
-    if (checkValidHTTPURL ((unsigned char *) url) != 0) {
+    if (checkValidHTTPURL ((unsigned char*) url) != 0) {
 	cur_ptr->problem = true;
 	cur_ptr->netio_error = NET_ERR_HTTP_PROTO_ERR;
 	return NULL;

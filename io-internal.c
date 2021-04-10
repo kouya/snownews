@@ -1,6 +1,7 @@
 // This file is part of Snownews - A lightweight console RSS newsreader
 //
 // Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+// Copyright (c) 2021 Mike Sharov <msharov@users.sourceforge.net>
 //
 // Snownews is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License version 3
@@ -20,7 +21,7 @@
 #include "io-internal.h"
 #include "netio.h"
 #include "ui-support.h"
-#include "xmlparse.h"
+#include "parsefeed.h"
 #include <errno.h>
 #include <ncurses.h>
 #include <sys/stat.h>
@@ -356,7 +357,7 @@ static void WriteFeedCache (const struct feed* feed)
 	fprintf (cache, "<![CDATA[%s]]>", feed->title);
     fputs ("</title>\n<link>", cache);
     if (feed->link) {
-	encoded = (char *) xmlEncodeEntitiesReentrant (NULL, (xmlChar *) feed->link);
+	encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) feed->link);
 	fputs (encoded, cache);
 	free (encoded);
     }

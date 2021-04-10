@@ -36,7 +36,7 @@ static int jg_zlib_uncompress (void const* in_buf, unsigned in_size, void** out_
     // Prepare the stream structure.
     z_stream stream = { };
 
-    stream.next_in = (void *) in_buf;
+    stream.next_in = (void*) in_buf;
     stream.avail_in = in_size;
 
     unsigned char tmp_buf[BUFSIZ];
@@ -115,7 +115,7 @@ int jg_gzip_uncompress (const void* in_buf, unsigned in_size, void** out_buf_ptr
     unsigned offset = sizeof (*header);
     if (header->flags & 8)     // skip the file name
 	while (offset < in_size)
-	    if (((char *) in_buf)[offset++] == 0)
+	    if (((char*) in_buf)[offset++] == 0)
 		break;
-    return jg_zlib_uncompress ((char *) in_buf + offset, in_size - offset - 8, out_buf_ptr, out_size, 0);
+    return jg_zlib_uncompress ((char*) in_buf + offset, in_size - offset - 8, out_buf_ptr, out_size, 0);
 }

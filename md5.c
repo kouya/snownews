@@ -93,7 +93,7 @@ void hash_md5_data (struct HashMD5* h, const void* d, size_t n)
 	if (copied > n)
 	    copied = n;
 	memcpy (h->bytes + blockOffset, d, copied);
-	d = (const char *) d + copied;
+	d = (const char*) d + copied;
 	n -= copied;
 	h->offset += copied;
 	blockOffset = (blockOffset + copied) % HASH_BLOCK_SIZE_MD5;

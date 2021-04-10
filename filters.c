@@ -80,12 +80,12 @@ int FilterPipeNG (struct feed* cur_ptr)
     char* filter = strdup (cur_ptr->perfeedfilter);
     char* command = strsep (&filter, " ");
 
-    char** options = malloc (sizeof (char *));
+    char** options = malloc (sizeof (char*));
     size_t nopts = 0;
     options[nopts++] = command;
 
     for (;;) {
-	options = realloc (options, sizeof (char *) * (nopts + 1));
+	options = realloc (options, sizeof (char*) * (nopts + 1));
 	if (!(options[nopts++] = strsep (&filter, " ")))
 	    break;
     }

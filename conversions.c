@@ -217,7 +217,7 @@ char* UIDejunk (const char* feed_description)
 			else
 			    ch = atol (entity + 1);
 		    } else {
-			const htmlEntityDesc* ep = htmlEntityLookup ((xmlChar *) entity);
+			const htmlEntityDesc* ep = htmlEntityLookup ((xmlChar*) entity);
 			if (ep)
 			    ch = ep->value;
 		    }

@@ -188,7 +188,7 @@ int NetSupportAuth (struct feed* cur_ptr, const char* authdata, const char* url,
 //
 int checkValidHTTPHeader (const unsigned char* header, unsigned size)
 {
-    unsigned len = strlen ((const char *) header);
+    unsigned len = strlen ((const char*) header);
     if (len > size)
 	return -1;
     for (unsigned i = 0; i < len && header[i] != ':'; ++i)
@@ -199,9 +199,9 @@ int checkValidHTTPHeader (const unsigned char* header, unsigned size)
 
 int checkValidHTTPURL (const unsigned char* url)
 {
-    if (strncasecmp ((const char *) url, "http://", 7) != 0)
+    if (strncasecmp ((const char*) url, "http://", 7) != 0)
 	return -1;
-    for (unsigned i = 0, len = strlen ((const char *)url); i < len; ++i)
+    for (unsigned i = 0, len = strlen ((const char*)url); i < len; ++i)
 	if (url[i] < ' ' || url[i] > '~')
 	    return -1;
     return 0;

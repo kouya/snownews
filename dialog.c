@@ -21,7 +21,7 @@
 #include "filters.h"
 #include "io-internal.h"
 #include "ui-support.h"
-#include "xmlparse.h"
+#include "parsefeed.h"
 #include <ncurses.h>
 #include <sys/stat.h>
 
