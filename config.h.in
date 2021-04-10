@@ -61,13 +61,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <locale.h>
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
 #include "os-support.h"
 #ifdef LOCALEPATH
     #include <libintl.h>
-    #include <locale.h>
     #define _(String) gettext (String)
 #else
     #define _(String) (String)

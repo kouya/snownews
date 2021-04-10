@@ -172,7 +172,7 @@ static void CleanupStderrLog (void)
 }
 
 // Redirects stderr into a log file in /tmp
-void RedirectStderrToLog (void)
+static void RedirectStderrToLog (void)
 {
     char logfile[PATH_MAX];
     if (0 > MakeStderrLogFileName (logfile, sizeof (logfile)))
@@ -293,11 +293,11 @@ static void srandrand (void)
 int main (int argc, char* argv[])
 {
     InstallSignalHandlers();
-    srandrand();	       // Init the pRNG. See about.c for usages of rand() ;)
-#ifdef LOCALEPATH
+    srandrand();
     setlocale (LC_ALL, "");
-    bindtextdomain ("snownews", LOCALEPATH);
-    textdomain ("snownews");
+#ifdef LOCALEPATH
+    bindtextdomain (SNOWNEWS_NAME, LOCALEPATH);
+    textdomain (SNOWNEWS_NAME);
 #endif
     RedirectStderrToLog();
 

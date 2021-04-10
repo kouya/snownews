@@ -39,7 +39,7 @@ void UIStatus (const char* text, int delay, int warning)
     attron (attr);
     clearLine (LINES - 1, INVERSE);
     attron (WA_REVERSE);
-    mvaddnstr (LINES - 1, 1, text, COLS - 2);
+    mvaddn_utf8 (LINES - 1, 1, text, COLS - 2);
     attroff (attr);
     refresh();
     if (delay)
@@ -233,4 +233,72 @@ void clearLine (int line, clear_line how)
     mvhline (line, 0, ' ', COLS);
     if (how == INVERSE)
 	attron (WA_REVERSE);
+}
+
+// Returns the number of bytes in the character whose first char is c
+static unsigned utf8_ibytes (char c)
+{
+    // Count the leading bits. Header bits are 1 * nBytes followed by a 0.
+    //	0 - single byte character. Take 7 bits (0xff >> 1)
+    //	1 - error, in the middle of the character. Take 6 bits (0xff >> 2)
+    //	    so you will keep reading invalid entries until you hit the next character.
+    //	>2 - multibyte character. Take remaining bits, and get the next bytes.
+    //
+    unsigned n = 0u;
+    for (uint8_t mask = 0x80; c & mask; ++n)
+	mask >>= 1;
+    return n+!n; // A sequence is always at least 1 byte.
+}
+
+static wchar_t utf8_next (const char** pt)
+{
+    const char* i = *pt;
+    unsigned n = utf8_ibytes (*i);
+    wchar_t v = *i & (0xff >> n);	// First byte contains bits after the header.
+    while (--n && *++i)			// Each subsequent byte has 6 bits.
+	v = (v << 6) | (*i & 0x3f);
+    *pt = ++i;
+    return v;
+}
+
+unsigned utf8_length (const char* s)
+{
+    unsigned l = 0;
+    while (utf8_next (&s))
+	++l;
+    return l;
+}
+
+void addn_utf8 (const char* s, unsigned n)
+{
+    attr_t attr = 0;
+    short cpair = 0;
+    attr_get (&attr, &cpair, NULL);
+
+    wchar_t wchzs[2] = { 0, 0 };
+    cchar_t ch = {};
+
+    while (n-- && (wchzs[0] = utf8_next (&s))) {
+	setcchar (&ch, wchzs, attr, cpair, NULL);
+	add_wch (&ch);
+    }
+}
+
+void add_utf8 (const char* s)
+{
+    int x = getcurx (stdscr);
+    unsigned w = getmaxx (stdscr);
+    addn_utf8 (s, w-x);
+}
+
+void mvaddn_utf8 (int y, int x, const char* s, unsigned n)
+{
+    move (y, x);
+    addn_utf8 (s, n);
+}
+
+void mvadd_utf8 (int y, int x, const char* s)
+{
+    move (y, x);
+    add_utf8 (s);
 }

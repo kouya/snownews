@@ -34,3 +34,8 @@ void SmartFeedNewitems (struct feed* smart_feed);
 bool SmartFeedExists (const char* smartfeed);
 void DrawProgressBar (int numobjects, int titlestrlen);
 void clearLine (int line, clear_line how);
+unsigned utf8_length (const char* s);
+void add_utf8 (const char* s);
+void addn_utf8 (const char* s, unsigned n);
+void mvadd_utf8 (int y, int x, const char* s);
+void mvaddn_utf8 (int y, int x, const char* s, unsigned n);

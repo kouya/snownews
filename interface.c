@@ -73,7 +73,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 	    free (newtext);
 
 	    int columns = COLS - 10;
-	    mvaddnstr (2, 1, converted, columns);
+	    mvaddn_utf8 (2, 1, converted, columns);
 	    if (xmlStrlen ((xmlChar *) converted) > columns)
 		mvaddstr (2, columns + 1, "...");
 
@@ -88,13 +88,13 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		free (newtext);
 
 		int columns = COLS - 10;
-		mvaddnstr (2, 1, converted, columns);
+		mvaddn_utf8 (2, 1, converted, columns);
 		if (xmlStrlen ((xmlChar *) converted) > columns)
 		    mvaddstr (2, columns + 1, "...");
 
 		free (converted);
 	    } else
-		mvaddstr (2, 1, current_feed->title);
+		mvadd_utf8 (2, 1, current_feed->title);
 	}
 
 	attroff (WA_BOLD);
@@ -122,21 +122,21 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 	    int columns = COLS - 6;
 	    if (xmlStrlen ((xmlChar *) converted) > columns) {
-		mvaddnstr (4, 1, converted, columns);
+		mvaddn_utf8 (4, 1, converted, columns);
 		if (xmlStrlen ((xmlChar *) converted) > columns)
 		    mvaddstr (4, columns + 1, "...");
 	    } else
-		mvprintw (4, (COLS / 2) - (xmlStrlen ((xmlChar *) converted) / 2), "%s", converted);
+		mvadd_utf8 (4, (COLS / 2) - (xmlStrlen ((xmlChar *) converted) / 2), converted);
 
 	    free (converted);
 	} else
-	    mvaddstr (4, (COLS / 2) - (strlen (_("No title")) / 2), _("No title"));
+	    mvadd_utf8 (4, (COLS / 2) - (strlen (_("No title")) / 2), _("No title"));
 
 	if (current_item->data->description == NULL)
-	    mvprintw (6, 1, _("No description available."));
+	    mvadd_utf8 (6, 1, _("No description available."));
 	else {
 	    if (strlen (current_item->data->description) == 0)
-		mvprintw (6, 1, _("No description available."));
+		mvadd_utf8 (6, 1, _("No description available."));
 	    else {
 		// Only generate a new scroll list if we need to rewrap everything.
 		// Otherwise just typeaheadskip this block.
@@ -188,7 +188,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		// We sould now have the linked list setup'ed... hopefully.
 		unsigned ypos = 6;
 		for (; ypos <= LINES - 4u && l; ++ientry, ++ypos, l = l->next)
-		    mvaddstr (ypos, 2, l->line);
+		    mvadd_utf8 (ypos, 2, l->line);
 	    }
 	}
 
@@ -202,9 +202,11 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 	// Print article URL.
 	if (current_item->data->link == NULL)
-	    mvaddstr (LINES - 2, 1, _("-> No link"));
-	else
-	    mvprintw (LINES - 2, 1, "-> %s", current_item->data->link);
+	    mvadd_utf8 (LINES - 2, 1, _("-> No link"));
+	else {
+	    mvaddstr (LINES - 2, 1, "-> ");
+	    add_utf8 (current_item->data->link);
+	}
 
 	// Disable color style.
 	if (!_settings.monochrome) {
@@ -391,13 +393,13 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    free (newtext);
 
 	    int columns = COLS - 10;
-	    mvaddnstr (2, 1, converted, columns);
+	    mvaddn_utf8 (2, 1, converted, columns);
 	    if (xmlStrlen ((xmlChar *) converted) > columns)
 		mvaddstr (2, columns + 1, "...");
 
 	    free (converted);
 	} else
-	    mvprintw (2, 1, "%s", current_feed->title);
+	    mvadd_utf8 (2, 1, current_feed->title);
 
 	if (_settings.color.feedtitle > -1) {
 	    attroff (COLOR_PAIR (4));
@@ -447,7 +449,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 		free (newtext);
 
 		int columns = COLS - 6;	// Cut max item length.
-		mvaddnstr (ypos, 1, converted, columns);
+		mvaddn_utf8 (ypos, 1, converted, columns);
 		if (xmlStrlen ((xmlChar *) converted) > columns)
 		    mvaddstr (ypos, columns + 1, "...");
 
@@ -456,9 +458,9 @@ static int UIDisplayFeed (struct feed* current_feed)
 		if (current_feed->smartfeed == 1) {
 		    char tmpstr[256];
 		    snprintf (tmpstr, sizeof (tmpstr), "(%s) %s", item->data->parent->title, _("No title"));
-		    mvaddstr (ypos, 1, tmpstr);
+		    mvadd_utf8 (ypos, 1, tmpstr);
 		} else
-		    mvaddstr (ypos, 1, _("No title"));
+		    mvadd_utf8 (ypos, 1, _("No title"));
 	    }
 
 	    ++ypos;
@@ -489,9 +491,11 @@ static int UIDisplayFeed (struct feed* current_feed)
 
 	// Print feed URL.
 	if (current_feed->link == NULL)
-	    mvaddstr (LINES - 2, 1, _("-> No link"));
-	else
-	    mvprintw (LINES - 2, 1, "-> %s", current_feed->link);
+	    mvadd_utf8 (LINES - 2, 1, _("-> No link"));
+	else {
+	    mvaddstr (LINES - 2, 1, "-> ");
+	    add_utf8 (current_feed->link);
+	}
 
 	// Disable color style.
 	if (!_settings.monochrome) {
@@ -609,7 +613,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    else if (uiinput == _settings.keybindings.urljump2 && highlighted)
 		UISupportURLJump (highlighted->data->link);
 	    else if (uiinput == _settings.keybindings.markread) {	// Mark everything read.
-		for (struct newsitem * i = current_feed->items; i; i = i->next) {
+		for (struct newsitem* i = current_feed->items; i; i = i->next) {
 		    if (!i->data->readstatus) {
 			i->data->readstatus = true;
 			current_feed->mtime = curtime;
@@ -624,8 +628,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    else if (uiinput == _settings.keybindings.feedinfo)
 		FeedInfo (current_feed);
 	    else if (resize_dirty || uiinput == KEY_RESIZE) {
-		endwin();
-		refresh();
+		clear();
 		resize_dirty = false;
 	    } else if (uiinput == 12)	// Redraw screen on ^L
 		clear();
@@ -893,7 +896,7 @@ void UIMainInterface (void)
 	    else
 		columns = COLS - 9 - strlen (_("new"));
 
-	    mvaddnstr (ypos, 1, cur_ptr->title, columns);
+	    mvaddn_utf8 (ypos, 1, cur_ptr->title, columns);
 	    if (xmlStrlen ((xmlChar *) cur_ptr->title) > columns)
 		mvaddstr (ypos, columns + 1, "...");
 
@@ -905,11 +908,11 @@ void UIMainInterface (void)
 		const char* localized_msg = ngettext ("%3u new", "%3u new", newcount);
 		char msgbuf[16];
 		snprintf (msgbuf, sizeof (msgbuf), localized_msg, newcount);
-		mvaddstr (ypos, COLS - 1 - strlen (localized_msg), msgbuf);
+		mvadd_utf8 (ypos, COLS - 1 - strlen (localized_msg), msgbuf);
 	    }
 
 	    if (cur_ptr->feedcategories != NULL)
-		mvaddnstr (ypos, COLS - 21 - strlen (_("new")), cur_ptr->feedcategories->name, 15);
+		mvaddn_utf8 (ypos, COLS - 21 - strlen (_("new")), cur_ptr->feedcategories->name, 15);
 
 	    ++ypos;
 
@@ -1286,8 +1289,7 @@ void UIMainInterface (void)
 		andxor = !andxor;
 		filteractivated = true;	// Reconstruct filter.
 	    } else if (resize_dirty || uiinput == KEY_RESIZE) {
-		endwin();
-		refresh();
+		clear();
 		resize_dirty = false;
 	    } else if (uiinput == 12)	// Redraw screen on ^L
 		clear();

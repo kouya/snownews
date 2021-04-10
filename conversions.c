@@ -18,6 +18,7 @@
 #include "main.h"
 #include "conversions.h"
 #include "md5.h"
+#include "ui-support.h"
 #include <iconv.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
@@ -293,7 +294,7 @@ char* WrapText (const char* text, unsigned width)
 		break;
 	    }
 
-	    if (strlen (chunk) > width) {
+	    if (utf8_length (chunk) > width) {
 		// First copy remaining stuff in line to newtext.
 		newtext = realloc (newtext, strlen (newtext) + strlen (line) + 2);
 		strcat (newtext, line);
