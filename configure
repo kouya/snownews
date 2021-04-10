@@ -34,9 +34,9 @@ seds=[s/^#undef \(USE_UNSUPPORTED_AND_BROKEN_CODE\)/#define \1/]
 progs="CC=gcc CC=clang CC=cc INSTALL=install MSGFMT=msgfmt"
 
 # Libs found using pkg-config
-pkgs="libxml-2.0 ncurses zlib"
+pkgs="libcurl libxml-2.0 ncurses"
 # Default pkg flags to substitute when pkg-config is not found
-pkg_libs="-lxml2 -lncursesw -lz"
+pkg_libs="-lcurl -lxml2 -lncursesw"
 pkg_cflags="-I\/usr\/include\/libxml2"
 pkg_ldflags=""
 

@@ -23,7 +23,6 @@
 #include "ui-support.h"
 #include "parsefeed.h"
 #include <ncurses.h>
-#include <sys/stat.h>
 
 char* UIOneLineEntryField (int x, int y)
 {
@@ -263,38 +262,6 @@ void FeedInfo (const struct feed* current_feed)
     else
 	mvaddstr (11, centerx - (COLS / 2 - 7), _("Feed does not use authentication."));
 
-    // Add a smiley indicator to the http status telling the overall status
-    // so you don't have to know what the HTTP return codes mean.
-    // Yes I think I got the idea from cdparanoia. :)
-    if (current_feed->lasthttpstatus != 0) {
-	size_t len;
-	if (current_feed->content_type == NULL) {
-	    len = strlen (_("Last webserver status: %d"));
-	    mvprintw (12, centerx - (COLS / 2 - 7), _("Last webserver status: %d"), current_feed->lasthttpstatus);
-	} else {
-	    len = strlen (_("Last webserver status: (%s) %d")) + strlen (current_feed->content_type) - 2;	// -2 == %s
-	    mvprintw (12, centerx - (COLS / 2 - 7), _("Last webserver status: (%s) %d"), current_feed->content_type, current_feed->lasthttpstatus);
-	}
-	switch (current_feed->lasthttpstatus) {
-	    case 200:
-	    case 304:
-		mvaddstr (12, centerx - (COLS / 2 - 7) + len + 2, ":-)");
-		break;
-	    case 401:
-	    case 403:
-	    case 500:
-	    case 503:
-		mvaddstr (12, centerx - (COLS / 2 - 7) + len + 2, ":-P");
-		break;
-	    case 404:
-	    case 410:
-		mvaddstr (12, centerx - (COLS / 2 - 7) + len + 2, ":-(");
-		break;
-	    default:
-		mvaddstr (12, centerx - (COLS / 2 - 7) + len + 2, "8-X");
-		break;
-	}
-    }
     // Display filter script if any.
     if (current_feed->perfeedfilter != NULL) {
 	UISupportDrawBox (5, 13, COLS - 6, 14);

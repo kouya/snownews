@@ -20,12 +20,9 @@
 #include "io-internal.h"
 #include "setup.h"
 #include "ui-support.h"
-#include <fcntl.h>
 #include <ncurses.h>
 #include <signal.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 //{{{ Global variables -------------------------------------------------
 

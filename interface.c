@@ -25,7 +25,6 @@
 #include "setup.h"
 #include "ui-support.h"
 #include <ncurses.h>
-#include <unistd.h>
 #include <libxml/parser.h>
 #ifdef UTF_8
 #define xmlStrlen(s) xmlUTF8Strlen(s)
@@ -819,10 +818,6 @@ void UIMainInterface (void)
 		    new_feed->link = cur_ptr->link;
 		    new_feed->description = cur_ptr->description;
 		    new_feed->lastmodified = cur_ptr->lastmodified;
-		    new_feed->lasthttpstatus = cur_ptr->lasthttpstatus;
-		    new_feed->cookies = cur_ptr->cookies;
-		    new_feed->authinfo = cur_ptr->authinfo;
-		    new_feed->servauth = cur_ptr->servauth;
 		    new_feed->items = cur_ptr->items;
 		    new_feed->problem = cur_ptr->problem;
 		    new_feed->custom_title = cur_ptr->custom_title;
@@ -1086,15 +1081,14 @@ void UIMainInterface (void)
 			    }
 			    free (removed->feedurl);
 			    free (removed->xmltext);
+			    removed->xmltext = NULL;
+			    removed->content_length = 0;
 			    free (removed->title);
 			    free (removed->link);
 			    free (removed->description);
 			    free (removed->lastmodified);
 			    free (removed->custom_title);
 			    free (removed->original);
-			    free (removed->cookies);
-			    free (removed->authinfo);
-			    free (removed->servauth);
 			    free (removed);
 			    _feed_list_changed = true;
 			}

@@ -1,6 +1,7 @@
 // This file is part of Snownews - A lightweight console RSS newsreader
 //
 // Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+// Copyright (c) 2021 Mike Sharov <msharov@users.sourceforge.net>
 //
 // Snownews is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License version 3
@@ -17,4 +18,4 @@
 #pragma once
 #include "main.h"
 
-char* DownloadFeed (char* url, struct feed* cur_ptr, bool suppressoutput);
+void DownloadFeed (const char* url, struct feed* cur_ptr);

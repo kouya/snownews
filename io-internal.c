@@ -22,115 +22,12 @@
 #include "netio.h"
 #include "ui-support.h"
 #include "parsefeed.h"
-#include <errno.h>
 #include <ncurses.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <libxml/parser.h>
-#include <syslog.h>
 
 struct feed* newFeedStruct (void)
 {
-    struct feed* new = calloc (1, sizeof (struct feed));
-    new->netio_error = NET_ERR_OK;
-    return new;
-}
-
-static void GetHTTPErrorString (char* errorstring, size_t size, unsigned httpstatus)
-{
-    const char* statusmsg = "HTTP %u!";
-    switch (httpstatus) {
-	case 400:
-	    statusmsg = "Bad request";
-	    break;
-	case 402:
-	    statusmsg = "Payment required";
-	    break;
-	case 403:
-	    statusmsg = "Access denied";
-	    break;
-	case 500:
-	    statusmsg = "Internal server error";
-	    break;
-	case 501:
-	    statusmsg = "Not implemented";
-	    break;
-	case 502:
-	case 503:
-	    statusmsg = "Service unavailable";
-	    break;
-    }
-    snprintf (errorstring, size, statusmsg, httpstatus);
-}
-
-static void PrintUpdateError (const struct feed* cur_ptr)
-{
-    enum netio_error err = cur_ptr->netio_error;
-    char errstr[256];
-    switch (err) {
-	case NET_ERR_URL_INVALID:
-	    snprintf (errstr, sizeof (errstr), _("%s: Invalid URL!"), cur_ptr->title);
-	    break;
-	case NET_ERR_SOCK_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Couldn't create network socket!"), cur_ptr->title);
-	    break;
-	case NET_ERR_HOST_NOT_FOUND:
-	    snprintf (errstr, sizeof (errstr), _("%s: Can't resolve host!"), cur_ptr->title);
-	    break;
-	case NET_ERR_CONN_REFUSED:
-	    snprintf (errstr, sizeof (errstr), _("%s: Connection refused!"), cur_ptr->title);
-	    break;
-	case NET_ERR_CONN_FAILED:
-	    snprintf (errstr, sizeof (errstr), _("%s: Couldn't connect to server: %s"), cur_ptr->title, (strerror (cur_ptr->connectresult) ? strerror (cur_ptr->connectresult) : "(null)"));
-	    break;
-	case NET_ERR_TIMEOUT:
-	    snprintf (errstr, sizeof (errstr), _("%s: Connection timed out."), cur_ptr->title);
-	    break;
-	case NET_ERR_UNKNOWN:
-	    break;
-	case NET_ERR_REDIRECT_COUNT_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Too many HTTP redirects encountered! Giving up."), cur_ptr->title);
-	    break;
-	case NET_ERR_REDIRECT_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Server sent an invalid redirect!"), cur_ptr->title);
-	    break;
-	case NET_ERR_HTTP_410:
-	case NET_ERR_HTTP_404:
-	    snprintf (errstr, sizeof (errstr), _("%s: This feed no longer exists. Please unsubscribe!"), cur_ptr->title);
-	    break;
-	case NET_ERR_HTTP_NON_200:{
-		char httperrstr[64];
-		GetHTTPErrorString (httperrstr, sizeof (httperrstr), cur_ptr->lasthttpstatus);
-		snprintf (errstr, sizeof (errstr), _("%s: Could not download feed: %s"), cur_ptr->title, httperrstr);
-	    }
-	    break;
-	case NET_ERR_HTTP_PROTO_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Error in server reply."), cur_ptr->title);
-	    break;
-	case NET_ERR_AUTH_FAILED:
-	    snprintf (errstr, sizeof (errstr), _("%s: Authentication failed!"), cur_ptr->title);
-	    break;
-	case NET_ERR_AUTH_NO_AUTHINFO:
-	    snprintf (errstr, sizeof (errstr), _("%s: URL does not contain authentication information!"), cur_ptr->title);
-	    break;
-	case NET_ERR_AUTH_GEN_AUTH_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Could not generate authentication information!"), cur_ptr->title);
-	    break;
-	case NET_ERR_AUTH_UNSUPPORTED:
-	    snprintf (errstr, sizeof (errstr), _("%s: Unsupported authentication method requested by server!"), cur_ptr->title);
-	    break;
-	case NET_ERR_GZIP_ERR:
-	    snprintf (errstr, sizeof (errstr), _("%s: Error decompressing server reply!"), cur_ptr->title);
-	    break;
-	case NET_ERR_CHUNKED:
-	    snprintf (errstr, sizeof (errstr), _("%s: Error in server reply. Chunked encoding is not supported."), cur_ptr->title);
-	    break;
-	default:
-	    snprintf (errstr, sizeof (errstr), _("%s: Some error occured for which no specific error message was written."), cur_ptr->title);
-	    break;
-    }
-    UIStatus (errstr, 2, 1);
-    syslog (LOG_ERR, "%s", errstr);
+    return calloc (1, sizeof (struct feed));
 }
 
 // Update given feed from server.
@@ -148,13 +45,7 @@ int UpdateFeed (struct feed* cur_ptr)
     if (cur_ptr->execurl)
 	FilterExecURL (cur_ptr);
     else {
-	// Need to work on a copy of ->feedurl, because DownloadFeed() changes the pointer.
-	char* feedurl = strdup (cur_ptr->feedurl);
-	free (cur_ptr->xmltext);
-
-	cur_ptr->xmltext = DownloadFeed (feedurl, cur_ptr, 0);
-
-	free (feedurl);
+	DownloadFeed (cur_ptr->feedurl, cur_ptr);
 
 	// Set title and link structure to something.
 	// To the feedurl in this case so the program show something
@@ -165,11 +56,8 @@ int UpdateFeed (struct feed* cur_ptr)
 	    cur_ptr->link = strdup (cur_ptr->feedurl);
 
 	// If the download function returns a NULL pointer return from here.
-	if (!cur_ptr->xmltext) {
-	    if (cur_ptr->problem)
-		PrintUpdateError (cur_ptr);
+	if (!cur_ptr->xmltext)
 	    return 1;
-	}
     }
 
     // Feed downloaded content through the defined filter.
@@ -189,6 +77,7 @@ int UpdateFeed (struct feed* cur_ptr)
     // We don't need these anymore. Free the raw XML to save some memory.
     free (cur_ptr->xmltext);
     cur_ptr->xmltext = NULL;
+    cur_ptr->content_length = 0;
 
     // Mark the time to detect modifications
     cur_ptr->mtime = time (NULL);
@@ -260,6 +149,7 @@ int LoadFeed (struct feed* cur_ptr)
 
     free (cur_ptr->xmltext);
     cur_ptr->xmltext = NULL;
+    cur_ptr->content_length = 0;
     cur_ptr->mtime = cachest.st_mtime;
     return 0;
 }

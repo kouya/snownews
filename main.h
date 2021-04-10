@@ -19,32 +19,6 @@
 
 //----------------------------------------------------------------------
 
-enum netio_error {
-    NET_ERR_OK,
-    // Init errors
-    NET_ERR_URL_INVALID,
-    // Connect errors
-    NET_ERR_SOCK_ERR,
-    NET_ERR_HOST_NOT_FOUND,
-    NET_ERR_CONN_REFUSED,
-    NET_ERR_CONN_FAILED,
-    NET_ERR_TIMEOUT,
-    NET_ERR_UNKNOWN,
-    // Transfer errors
-    NET_ERR_REDIRECT_COUNT_ERR,
-    NET_ERR_REDIRECT_ERR,
-    NET_ERR_HTTP_410,
-    NET_ERR_HTTP_404,
-    NET_ERR_HTTP_NON_200,
-    NET_ERR_HTTP_PROTO_ERR,
-    NET_ERR_AUTH_FAILED,
-    NET_ERR_AUTH_NO_AUTHINFO,
-    NET_ERR_AUTH_GEN_AUTH_ERR,
-    NET_ERR_AUTH_UNSUPPORTED,
-    NET_ERR_GZIP_ERR,
-    NET_ERR_CHUNKED
-};
-
 struct feed {
     struct newsitem* items;
     struct feed* next;
@@ -56,17 +30,11 @@ struct feed {
     char* description;
     char* lastmodified;		// Content of header as sent by the server.
     char* content_type;
-    char* cookies;		// Login cookies for this feed.
-    char* authinfo;		// HTTP authinfo string.
-    char* servauth;		// Server supplied authorization header.
     char* custom_title;		// Custom feed title.
     char* original;		// Original feed title.
     char* perfeedfilter;	// Pipe feed through this program before parsing.
     time_t mtime;		// Last modification time
     unsigned content_length;
-    enum netio_error netio_error;	// See netio.h
-    int connectresult;		// Socket errno
-    int lasthttpstatus;
     bool problem;		// Set if there was a problem downloading the feed.
     bool execurl;		// Execurl?
     bool smartfeed;		// 1: new items feed.

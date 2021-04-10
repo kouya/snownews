@@ -16,9 +16,6 @@
 
 #include "filters.h"
 #include "ui-support.h"
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 //----------------------------------------------------------------------
 
@@ -76,6 +73,7 @@ int FilterPipeNG (struct feed* cur_ptr)
 
     free (cur_ptr->xmltext);
     cur_ptr->xmltext = NULL;
+    cur_ptr->content_length = 0;
 
     char* filter = strdup (cur_ptr->perfeedfilter);
     char* command = strsep (&filter, " ");

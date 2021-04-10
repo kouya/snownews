@@ -17,7 +17,6 @@
 
 #include "ui-support.h"
 #include <ncurses.h>
-#include <unistd.h>
 
 // Init the ncurses library.
 void InitCurses (void)

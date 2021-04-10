@@ -17,14 +17,9 @@
 #include "setup.h"
 #include "main.h"
 #include "categories.h"
-#include "cookies.h"
 #include "io-internal.h"
 #include "ui-support.h"
-#include <errno.h>
 #include <ncurses.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 // Load browser command from ~./snownews/browser.
 static void SetupBrowser (const char* filename)
@@ -399,11 +394,6 @@ static unsigned SetupFeedList (const char* filename)
 	if (categories && categories[0])	// Put categories into cat struct.
 	    for (char *catnext = categories, *catname; (catname = strsep (&catnext, ","));)
 		FeedCategoryAdd (new_ptr, catname);
-
-	// Load cookies for this feed.
-	// But skip loading cookies for execurls.
-	if (new_ptr->execurl != 1)
-	    LoadCookies (new_ptr);
 
 	// Add to bottom of pointer chain.
 	if (!_feed_list)

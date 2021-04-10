@@ -64,6 +64,11 @@
 #include <limits.h>
 #include <locale.h>
 #include <assert.h>
+#include <syslog.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <time.h>
 #include "os-support.h"

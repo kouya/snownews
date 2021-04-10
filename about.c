@@ -19,7 +19,6 @@
 #include "about.h"
 #include <ncurses.h>
 #include <sys/time.h>
-#include <sys/stat.h>
 
 //----------------------------------------------------------------------
 
