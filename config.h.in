@@ -29,10 +29,6 @@
 // Define to the value of LOCALEPATH environment variable
 #define LOCALEPATH		"@localepath@"
 
-// Snownews configuration files directory, starts with %s for $HOME
-#define SNOWNEWS_CONFIG_DIR	"%s/.snownews/"
-#define SNOWNEWS_CACHE_DIR	SNOWNEWS_CONFIG_DIR "cache/"
-
 // Define to output of uname
 #undef OS
 

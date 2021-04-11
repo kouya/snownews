@@ -17,6 +17,7 @@
 
 #include "netio.h"
 #include "uiutil.h"
+#include "setup.h"
 #include <curl/curl.h>
 
 static size_t FeedReceiver (void* buffer, size_t msz, size_t nm, void* vpfeed)
@@ -81,8 +82,8 @@ void DownloadFeed (const char* url, struct feed* fp)
 
     // Cookies, if the cookie file is in the config dir
     char cookiefile [PATH_MAX];
-    unsigned cfnl = snprintf (cookiefile, sizeof(cookiefile), SNOWNEWS_CONFIG_DIR "cookies", getenv("HOME"));
-    if (cfnl < sizeof(cookiefile) && access (cookiefile, R_OK) == 0)
+    ConfigFilePath ("cookies", cookiefile, sizeof(cookiefile));
+    if (access (cookiefile, R_OK) == 0)
 	curl_easy_setopt (curl, CURLOPT_COOKIEFILE, cookiefile);
 
     // Save old content

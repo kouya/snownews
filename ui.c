@@ -1021,7 +1021,7 @@ void UIMainInterface (void)
 			// Remove cachefile from filesystem.
 			char* hashme = Hashify (highlighted->feedurl);
 			char cachefilename[PATH_MAX];
-			snprintf (cachefilename, sizeof (cachefilename), SNOWNEWS_CACHE_DIR "%s", getenv ("HOME"), hashme);
+			CacheFilePath (hashme, cachefilename, sizeof(cachefilename));
 			free (hashme);
 
 			// Errors from unlink can be ignored. Worst thing that happens is that

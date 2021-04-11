@@ -23,6 +23,7 @@
 #include "feedio.h"
 #include "uiutil.h"
 #include "parse.h"
+#include "setup.h"
 #include <ncurses.h>
 
 char* UIOneLineEntryField (int x, int y)
@@ -244,10 +245,11 @@ void FeedInfo (const struct feed* current_feed)
     free (url);
     url = NULL;
 
-    char cachefile[PATH_MAX];
     char* hashme = Hashify (current_feed->feedurl);
-    snprintf (cachefile, sizeof (cachefile), SNOWNEWS_CACHE_DIR "%s", getenv ("HOME"), hashme);
+    char cachefile [PATH_MAX];
+    CacheFilePath (hashme, cachefile, sizeof(cachefile));
     free (hashme);
+
     struct stat cachestat;
     move (9, centerx - (COLS / 2 - 7));
     if (stat (cachefile, &cachestat) < 0)

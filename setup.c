@@ -23,6 +23,34 @@
 #include "conv.h"
 #include <ncurses.h>
 
+void ConfigFilePath (const char* filename, char* path, size_t pathsz)
+{
+    const char* confhome = getenv ("XDG_CONFIG_HOME");
+    unsigned pathlen;
+    if (confhome)
+	pathlen = snprintf (path, pathsz, "%s/" SNOWNEWS_NAME "/%s", confhome, filename);
+    else
+	pathlen = snprintf (path, pathsz, "%s/.config/" SNOWNEWS_NAME "/%s", getenv("HOME"), filename);
+    if (pathlen >= pathsz)
+	MainQuit ("ConfigFilePath", "configuration dir path is too long");
+    if (path[pathlen-1] == '/')
+	path[pathlen-1] = 0;
+}
+
+void CacheFilePath (const char* filename, char* path, size_t pathsz)
+{
+    const char* datahome = getenv ("XDG_DATA_HOME");
+    unsigned pathlen;
+    if (datahome)
+	pathlen = snprintf (path, pathsz, "%s/" SNOWNEWS_NAME "/%s", datahome, filename);
+    else
+	pathlen = snprintf (path, pathsz, "%s/.local/share/" SNOWNEWS_NAME "/%s", getenv("HOME"), filename);
+    if (pathlen >= pathsz)
+	MainQuit ("CacheFilePath", "cache dir path is too long");
+    if (path[pathlen-1] == '/')
+	path[pathlen-1] = 0;
+}
+
 // Load browser command from ~./snownews/browser.
 static void SetupBrowser (const char* filename)
 {
@@ -40,7 +68,7 @@ static void SetupBrowser (const char* filename)
 void SaveBrowserSetting (void)
 {
     char browserfilename[PATH_MAX];
-    snprintf (browserfilename, sizeof (browserfilename), SNOWNEWS_CONFIG_DIR "browser", getenv ("HOME"));
+    ConfigFilePath ("browser", browserfilename, sizeof(browserfilename));
     FILE* browserfile = fopen (browserfilename, "w");
     if (!browserfile)
 	MainQuit (_("Save settings (browser)"), strerror (errno));
@@ -69,24 +97,6 @@ static void SetupProxy (void)
 	}
     }
     free (proxystrbase);
-}
-
-// Construct the user agent string that snownews sends to the webserver.
-// This includes Snownews/VERSION, OS name and language setting.
-static void SetupUserAgent (void)
-{
-    // Constuct the User-Agent string of snownews. This is done here in program init,
-    // because we need to do it exactly once and it will never change while the program
-    // is running.
-    const char* lang = getenv ("LANG");
-    if (!lang)
-	lang = "C";
-    // Snonews/VERSION (Linux; de_DE; (http://kiza.kcore.de/software/snownews/)
-    static const char url[] = "http://snownews.kcore.de/software/snownews/";
-    const unsigned urllen = strlen (url);
-    unsigned ualen = strlen ("Snownews/" SNOWNEWS_VERSION) + 2 + strlen (lang) + 2 + strlen (OS) + 2 + urllen + 2;
-    _settings.useragent = malloc (ualen);
-    snprintf (_settings.useragent, ualen, "Snownews/" SNOWNEWS_VERSION " (" OS "; %s; %s)", lang, url);
 }
 
 // Define global keybindings and load user customized bindings.
@@ -411,6 +421,34 @@ static unsigned SetupFeedList (const char* filename)
     return numfeeds;
 }
 
+// Migrates configuration from ~/.snownews to ~/.config/snownews and ~/.local/share/snownews
+static void MigrateConfigToXDG (void)
+{
+    char dirname [PATH_MAX];
+    const char* homedir = getenv ("HOME");
+    if (!homedir)
+	MainQuit ("Reading configuration", "you have no home directory");
+
+    // Migrate cache dir to ~/.local/snownews
+    snprintf (dirname, sizeof(dirname), "%s/.snownews/cache", homedir);
+    struct stat dirtest;
+    if (0 == stat (dirname, &dirtest) && S_ISDIR(dirtest.st_mode)) {
+	char cachedir [PATH_MAX];
+	CacheFilePath ("", cachedir, sizeof(cachedir));
+	if (0 != rename (dirname, cachedir))
+	    MainQuit ("Migrating feed cache ~/.snownews/cache to ~/.local/share/snownews", strerror (errno));
+    }
+
+    // Migrate configuration dir to ~/.config/snownews
+    snprintf (dirname, sizeof(dirname), "%s/.snownews", homedir);
+    if (0 == stat (dirname, &dirtest) && S_ISDIR(dirtest.st_mode)) {
+	char configdir [PATH_MAX];
+	ConfigFilePath ("", configdir, sizeof(configdir));
+	if (0 != rename (dirname, configdir))
+	    MainQuit ("Migrating configuration ~/.snownews to ~/.config/snownews", strerror (errno));
+    }
+}
+
 // Create snownews' config directories if they do not exist yet,
 // load global configuration settings and caches.
 //
@@ -421,43 +459,41 @@ unsigned Config (void)
     // Set umask to 077 for all created files.
     umask (0077);
 
+    MigrateConfigToXDG();
     SetupProxy();
-    SetupUserAgent();
 
     // Setup config directories.
-    char dirname[PATH_MAX];
-    snprintf (dirname, sizeof (dirname), SNOWNEWS_CONFIG_DIR, getenv ("HOME"));
+    char dirname [PATH_MAX];
+    ConfigFilePath ("", dirname, sizeof(dirname));
     struct stat dirtest;
     if (0 > stat (dirname, &dirtest)) {
-	if (0 > mkdir (dirname, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
-	    MainQuit ("Creating config directory " SNOWNEWS_CONFIG_DIR, strerror (errno));
+	if (0 > mkdir (dirname, S_IRWXU))
+	    MainQuit (dirname, strerror (errno));
     } else if (!S_ISDIR (dirtest.st_mode))
-	MainQuit ("Creating config directory " SNOWNEWS_CONFIG_DIR, "A file with the name \"" SNOWNEWS_CONFIG_DIR "\" exists!");
+	MainQuit (dirname, "is a file");
 
-    snprintf (dirname, sizeof (dirname), SNOWNEWS_CACHE_DIR, getenv ("HOME"));
+    CacheFilePath ("", dirname, sizeof(dirname));
     if (0 > stat (dirname, &dirtest)) {
-	if (0 > mkdir (dirname, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
-	    MainQuit (_("Creating config directory " SNOWNEWS_CACHE_DIR), strerror (errno));
+	if (0 > mkdir (dirname, S_IRWXU))
+	    MainQuit (dirname, strerror (errno));
     } else if (!S_ISDIR (dirtest.st_mode))
-	MainQuit ("Creating config directory " SNOWNEWS_CACHE_DIR, "A file with the name \"" SNOWNEWS_CACHE_DIR "\" exists!");
+	MainQuit (dirname, "is a file");
 
     UIStatus (_("Reading configuration settings..."), 0, 0);
 
     char filename[PATH_MAX];
-    snprintf (filename, sizeof (filename), SNOWNEWS_CONFIG_DIR "browser", getenv ("HOME"));
+    ConfigFilePath ("browser", filename, sizeof(filename));
     SetupBrowser (filename);
 
-    snprintf (filename, sizeof (filename), SNOWNEWS_CONFIG_DIR "urls", getenv ("HOME"));
-    unsigned numfeeds = SetupFeedList (filename);
-
-    snprintf (filename, sizeof (filename), SNOWNEWS_CONFIG_DIR "keybindings", getenv ("HOME"));
+    ConfigFilePath ("keybindings", filename, sizeof(filename));
     SetupKeybindings (filename);
 
-    snprintf (filename, sizeof (filename), SNOWNEWS_CONFIG_DIR "colors", getenv ("HOME"));
+    ConfigFilePath ("colors", filename, sizeof(filename));
     SetupColors (filename);
 
-    snprintf (filename, sizeof (filename), SNOWNEWS_CONFIG_DIR "html_entities", getenv ("HOME"));
+    ConfigFilePath ("html_entities", filename, sizeof(filename));
     SetupEntities (filename);
 
-    return numfeeds;
+    ConfigFilePath ("urls", filename, sizeof(filename));
+    return SetupFeedList (filename);
 }

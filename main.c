@@ -96,10 +96,11 @@ enum EPIDAction { pid_file_delete, pid_file_create };
 static void make_pidfile_name (char* fnbuf, size_t fnbufsz)
 {
     const char* rundir = getenv ("XDG_RUNTIME_DIR");
-    if (rundir)
-	snprintf (fnbuf, fnbufsz, "%s/snownews.pid", rundir);
-    else
-	snprintf (fnbuf, fnbufsz, SNOWNEWS_CONFIG_DIR "pid", getenv ("HOME"));
+    if (!rundir)
+	rundir = getenv ("TMPDIR");
+    if (!rundir)
+	rundir = "/tmp";
+    snprintf (fnbuf, fnbufsz, "%s/snownews.pid", rundir);
 }
 
 static void modifyPIDFile (enum EPIDAction action)

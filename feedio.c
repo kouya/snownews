@@ -21,6 +21,7 @@
 #include "netio.h"
 #include "uiutil.h"
 #include "parse.h"
+#include "setup.h"
 #include <ncurses.h>
 #include <libxml/parser.h>
 
@@ -99,8 +100,8 @@ int LoadFeed (struct feed* cur_ptr)
 	return 0;
 
     char* hashme = Hashify (cur_ptr->feedurl);
-    char cachefilename[PATH_MAX];
-    snprintf (cachefilename, sizeof (cachefilename), SNOWNEWS_CACHE_DIR "%s", getenv ("HOME"), hashme);
+    char cachefilename [PATH_MAX];
+    CacheFilePath (hashme, cachefilename, sizeof(cachefilename));
     free (hashme);
     FILE* cache = fopen (cachefilename, "r");
     if (cache == NULL) {
@@ -184,7 +185,7 @@ static void WriteFeedUrls (void)
 
     // Make a backup of urls.
     char urlsfilename[PATH_MAX];
-    snprintf (urlsfilename, sizeof (urlsfilename), SNOWNEWS_CONFIG_DIR "urls", getenv ("HOME"));
+    ConfigFilePath ("urls", urlsfilename, sizeof(urlsfilename));
 
     // Write urls
     FILE* urlfile = fopen (urlsfilename, "w");
@@ -216,8 +217,8 @@ static void WriteFeedUrls (void)
 static void WriteFeedCache (const struct feed* feed)
 {
     char* hashme = Hashify (feed->feedurl);
-    char cachefilename[PATH_MAX];
-    snprintf (cachefilename, sizeof (cachefilename), SNOWNEWS_CACHE_DIR "%s", getenv ("HOME"), hashme);
+    char cachefilename [PATH_MAX];
+    CacheFilePath (hashme, cachefilename, sizeof(cachefilename));
     free (hashme);
 
     // Check if the feed has been modified since last loaded from this file
