@@ -33,9 +33,6 @@
 #define SNOWNEWS_CONFIG_DIR	"%s/.snownews/"
 #define SNOWNEWS_CACHE_DIR	SNOWNEWS_CONFIG_DIR "cache/"
 
-// Define to use experimental code
-#undef USE_UNSUPPORTED_AND_BROKEN_CODE
-
 // Define to output of uname
 #undef OS
 

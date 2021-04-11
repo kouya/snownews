@@ -2,6 +2,7 @@
 //
 // Copyright (c) 2003-2009 Oliver Feiler <kiza@kcore.de>
 // Copyright (c) 2003-2009 Rene Puls <rpuls@gmx.net>
+// Copyright (c) 2021 Mike Sharov <msharov@users.sourceforge.net>
 //
 // Snownews is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License version 3
@@ -17,11 +18,12 @@
 
 #include "main.h"
 #include "conversions.h"
-#include "md5.h"
 #include "ui-support.h"
 #include <iconv.h>
 #include <libxml/HTMLparser.h>
 #include <langinfo.h>
+#include <openssl/evp.h>
+#include <openssl/md5.h>
 
 //----------------------------------------------------------------------
 
@@ -342,86 +344,6 @@ char* WrapText (const char* text, unsigned width)
     return newtext;
 }
 
-char* base64encode (const char* inbuf, unsigned inbuf_size)
-{
-    static unsigned char const alphabet[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-    unsigned inbuf_pos = 0, outbuf_pos = 0, outbuf_size = 0, bits = 0, char_count = 0;
-
-    char* outbuf = malloc (1);
-    while (inbuf_pos < inbuf_size) {
-	bits |= *inbuf;
-	++char_count;
-	if (char_count == 3) {
-	    outbuf = realloc (outbuf, outbuf_size + 4);
-	    outbuf_size += 4;
-	    outbuf[outbuf_pos + 0] = alphabet[bits >> 18];
-	    outbuf[outbuf_pos + 1] = alphabet[(bits >> 12) & 0x3f];
-	    outbuf[outbuf_pos + 2] = alphabet[(bits >> 6) & 0x3f];
-	    outbuf[outbuf_pos + 3] = alphabet[bits & 0x3f];
-	    outbuf_pos += 4;
-	    bits = 0;
-	    char_count = 0;
-	}
-	++inbuf;
-	++inbuf_pos;
-	bits <<= 8;
-    }
-
-    if (char_count > 0) {
-	bits <<= 16 - (8 * char_count);
-	outbuf = realloc (outbuf, outbuf_size + 4);
-	outbuf_size += 4;
-	outbuf[outbuf_pos + 0] = alphabet[bits >> 18];
-	outbuf[outbuf_pos + 1] = alphabet[(bits >> 12) & 0x3f];
-	if (char_count == 1) {
-	    outbuf[outbuf_pos + 2] = '=';
-	    outbuf[outbuf_pos + 3] = '=';
-	} else {
-	    outbuf[outbuf_pos + 2] = alphabet[(bits >> 6) & 0x3f];
-	    outbuf[outbuf_pos + 3] = '=';
-	}
-	outbuf_pos += 4;
-    }
-
-    outbuf = realloc (outbuf, outbuf_size + 1);
-    outbuf[outbuf_pos] = 0;
-
-    return outbuf;
-}
-
-#ifdef USE_UNSUPPORTED_AND_BROKEN_CODE
-// Returns NULL on invalid input
-char* decodechunked (char* chunked, unsigned int* inputlen)
-{
-#warning ===The function decodedechunked() is not safe for binary data. Since you specifically requested it to be compiled in you probably know better what you are doing than me. Do not report bugs for this code.===
-    char* orig = chunked, *dest = chunked;
-    unsigned long chunklen;
-
-    // We can reuse the same buffer to dechunkify it:
-    // the data size will never increase.
-    while ((chunklen = strtoul (orig, &orig, 16))) {
-	// process one more chunk:
-	// skip chunk-extension part
-	while (*orig && (*orig != '\r'))
-	    ++orig;
-	// skip '\r\n' after chunk length
-	orig += 2;
-	if ((chunklen > (chunked + *inputlen - orig)))
-	    // insane chunk length. Well...
-	    return NULL;
-	memmove (dest, orig, chunklen);
-	dest += chunklen;
-	orig += chunklen;
-	// and go to the next chunk
-    }
-    *dest = '\0';
-    *inputlen = dest - chunked;
-
-    return chunked;
-}
-#endif
-
 // Remove leading whitspaces, newlines, tabs.
 // This function should be safe for working on UTF-8 strings.
 // tidyness: 0 = only suck chars from beginning of string
@@ -484,14 +406,21 @@ char* Hashify (const char* url)
 
 char* genItemHash (const char* const* hashitems, unsigned items)
 {
-    struct HashMD5 hash;
-    hash_md5_init (&hash);
+    EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit (mdctx, EVP_md5());
+
     for (unsigned i = 0; i < items; ++i)
 	if (hashitems[i])
-	    hash_md5_data (&hash, hashitems[i], strlen (hashitems[i]));
-    hash_md5_finish (&hash);
-    char hashtext[HASH_SIZE_MD5 * 2 + 1];
-    hash_md5_to_text (&hash, hashtext);
+	    EVP_DigestUpdate (mdctx, hashitems[i], strlen (hashitems[i]));
+
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned md_len = 0;
+    EVP_DigestFinal_ex (mdctx, md_value, &md_len);
+    EVP_MD_CTX_free (mdctx);
+
+    char hashtext [MD5_DIGEST_LENGTH*2 + 1];
+    for (unsigned i = 0; i < md_len; ++i)
+	sprintf (&hashtext[2*i], "%02hhx", md_value[i]);
     return strdup (hashtext);
 }
 

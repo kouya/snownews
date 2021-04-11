@@ -2,7 +2,7 @@ Snownews
 ========
 
 Snownews is a command-line RSS feed reader, originally written by
-[Oliver Feiler](https://github.com/kouya) (@kouya).
+[Oliver Feiler](https://github.com/kouya).
 It is designed to be simple and lightweight, and integrates well with
 other command-line tools, for both generating and filtering the feeds
 it reads.
@@ -14,9 +14,8 @@ Features
 * Fast and very resource friendly.
 * Downloads feeds using libcurl to support a variety of URL types.
 * Uses local cache for minimal network traffic.
-* Supports cookies.
 * A help menu available throughout the program.
-* Few dependencies on external libraries; ncurses, libcurl, and libxml2.
+* Few dependencies on external libraries; ncurses, libcurl, openssl, and libxml2.
 * Import feature for OPML subscription lists.
 * Fully customizable key bindings of all program functions.
 * Type Ahead Find for quick and easy navigation.
@@ -32,19 +31,17 @@ You will need the following:
 - ncurses 5.0+
 - libcurl
 - libxml2
+- openssl 1.1+
 - gettext
 
-Once you have the above dependencies installed:
+Once you have these dependencies installed:
 
 ```sh
 ./configure --prefix=/usr
 make install
 ```
 
-By default, this will install Snownews into `/usr/local`. If you
-prefer it to go somewhere else, set the `./configure --prefix=DIR`
-parameter. `configure --help` will list other options that you may
-find interesting.
+`configure --help` will list other options that you may find interesting.
 
 Localization
 ------------
