@@ -16,7 +16,7 @@ Als u een feed selecteert en op Enter drukt zal het programma elk item van deze 
 
 Selecteer een item en druk op Enter om de beschrijving te lezen. Als er geen beschrijving aan toegevoegd is zal de tekst 'Geen beschrijving beschikbaar.' verschijnen. U kunt met de pijltjestoetsen links en rechts, respectievelijk 'p' en 'n' het vorige of volgende nieuwsitem uit de lijst selecteren. Door op 'o' te drukken wordt de link (meestal de complete nieuwstekst) geopend in de browser.
 
-De standaardbrowser is lynx, maar u kunt dit veranderen door op 'B' te drukken in het hoofdmenu en een nieuwe standaardbrowser in te voeren. Of u kunt het bestand ~/.snownews/browser bewerken. Het programma vervangt %s door de URL bij het uitbreiden van de string.
+De standaardbrowser is lynx, maar u kunt dit veranderen door op 'B' te drukken in het hoofdmenu en een nieuwe standaardbrowser in te voeren. Of u kunt het bestand ~/.config/snownews/browser bewerken. Het programma vervangt %s door de URL bij het uitbreiden van de string.
 
 Netwerk verbindingen kunnen onderbroken worden door op 
 .B 'z' 
@@ -44,14 +44,7 @@ U kunt alle al gedefinieerde catgorieën voor een feed zien in de feed info.
 .P
 .B Toetsenbord instellen
 .P
-U kunt de toetsen veranderen door het bestand ~/.snownews/keybindings te bewerken. Het formaat is "functiebeschrijving:toets". Verander de "functiebeschrijving" niet. Het teken achter de dubbele punt is de toets die het programma aan die functie toewijst. Als u een definitie verwijdert of het programma kan het bestand, om de een of andere reden, niet lezen worden de standaard instellingen gebruikt.
-
-.B Abbonnementen importeren uit ander programma's:
-.P
-Snownews kan opml abbonnementsbestanden importeren van andere RSS lezers naar het eigen formaat met het bijgevoegde programma "opml2snow".
-Om een opml abbonnementsbestand te converteren type "ompl2snow MijnAbbonnementen.opml" waarbij MijnAbbonnementen.opml de bestandsnaam is van het bestand dat u wilt converteren.
-Het programma toont de geconverteerde data op de stdout. Gebruik "ompl2snow bestand.opml > geconverteerd" om de geconverteerde data in het bestand "geconverteerd" te plaatsen of "ompl2snow bestand.opml >> ~/.snownews/url" om het toe te voegen aan het einde van de abbonnementenlijst van Snownews.
-Gebruik "opml2snow -h" voor meer voorbeelden van het gebruik.
+U kunt de toetsen veranderen door het bestand ~/.config/snownews/keybindings te bewerken. Het formaat is "functiebeschrijving:toets". Verander de "functiebeschrijving" niet. Het teken achter de dubbele punt is de toets die het programma aan die functie toewijst. Als u een definitie verwijdert of het programma kan het bestand, om de een of andere reden, niet lezen worden de standaard instellingen gebruikt.
 
 .B Een paar dingen die het waard zijn uit te leggen:
 

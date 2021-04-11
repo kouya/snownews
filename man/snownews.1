@@ -70,7 +70,7 @@ will open the link (usually the complete news text) in the browser.
 The default browser is lynx, but you can change this by pressing
 .B 'B'
 in the main menu and entering a new default browser. Or you can edit
-the file ~/.snownews/browser. The program replaces
+the file ~/.config/snownews/browser. The program replaces
 %s with the URL when expanding the string.
 .P
 You can rename a feed by pressing the key
@@ -112,7 +112,7 @@ You can see all defined categories for a feed in the feed info.
 .P
 .B Customizing keybindings
 .P
-You can customize the keybindings by editing the file ~/.snownews/keybindings.
+You can customize the keybindings by editing the file ~/.config/snownews/keybindings.
 The format is "function description:key". Do not change the string
 "function description". The single character behind the colon represents
 the key the program will associate with the corresponding function. If
@@ -122,7 +122,7 @@ the default settings will be used instead.
 .B Colours
 .P
 If you prefer to see the world in colours you can enable (and configure) colour
-support in Snownews. Edit the file ~/.snownews/colors. To globally enable
+support in Snownews. Edit the file ~/.config/snownews/colors. To globally enable
 colours in the program, set enabled to "1". To set a colour, use the colour
 key value that is listed in the comment in that file. You can disable usage
 for single items by using the value "-1".
@@ -134,24 +134,8 @@ the text. Tags will be stripped alltogether and some common HTML entities
 will be translated. By default only the five entities defined in XML
 (&lt; (<), &gt; (>), &amp; (&), &quot; (") and &apos; (')) plus a default
 setting included will be translated. You can influence this behaviour with
-the definition file at ~/.snownews/html_entities. See the comments on top
+the definition file at ~/.config/snownews/html_entities. See the comments on top
 of the file for further details.
-.P
-.B Importing/exporting subscriptions from other programs:
-.P
-Snownews can import opml subscription files from other RSS readers into
-its own format with the included program "opml2snow".
-To convert an opml subscription file type "opml2snow MySubsriptions.opml" 
-with MySubscriptions.opml being the name of the file you want to convert.
-The program will print the converted data to stdout. Use 
-"opml2snow file.opml >converted" to put the converted data into the file
-"converted" or "opml2snow file.opml >>~/.snownews/urls"
-to append it to snownews' subscription list.
-.P
-You can also export snownews' internal format to an OPML file with
-"opml2snow --export".
-.P
-See "opml2snow -h" or its manpage for more usage examples.
 .P
 .B HTTP client features
 .P
@@ -168,7 +152,7 @@ To subscribe to a feed that requires authentication, use an URL
 .B http://username:password@server/feed.rss.
 You can use cookies to supply log in information to a webserver. Put the
 cookies you want Snownews to use into the file
-.B ~/.snownews/cookies.
+.B ~/.config/snownews/cookies.
 The file has to be in standard Netscape cookies.txt file format. Mozilla uses
 this format for example. Snownews will automatically send the right cookies
 to the right webserver. You can also just place a symlink to your browser's
@@ -242,11 +226,6 @@ the program crash, regardless what you're doing is a bug and needs to be fixed.
 XML parsing errors are probably not fixable in Snownews since libxml is responsible
 for parsing a document's XML. Though you can report problematic feeds anyway,
 it may be a bug in Snownews.
-.P
-Please read http://kiza.kcore.de/software/snownews/faq#toc4 before you report a bug.
-
-.SH SEE ALSO
-.BR opml2snow (1).
 
 .SH AUTHOR
 Oliver Feiler <kiza@kcore.de>

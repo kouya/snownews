@@ -418,17 +418,11 @@ void CleanupString (char* string, int tidyness)
 	return;
 
     size_t len = strlen (string);
-    while (len && (string[0] == '\n' || string[0] == ' ' || string[0] == '\t')) {
+    while (len && isspace (string[0])) {
 	// len=strlen(string) does not include \0 of string.
 	// But since we copy from *string+1 \0 gets included.
 	// Delicate code. Think twice before it ends in buffer overflows.
 	memmove (string, string + 1, len);
-	--len;
-    }
-
-    // Remove trailing spaces.
-    while (len > 1 && string[len - 1] == ' ') {
-	string[len - 1] = 0;
 	--len;
     }
 
@@ -439,6 +433,10 @@ void CleanupString (char* string, int tidyness)
 	if (tidyness == 1 && string[i] == '\n')
 	    string[i] = ' ';
     }
+
+    // Remove trailing spaces.
+    while (len > 1 && isspace (string[len-1]))
+	string[--len] = 0;
 }
 
 // http://foo.bar/address.rdf -> http:__foo.bar_address.rdf

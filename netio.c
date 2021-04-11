@@ -118,7 +118,7 @@ void DownloadFeed (const char* url, struct feed* fp)
 	// Check if failed because already up-to-date
 	long unmet = 0;
 	if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_CONDITION_UNMET, &unmet) && unmet) {
-	    fp->lasterror = strdup (_("Feed already up to date"));
+	    fp->lasterror = strdup (_("already up to date"));
 	    UIStatus (fp->lasterror, 0, 0);
 	    fp->problem = false;
 	} else {

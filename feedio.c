@@ -22,6 +22,7 @@
 #include "uiutil.h"
 #include "parse.h"
 #include "setup.h"
+#include "cat.h"
 #include <ncurses.h>
 #include <libxml/parser.h>
 
@@ -178,6 +179,35 @@ int LoadAllFeeds (unsigned numfeeds)
     return 0;
 }
 
+void AddFeed (const char* url, const char* cname, const char* categories, const char* filter)
+{
+    struct feed* new_ptr = newFeedStruct();
+    new_ptr->feedurl = strdup (url);
+    if (strncasecmp (new_ptr->feedurl, "exec:", strlen ("exec:")) == 0)
+	new_ptr->execurl = true;
+    else if (strncasecmp (new_ptr->feedurl, "smartfeed:", strlen ("smartfeed:")) == 0)
+	new_ptr->smartfeed = true;
+    if (cname && cname[0])
+	new_ptr->custom_title = strdup (cname);
+    if (filter && filter[0])
+	new_ptr->perfeedfilter = strdup (filter);
+    if (categories && categories[0]) {	// Put categories into cat struct.
+	char* catlist = strdup (categories);
+	for (char* catnext = catlist; catnext;)
+	    FeedCategoryAdd (new_ptr, strsep (&catnext, ","));
+	free (catlist);
+    }
+    // Add to bottom of pointer chain.
+    if (!_feed_list)
+	_feed_list = new_ptr;
+    else {
+	new_ptr->prev = _feed_list;
+	while (new_ptr->prev->next)
+	    new_ptr->prev = new_ptr->prev->next;
+	new_ptr->prev->next = new_ptr;
+    }
+}
+
 static void WriteFeedUrls (void)
 {
     if (!_feed_list_changed)
@@ -185,7 +215,7 @@ static void WriteFeedUrls (void)
 
     // Make a backup of urls.
     char urlsfilename[PATH_MAX];
-    ConfigFilePath ("urls", urlsfilename, sizeof(urlsfilename));
+    ConfigFilePath ("urls.opml", urlsfilename, sizeof(urlsfilename));
 
     // Write urls
     FILE* urlfile = fopen (urlsfilename, "w");
@@ -193,23 +223,51 @@ static void WriteFeedUrls (void)
 	syslog (LOG_ERR, "error saving urls: %s", strerror (errno));
 	return;
     }
-    for (const struct feed * f = _feed_list; f; f = f->next) {
-	fputs (f->feedurl, urlfile);
-	fputc ('|', urlfile);
-	if (f->custom_title)
-	    fputs (f->title, urlfile);
-	fputc ('|', urlfile);
-	for (const struct feedcategories * c = f->feedcategories; c; c = c->next) {
-	    fputs (c->name, urlfile);
-	    if (c->next)       // Only add a colon of we run the loop again!
-		fputc (',', urlfile);
-	}
-	fputc ('|', urlfile);
-	if (f->perfeedfilter != NULL)
-	    fputs (f->perfeedfilter, urlfile);
 
-	fputc ('\n', urlfile); // Add newline character.
+    // Write header
+    fputs (
+	"<?xml version=\"1.0\"?>\n"
+	"<opml version=\"2.0\"", urlfile);
+
+    // See if the custom namespace is needed
+    bool needNs = false;
+    for (const struct feed* f = _feed_list; f; f = f->next)
+	if (f->perfeedfilter)
+	    needNs = true;
+    if (needNs)
+	fputs (" xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\"", urlfile);
+
+    fputs (
+	">\n"
+	"    <head>\n"
+	"	<title>" SNOWNEWS_NAME " subscriptions</title>\n"
+	"    </head>\n"
+	"    <body>\n"
+	, urlfile);
+
+    // Write one outline element per feed
+    for (const struct feed* f = _feed_list; f; f = f->next) {
+	fputs ("\t<outline", urlfile);
+	if (f->custom_title)
+	    fprintf (urlfile, " text=\"%s\"", f->custom_title);
+	if (f->feedurl)
+	    fprintf (urlfile, " xmlUrl=\"%s\"", f->feedurl);
+	if (f->feedcategories) {
+	    fputs (" category=\"", urlfile);
+	    for (const struct feedcategories* c = f->feedcategories; c; c = c->next) {
+		fputs (c->name, urlfile);
+		if (c->next)
+		    fputc (',', urlfile);
+	    }
+	    fputs ("\"", urlfile);
+	}
+	if (f->perfeedfilter)
+	    fprintf (urlfile, " snow:filter=\"%s\"", f->perfeedfilter);
+	fputs ("/>\n", urlfile);
     }
+    fputs (
+	"    </body>\n"
+	"</opml>\n", urlfile);
     fclose (urlfile);
     _feed_list_changed = false;
 }
@@ -232,7 +290,12 @@ static void WriteFeedCache (const struct feed* feed)
 	return;
     }
 
-    fputs ("<?xml version=\"1.0\" ?>\n\n<rdf:RDF\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns=\"http://purl.org/rss/1.0/\"\n  xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
+    fputs (
+	"<?xml version=\"1.0\" ?>\n\n"
+	"<rdf:RDF\n"
+	"\txmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+	"\txmlns=\"http://purl.org/rss/1.0/\"\n"
+	"\txmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
 
     if (feed->lastmodified)
 	fprintf (cache, "<snow:lastmodified>%ld</snow:lastmodified>\n", feed->lastmodified);

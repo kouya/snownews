@@ -72,7 +72,7 @@ ouvre le lien dans un navigateur.
 Le navigateur par défaut est lynx, mais ceci peut être configuré en pressant
 .B Shift+B
 dans le menu principal puis en entrant un nouveau navigateur.
-Vous pouvez également éditer le fichier ~/.snownews/browser.
+Vous pouvez également éditer le fichier ~/.config/snownews/browser.
 Le programme remplace %s par l'URL dans la chaîne entrée.
 .P
 Une connexion peut être interrompue en pressant
@@ -110,26 +110,12 @@ pressez simplement son numéro dans l'interface de catégorisation des feeds.
 .P
 Vous pouvez voir toutes les catégories d'un feed dans son écran d'info.
 .P
-Vous pouvez modifier les touches en éditant le fichier ~/.snownews/keybindings.
+Vous pouvez modifier les touches en éditant le fichier ~/.config/snownews/keybindings.
 Le format est "description de la fonction:touche". Ne changez pas la partie
 "description de la fonction". Le caractère suivant les deux points représente
 la touche que le programme associera avec la fonction correspondante.
 Si une définition est effacée, ou si le programme ne peut pas lire le fichier
 pour quelque raison, alors le réglage par défaut sera utilisé.
-.P
-.B Import de feeds d'un autre programme:
-.P
-Snownews peut importer des fichiers d'abonnements RSS issus d'autres programmes
-dans son propre format au moyen de l'outil "opml2snow".
-Pour convertir un fichier d'abonnement de type opml, taper:
-"opml2snow MesAbonnements.opml"
-où MesAbonnements.opml est le nom du fichier à convertir.
-opml2snow enverra le résultat de la conversion sur la sortie standard.
-Taper "opml2snow fichier.opml > converti" pour écrire le résultat dans un
-fichier appelé "converti", ou encore "opml2snow fichier.opml >> ~/.snownews/urls"
-pour ajouter les abonnements convertis dans le fichier des abonnements de
-Snownews.
-Voir "opml2snow -h" pour d'autres exemples d'utilisation.
 .P
 .B Quelques détails supplémentaires:
 .P

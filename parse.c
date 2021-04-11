@@ -17,6 +17,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "parse.h"
+#include "feedio.h"
 #include "conv.h"
 #include <libxml/parser.h>
 
@@ -465,4 +466,55 @@ int DeXML (struct feed* cur_ptr)
 	cur_ptr->title = strdup (cur_ptr->custom_title);
     }
     return 0;
+}
+
+unsigned ParseOPMLFile (const char* flbuf)
+{
+    unsigned nfeeds = 0;
+    xmlDocPtr doc = xmlRecoverMemory (flbuf, strlen (flbuf));
+    if (!doc)
+	return nfeeds;
+
+    xmlNodePtr rootnode = xmlDocGetRootElement (doc);
+    if (!rootnode) {
+	xmlFreeDoc (doc);
+	return nfeeds;
+    }
+    if (xmlStrcmp (rootnode->name, (const xmlChar*) "opml") == 0) {
+	for (xmlNodePtr body = rootnode->children; body; body = body->next) {
+	    if (body->type != XML_ELEMENT_NODE
+		|| 0 != xmlStrcmp (body->name, (const xmlChar*) "body"))
+		continue;
+	    for (xmlNodePtr outline = body->children; outline; outline = outline->next) {
+		if (outline->type != XML_ELEMENT_NODE
+		    || 0 != xmlStrcmp (outline->name, (const xmlChar*) "outline"))
+		    continue;
+
+		char* text = (char*) xmlGetProp (outline, (const xmlChar*) "text");
+		char* xmlUrl = (char*) xmlGetProp (outline, (const xmlChar*) "xmlUrl");
+		char* categories = (char*) xmlGetProp (outline, (const xmlChar*) "category");
+		char* filter = (char*) xmlGetNsProp (outline, (const xmlChar*) "filter", snowNs);
+		CleanupString (xmlUrl, 0);
+		CleanupString (text, 0);
+		CleanupString (categories, 0);
+		CleanupString (filter, 0);
+
+		if (xmlUrl && text) {
+		    AddFeed (xmlUrl, text, categories, filter);
+		    ++nfeeds;
+		}
+
+		if (xmlUrl)
+		    xmlFree (xmlUrl);
+		if (text)
+		    xmlFree (text);
+		if (categories)
+		    xmlFree (categories);
+		if (filter)
+		    xmlFree (filter);
+	    }
+	}
+    }
+    xmlFreeDoc (doc);
+    return nfeeds;
 }

@@ -18,3 +18,4 @@
 #include "main.h"
 
 int DeXML (struct feed* cur_ptr);
+unsigned ParseOPMLFile (const char* flbuf);

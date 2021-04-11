@@ -23,10 +23,6 @@ ${exe}:	${objs}
 	@echo "Linking $@ ..."
 	@${CC} ${ldflags} -o $@ $^ ${libs}
 
-${exe}-static: ${srcs}
-	@echo "Statically linking $@ ..."
-	@${CC} ${cflags} ${ldflags} -s -static -o $@ $^
-
 $O%.o:	%.c
 	@echo "    Compiling $< ..."
 	@${CC} ${cflags} -MMD -MT "$(<:.c=.s) $@" -o $@ -c $<
@@ -45,8 +41,6 @@ ifdef bindir
 
 exed	:= ${DESTDIR}${bindir}
 exei	:= ${exed}/$(notdir ${exe})
-o2si	:= ${exed}/opml2snow
-s2oi	:= ${exed}/snow2opml
 
 ${exed}:
 	@echo "Creating $@ ..."
@@ -54,20 +48,14 @@ ${exed}:
 ${exei}:	${exe} | ${exed}
 	@echo "Installing $@ ..."
 	@${INSTALL_PROGRAM} $< $@
-${o2si}:	opml2snow | ${exed}
-	@echo "Installing $@ ..."
-	@${INSTALL_PROGRAM} $< $@
-${s2oi}:	${o2si} | ${exed}
-	@echo "Installing $@ ..."
-	@(cd ${exed}; rm -f $@; ln -s $(notdir $<) $(notdir $@))
 
 installdirs:	${exed}
-install:	${exei} ${o2si} ${s2oi}
+install:	${exei}
 uninstall:	uninstall-bin
 uninstall-bin:
 	@if [ -f ${exei} ]; then\
 	    echo "Removing ${exei} ...";\
-	    rm -f ${exei} ${o2si} ${s2oi};\
+	    rm -f ${exei};\
 	fi
 endif
 
@@ -77,7 +65,7 @@ endif
 
 clean:
 	@if [ -d ${builddir} ]; then\
-	    rm -f ${exe} ${exe}-static ${objs} ${deps} $O.d;\
+	    rm -f ${exe} ${objs} ${deps} $O.d;\
 	    rmdir ${builddir};\
 	fi
 

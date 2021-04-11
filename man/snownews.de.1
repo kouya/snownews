@@ -77,7 +77,7 @@ Webbrowser.
 Der Standardbrowser ist Lynx. Sie können dies aber ändern, indem
 Sie im Hauptmenü die Taste
 .B 'B'
-drücken. Alternativ können Sie auch die Datei ~/.snownews/browser
+drücken. Alternativ können Sie auch die Datei ~/.config/snownews/browser
 editieren. Das Programm ersetzt %s durch die URL, wenn es den
 Webbrowser aufruft.
 .P
@@ -127,7 +127,7 @@ der Feed Information.
 .B Tatenbelegung konfigurieren
 .P
 Die Tastenbelegung können Sie ändern, indem Sie die Datei
-~/.snownews/keybindings editieren. Das Format der Datei ist
+~/.config/snownews/keybindings editieren. Das Format der Datei ist
 "Funktionsbeschreibung:Taste". ändern Sie bitte nicht den Text der
 Funktionsbeschreibung. Der einzelne Buchstabe hinter dem Doppelpunkt
 stellt die Taste dar, die das Programm mit der entsprechenden Funktion
@@ -143,19 +143,7 @@ entfernt und gebräuchliche Entities umgewandelt. Standardmäßig werden
 nur die in XML definierten Entities (&lt; (<), &gt; (>), &amp; (&), &quot;
 (") and &apos; (')) und eine interne Standardvorgabe umgewandelt. Sie
 können diese Liste erweitern, indem Sie die gewünschten Zeichen in die
-Datei ~/.snownews/html_conversion eintragen.
-.P
-.B Importieren von Abonnements aus anderen Programmen:
-.P
-Snownews kann opml Abonnements von anderen RSS Newsreadern in sein
-eigenes Format importieren. Dies funktioniert mit dem mitgelieferten
-Programm "opml2snow". Um eine Subscription Datei zu konvertieren,
-tippen Sie "opml2snow Datei.opml", wobei Datei.opml die zu importierende
-Datei ist. Das Programm gibt die konvertierten Daten auf den Bildschirm
-aus. Verwenden Sie "opml2snow Datei.opml >konvertiert" um die Ausgabe
-in die Datei "konvertiert" zu schreiben, oder "opml2snow Datei.opml
->>~/.snownews/urls" um die konvertierten Daten zu der Feedliste von
-Snownews hinzuzufügen. Geben Sie "opml2snow -h" ein für mehr Beispiele.
+Datei ~/.config/snownews/html_conversion eintragen.
 .P
 .B Einige weitere nützliche Dinge:
 .P

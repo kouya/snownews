@@ -21,6 +21,8 @@
 #include "feedio.h"
 #include "uiutil.h"
 #include "conv.h"
+#include "parse.h"
+#include <ctype.h>
 #include <ncurses.h>
 
 void ConfigFilePath (const char* filename, char* path, size_t pathsz)
@@ -51,18 +53,40 @@ void CacheFilePath (const char* filename, char* path, size_t pathsz)
 	path[pathlen-1] = 0;
 }
 
+static char* LoadFile (const char* filename)
+{
+    struct stat st;
+    if (0 != stat (filename, &st) || !S_ISREG(st.st_mode) || !st.st_size)
+	return NULL;
+    int fd = open (filename, O_RDONLY);
+    if (fd < 0)
+	return NULL;
+    char* r = calloc (1, st.st_size);
+    for (ssize_t br = 0; br < st.st_size;) {
+	ssize_t ec = read (fd, &r[br], st.st_size-br);
+	if (ec <= 0) {
+	    if (errno == EINTR)
+		continue;
+	    free (r);
+	    return NULL;
+	}
+	br += ec;
+    }
+    return r;
+}
+
 // Load browser command from ~./snownews/browser.
 static void SetupBrowser (const char* filename)
 {
-    char linebuf[128] = "lynx %s";
-    FILE* browserfile = fopen (filename, "r");
-    if (browserfile) {
-	fgets (linebuf, sizeof (linebuf), browserfile);
-	if (linebuf[strlen (linebuf) - 1] == '\n')
-	    linebuf[strlen (linebuf) - 1] = '\0';
-	fclose (browserfile);
+    char* fbuf = LoadFile (filename);
+    if (!fbuf) {
+	_settings.browser = strdup ("lynx %s");
+	return;
     }
-    _settings.browser = strdup (linebuf);
+    size_t fbuflen = strlen(fbuf);
+    while (isspace (fbuf[fbuflen-1]))
+	fbuf[--fbuflen] = 0;
+    _settings.browser = fbuf;
 }
 
 void SaveBrowserSetting (void)
@@ -368,56 +392,40 @@ static void SetupEntities (const char* file)
     }
 }
 
+static unsigned ParseOldFeedListFile (char* flbuf)
+{
+    unsigned numfeeds = 0;
+    for (char* lineiter = flbuf; lineiter;) {
+	char* line = strsep (&lineiter, "\n");
+
+	// File format is url|custom name|comma seperated categories|filters
+	const char* url = strsep (&line, "|");
+	if (!url || !url[0])
+	    continue;	       // no url
+	const char* cname = strsep (&line, "|");
+	const char* categories = strsep (&line, "|");
+	const char* filters = line;
+
+	AddFeed (url, cname, categories, filters);
+	++numfeeds;
+    }
+    return numfeeds;
+}
+
 static unsigned SetupFeedList (const char* filename)
 {
     unsigned numfeeds = 0;
-    FILE* configfile = fopen (filename, "r");
-    if (!configfile)
+    char* flbuf = LoadFile (filename);
+    if (!flbuf)
 	return numfeeds;       // no feeds
-    while (!feof (configfile)) {
-	char linebuf[256];
-	if (!fgets (linebuf, sizeof (linebuf), configfile))
-	    break;
-	if (linebuf[0] == '\n')
-	    break;
-	linebuf[strlen (linebuf) - 1] = 0;	// chop newline
 
-	// File format is url|custom name|comma seperated categories|filters
-	char* parse = linebuf;
-	const char* url = strsep (&parse, "|");
-	if (!url || !url[0])
-	    continue;	       // no url
-	const char* cname = strsep (&parse, "|");
-	char* categories = strsep (&parse, "|");
-	const char* filters = parse;
-
-	++numfeeds;
-
-	struct feed* new_ptr = newFeedStruct();
-	new_ptr->feedurl = strdup (url);
-	if (strncasecmp (new_ptr->feedurl, "exec:", strlen ("exec:")) == 0)
-	    new_ptr->execurl = true;
-	else if (strncasecmp (new_ptr->feedurl, "smartfeed:", strlen ("smartfeed:")) == 0)
-	    new_ptr->smartfeed = true;
-	if (cname && cname[0])
-	    new_ptr->custom_title = strdup (cname);
-	if (filters && filters[0])
-	    new_ptr->perfeedfilter = strdup (filters);
-	if (categories && categories[0])	// Put categories into cat struct.
-	    for (char *catnext = categories, *catname; (catname = strsep (&catnext, ","));)
-		FeedCategoryAdd (new_ptr, catname);
-
-	// Add to bottom of pointer chain.
-	if (!_feed_list)
-	    _feed_list = new_ptr;
-	else {
-	    new_ptr->prev = _feed_list;
-	    while (new_ptr->prev->next)
-		new_ptr->prev = new_ptr->prev->next;
-	    new_ptr->prev->next = new_ptr;
-	}
-    }
-    fclose (configfile);
+    // Check the format; old snownews style or OPML
+    if (0 != strncmp (flbuf, "<?xml", strlen("<?xml"))) {
+	numfeeds = ParseOldFeedListFile (flbuf);
+	_feed_list_changed = true; // force conversion to OPML
+    } else
+	numfeeds = ParseOPMLFile (flbuf);
+    free (flbuf);
     return numfeeds;
 }
 
@@ -446,6 +454,17 @@ static void MigrateConfigToXDG (void)
 	ConfigFilePath ("", configdir, sizeof(configdir));
 	if (0 != rename (dirname, configdir))
 	    MainQuit ("Migrating configuration ~/.snownews to ~/.config/snownews", strerror (errno));
+    }
+
+    // Convert urls to urls.opml
+    char oldurls [PATH_MAX];
+    ConfigFilePath ("urls", oldurls, sizeof(oldurls));
+    if (0 == access (oldurls, F_OK)) {
+	char newurls [PATH_MAX];
+	ConfigFilePath ("urls.opml", newurls, sizeof(newurls));
+	if (0 != rename (oldurls, newurls))
+	    MainQuit ("Migrating urls to urls.opml", strerror (errno));
+	_feed_list_changed = true; // force conversion to OPML
     }
 }
 
@@ -494,6 +513,6 @@ unsigned Config (void)
     ConfigFilePath ("html_entities", filename, sizeof(filename));
     SetupEntities (filename);
 
-    ConfigFilePath ("urls", filename, sizeof(filename));
+    ConfigFilePath ("urls.opml", filename, sizeof(filename));
     return SetupFeedList (filename);
 }

@@ -29,7 +29,6 @@ struct feed {
     char* link;
     char* description;
     char* lasterror;
-    char* content_type;
     char* custom_title;		// Custom feed title.
     char* original;		// Original feed title.
     char* perfeedfilter;	// Pipe feed through this program before parsing.

@@ -81,7 +81,7 @@ premendo il tasto
 .B 'B'
 nel menu principale e impostando un browser differente.
 In alternativa, si pu modificare il file di configurazione
-~/.snownews/browser. Il programma sostituisce alla stringa
+~/.config/snownews/browser. Il programma sostituisce alla stringa
 %s l'URL indicata dal link.
 .P
 Le connessioni ai siti possono essere interrotte premendo il tasto 
@@ -136,7 +136,7 @@ Si possono vedere tutte le categorie cui un feed fa parte tra le informazioni
 relative ad un feed.
 .P
 Si possono personalizzare le associazioni dei tasti modificando il file
-~/.snownews/keybindings.
+~/.config/snownews/keybindings.
 Il formato del file �semplicemente
 "descrizione della funzione:key". Attenzione: non si deve modificare la stringa
 "descrizione della funzione". 
@@ -145,22 +145,6 @@ funzione specificata.
 Se si eliminano delle definizioni o se, per qualsiasi motivo, il programma 
 non �in grado di effettuare il parsing del file, verranno usate le 
 impostazioni predefinite.
-.P
-.B Importare sottoscrizioni da altri programmi.
-.P
-Snownews �in grado di importare file di sottoscrizioni opml da altri lettori 
-RSS usando il programma "opml2snow".
-Per convertire un file opml nel formato usato da Snownews, �sufficiente digitare il comando 
-"opml2snow MySubsriptions.opml", dove
-MySubscriptions.opml rappresenta il nome del file con le sottoscrizioni da 
-importare.
-opml2snow stampa i dati convertiti sullo stdout.
-Basta digitare
-"opml2snow file.opml >converted" per salvare tali dati nel file
-"converted", o "opml2snow file.opml >>~/.snownews/urls"
-per appenderli alla lista dei feed sottoscritti da Snownews.
-Per maggiori informazioni, si pu lanciare
-"opml2snow -h".
 .P
 .B Alcuni particolari interessanti.
 .P
