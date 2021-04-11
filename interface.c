@@ -599,8 +599,8 @@ static int UIDisplayFeed (struct feed* current_feed)
 		    continue;
 
 		if (uiinput == _settings.keybindings.forcereload) {
-		    free (current_feed->lastmodified);
-		    current_feed->lastmodified = NULL;
+		    free (current_feed->lasterror);
+		    current_feed->lasterror = NULL;
 		}
 
 		UpdateFeed (current_feed);
@@ -817,7 +817,7 @@ void UIMainInterface (void)
 		    new_feed->title = cur_ptr->title;
 		    new_feed->link = cur_ptr->link;
 		    new_feed->description = cur_ptr->description;
-		    new_feed->lastmodified = cur_ptr->lastmodified;
+		    new_feed->lasterror = cur_ptr->lasterror;
 		    new_feed->items = cur_ptr->items;
 		    new_feed->problem = cur_ptr->problem;
 		    new_feed->custom_title = cur_ptr->custom_title;
@@ -961,8 +961,8 @@ void UIMainInterface (void)
 		    UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 		else {
 		    if (highlighted && uiinput == _settings.keybindings.forcereload) {
-			free (highlighted->lastmodified);
-			highlighted->lastmodified = NULL;
+			free (highlighted->lasterror);
+			highlighted->lasterror = NULL;
 		    }
 		    UpdateFeed (highlighted);
 		    update_smartfeeds = true;
@@ -1086,7 +1086,7 @@ void UIMainInterface (void)
 			    free (removed->title);
 			    free (removed->link);
 			    free (removed->description);
-			    free (removed->lastmodified);
+			    free (removed->lasterror);
 			    free (removed->custom_title);
 			    free (removed->original);
 			    free (removed);

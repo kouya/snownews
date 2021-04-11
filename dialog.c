@@ -229,10 +229,17 @@ void FeedInfo (const struct feed* current_feed)
     attron (WA_REVERSE);
     mvaddstr (5, centerx - ((strlen (current_feed->title)) / 2), current_feed->title);
     mvaddnstr (7, centerx - (COLS / 2 - 7), url, COLS - 14);
-    if (current_feed->lastmodified != NULL)
-	mvprintw (8, centerx - (COLS / 2 - 7), _("Last updated: %s"), current_feed->lastmodified);
-    else
-	mvaddstr (8, centerx - (COLS / 2 - 7), _("No modification date."));
+    move (8, centerx - (COLS / 2 - 7));
+    if (current_feed->lastmodified) {
+	char timebuf [32] = "";
+	ctime_r (&current_feed->lastmodified, timebuf);
+	for (unsigned i = 0; i < sizeof(timebuf); ++i)
+	    if (timebuf[i] == '\n')
+		timebuf[i] = 0;
+	timebuf[sizeof(timebuf)-1] = 0;
+	printw (_("Last updated: %s"), timebuf);
+    } else
+	addstr (_("No modification date."));
     free (url);
     url = NULL;
 
@@ -241,26 +248,32 @@ void FeedInfo (const struct feed* current_feed)
     snprintf (cachefile, sizeof (cachefile), SNOWNEWS_CACHE_DIR "%s", getenv ("HOME"), hashme);
     free (hashme);
     struct stat cachestat;
+    move (9, centerx - (COLS / 2 - 7));
     if (stat (cachefile, &cachestat) < 0)
-	mvaddstr (9, centerx - (COLS / 2 - 7), _("Not in disk cache."));
+	addstr (_("Not in disk cache."));
     else
-	mvprintw (9, centerx - (COLS / 2 - 7), _("In disk cache: %jd bytes"), cachestat.st_size);
+	printw (_("In disk cache: %jd bytes"), cachestat.st_size);
 
     // Print category info
     mvaddstr (10, centerx - (COLS / 2 - 7), _("Categories:"));
+    addstr (" ");
     if (current_feed->feedcategories == NULL)
-	mvaddstr (10, centerx - (COLS / 2 - 7) + strlen (_("Categories:")) + 1, _("none"));
+	addstr (_("none"));
     else {
 	char* categories = GetCategoryList (current_feed);
-	mvprintw (10, centerx - (COLS / 2 - 7) + strlen (_("Categories:")) + 1, categories);
+	printw (categories);
 	free (categories);
     }
 
     // Tell user if feed uses auth, but don't display the string.
-    if (pauthinfo)
-	mvaddstr (11, centerx - (COLS / 2 - 7), _("Feed uses authentication."));
+    move (11, centerx - (COLS / 2 - 7));
+    if (current_feed->lasterror) {
+	addstr (_("Download failed: "));
+	addstr (current_feed->lasterror);
+    } else if (pauthinfo)
+	addstr (_("Feed uses authentication."));
     else
-	mvaddstr (11, centerx - (COLS / 2 - 7), _("Feed does not use authentication."));
+	addstr (_("Feed does not use authentication."));
 
     // Display filter script if any.
     if (current_feed->perfeedfilter != NULL) {

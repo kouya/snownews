@@ -235,7 +235,7 @@ static void WriteFeedCache (const struct feed* feed)
     fputs ("<?xml version=\"1.0\" ?>\n\n<rdf:RDF\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns=\"http://purl.org/rss/1.0/\"\n  xmlns:snow=\"http://snownews.kcore.de/ns/1.0/\">\n\n", cache);
 
     if (feed->lastmodified)
-	fprintf (cache, "<snow:lastmodified>%s</snow:lastmodified>\n", feed->lastmodified);
+	fprintf (cache, "<snow:lastmodified>%ld</snow:lastmodified>\n", feed->lastmodified);
 
     char* encoded = (char*) xmlEncodeEntitiesReentrant (NULL, (xmlChar*) feed->feedurl);
     fprintf (cache, "<channel rdf:about=\"%s\">\n<title>", encoded);

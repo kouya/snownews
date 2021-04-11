@@ -28,12 +28,13 @@ struct feed {
     char* title;
     char* link;
     char* description;
-    char* lastmodified;		// Content of header as sent by the server.
+    char* lasterror;
     char* content_type;
     char* custom_title;		// Custom feed title.
     char* original;		// Original feed title.
     char* perfeedfilter;	// Pipe feed through this program before parsing.
-    time_t mtime;		// Last modification time
+    time_t mtime;		// Last local modification time
+    time_t lastmodified;	// Last modification time on the server
     unsigned content_length;
     bool problem;		// Set if there was a problem downloading the feed.
     bool execurl;		// Execurl?

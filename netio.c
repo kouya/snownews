@@ -40,12 +40,11 @@ static size_t FeedReceiver (void* buffer, size_t msz, size_t nm, void* vpfeed)
 void DownloadFeed (const char* url, struct feed* fp)
 {
     // Default to error
-    if (fp->xmltext) {
-	free (fp->xmltext);
-	fp->xmltext = NULL;
-	fp->content_length = 0;
-    }
     fp->problem = true;
+    if (fp->lasterror) {
+	free (fp->lasterror);
+	fp->lasterror = NULL;
+    }
 
     // libcurl global init must be called only once
     // snownews is single threaded, so no fancy locks needed
@@ -60,33 +59,76 @@ void DownloadFeed (const char* url, struct feed* fp)
 	s_curl_initialized = true;
     }
 
+    // Setup CURL connection
     CURL* curl = curl_easy_init();
     if (!curl)
 	return;
-
     curl_easy_setopt (curl, CURLOPT_URL, url);
     curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, FeedReceiver);
     curl_easy_setopt (curl, CURLOPT_WRITEDATA, fp);
+    curl_easy_setopt (curl, CURLOPT_USERAGENT, SNOWNEWS_NAME "/" SNOWNEWS_VERSTRING);
+    curl_easy_setopt (curl, CURLOPT_BUFFERSIZE, CURL_MAX_READ_SIZE);
+    curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt (curl, CURLOPT_MAXREDIRS, 8);
+    curl_easy_setopt (curl, CURLOPT_AUTOREFERER, 1);
 
+    // Avoid redownloading if not modified
+    curl_easy_setopt (curl, CURLOPT_FILETIME, 1);
+    if (fp->lastmodified > 0) {
+	curl_easy_setopt (curl, CURLOPT_TIMEVALUE, fp->lastmodified);
+	curl_easy_setopt (curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+    }
+
+    // Cookies, if the cookie file is in the config dir
     char cookiefile [PATH_MAX];
     unsigned cfnl = snprintf (cookiefile, sizeof(cookiefile), SNOWNEWS_CONFIG_DIR "cookies", getenv("HOME"));
     if (cfnl < sizeof(cookiefile) && access (cookiefile, R_OK) == 0)
 	curl_easy_setopt (curl, CURLOPT_COOKIEFILE, cookiefile);
 
+    // Save old content
+    char* oldxmltext = fp->xmltext;
+    unsigned oldcontent_length = fp->content_length;
+    fp->xmltext = NULL;
+    fp->content_length = 0;
+
+    // Download the new feed
     CURLcode rc = curl_easy_perform (curl);
-
-    curl_easy_cleanup (curl);
-
-    if (rc == CURLE_OK)
+    if (rc == CURLE_OK && fp->content_length)  {
+	//
+	// Transfer successful
+	//
 	fp->problem = false;
-    else if (fp->xmltext) {
-	free (fp->xmltext);
-	fp->xmltext = NULL;
-	fp->content_length = 0;
-	const char* cerrt = curl_easy_strerror (rc);
-	if (cerrt) {
-	    UIStatus (cerrt, 2, 1);
-	    syslog (LOG_ERR, "%s", cerrt);
+	if (oldxmltext) {
+	    free (oldxmltext);
+	    oldxmltext = NULL;
+	}
+	long filetime = 0;
+	if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_FILETIME, &filetime) && filetime > 0)
+	    fp->lastmodified = filetime;
+    } else {
+	//
+	// On error, free downloaded text and restore original
+	//
+	if (fp->xmltext)
+	    free (fp->xmltext);
+	fp->xmltext = oldxmltext;
+	fp->content_length = oldcontent_length;
+
+	// Check if failed because already up-to-date
+	long unmet = 0;
+	if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_CONDITION_UNMET, &unmet)) {
+	    fp->lasterror = strdup (_("Feed already up to date"));
+	    UIStatus (fp->lasterror, 0, 0);
+	    fp->problem = false;
+	} else {
+	    // The error is stored in fp->lasterror for display
+	    const char* cerrt = curl_easy_strerror (rc);
+	    if (cerrt) {
+		fp->lasterror = strdup (cerrt);
+		UIStatus (cerrt, 2, 1);
+		syslog (LOG_ERR, "%s", cerrt);
+	    }
 	}
     }
+    curl_easy_cleanup (curl);
 }

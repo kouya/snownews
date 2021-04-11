@@ -411,8 +411,11 @@ int DeXML (struct feed* cur_ptr)
 	    if (xmlStrcmp (c->name, (const xmlChar*) "item") == 0)
 		parse_rdf10_item (cur_ptr, doc, c->children);
 	    // Last-Modified is only used when reading from internal feeds (disk cache).
-	    if (c->ns && (xmlStrcmp (c->ns->href, snowNs) == 0) && (xmlStrcmp (c->name, (const xmlChar*) "lastmodified") == 0))
-		cur_ptr->lastmodified = (char*) xmlNodeListGetString (doc, c->children, 1);
+	    if (c->ns && (xmlStrcmp (c->ns->href, snowNs) == 0) && (xmlStrcmp (c->name, (const xmlChar*) "lastmodified") == 0)) {
+		char* lastmodified = (char*) xmlNodeListGetString (doc, c->children, 1);
+		cur_ptr->lastmodified = atol (lastmodified);
+		xmlFree (lastmodified);
+	    }
 	}
     } else if (xmlStrcmp (cur->name, (const xmlChar*) "rss") == 0) {
 	for (xmlNodePtr c = cur->children; c; c = c->next) {
