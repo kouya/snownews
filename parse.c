@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "parsefeed.h"
-#include "conversions.h"
+#include "parse.h"
+#include "conv.h"
 #include <libxml/parser.h>
 
 //{{{ Local variables --------------------------------------------------

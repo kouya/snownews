@@ -15,7 +15,8 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "filters.h"
-#include "ui-support.h"
+#include "uiutil.h"
+#include "conv.h"
 
 //----------------------------------------------------------------------
 

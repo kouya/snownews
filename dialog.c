@@ -1,6 +1,7 @@
 // This file is part of Snownews - A lightweight console RSS newsreader
 //
 // Copyright (c) 2003-2004 Oliver Feiler <kiza@kcore.de>
+// Copyright (c) 2021 Mike Sharov <msharov@users.sourceforge.net>
 //
 // Snownews is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License version 3
@@ -16,12 +17,12 @@
 
 #include "dialog.h"
 #include "main.h"
-#include "categories.h"
-#include "conversions.h"
+#include "cat.h"
+#include "conv.h"
 #include "filters.h"
-#include "io-internal.h"
-#include "ui-support.h"
-#include "parsefeed.h"
+#include "feedio.h"
+#include "uiutil.h"
+#include "parse.h"
 #include <ncurses.h>
 
 char* UIOneLineEntryField (int x, int y)

@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "interface.h"
+#include "ui.h"
 #include "main.h"
 #include "about.h"
-#include "categories.h"
-#include "conversions.h"
+#include "cat.h"
+#include "conv.h"
 #include "dialog.h"
-#include "io-internal.h"
+#include "feedio.h"
 #include "setup.h"
-#include "ui-support.h"
+#include "uiutil.h"
 #include <ncurses.h>
 #include <libxml/parser.h>
 #ifdef UTF_8

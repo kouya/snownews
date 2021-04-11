@@ -16,10 +16,10 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "main.h"
-#include "interface.h"
-#include "io-internal.h"
+#include "ui.h"
+#include "feedio.h"
 #include "setup.h"
-#include "ui-support.h"
+#include "uiutil.h"
 #include <ncurses.h>
 #include <signal.h>
 #include <sys/wait.h>

@@ -17,6 +17,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #pragma once
+#include "config.h"
 
 char* iconvert (const char* inbuf);
 char* UIDejunk (const char* feed_description);
@@ -27,3 +28,7 @@ char* genItemHash (const char* const* hashitems, unsigned items);
 time_t ISODateToUnix (const char* ISODate);
 time_t pubDateToUnix (const char* pubDate);
 char* unixToPostDateString (time_t unixDate);
+const char* s_strcasestr (const char* a, const char* b);
+#ifdef SUN
+char* strsep (char** str, const char* delims);
+#endif

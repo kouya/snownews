@@ -15,7 +15,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "main.h"
-#include "categories.h"
+#include "cat.h"
 
 // Compare global category list with string categoryname and return 1 if a
 // matching category was found.

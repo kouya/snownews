@@ -16,7 +16,7 @@
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
 #include "netio.h"
-#include "ui-support.h"
+#include "uiutil.h"
 #include <curl/curl.h>
 
 static size_t FeedReceiver (void* buffer, size_t msz, size_t nm, void* vpfeed)

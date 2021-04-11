@@ -68,7 +68,6 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <time.h>
-#include "os-support.h"
 #ifdef LOCALEPATH
     #include <libintl.h>
     #define _(String) gettext (String)

@@ -15,13 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "io-internal.h"
-#include "conversions.h"
+#include "feedio.h"
+#include "conv.h"
 #include "filters.h"
-#include "io-internal.h"
 #include "netio.h"
-#include "ui-support.h"
-#include "parsefeed.h"
+#include "uiutil.h"
+#include "parse.h"
 #include <ncurses.h>
 #include <libxml/parser.h>
 

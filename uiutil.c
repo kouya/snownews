@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Snownews. If not, see http://www.gnu.org/licenses/.
 
-#include "ui-support.h"
+#include "uiutil.h"
 #include <ncurses.h>
 
 // Init the ncurses library.
