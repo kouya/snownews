@@ -4,7 +4,7 @@
 ######################################################################
 
 pkg_name="snownews"
-pkg_verstr="v1.6.0"
+pkg_verstr="v1.7"
 pkg_bugreport="Mike Sharov <msharov@users.sourceforge.net>"
 
 # Files that get created by this script
