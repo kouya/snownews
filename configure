@@ -15,7 +15,7 @@ components="
 {
 name=[with-debug]
 desc=[	Compile for debugging]
-seds=[s/^#\(DEBUG\)/\1/]
+seds=[s/^#\(debug\)/\1/]
 }{
 name=[with-native]
 desc=[	Use -march=native]
