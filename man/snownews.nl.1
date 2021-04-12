@@ -4,57 +4,119 @@
 .SH "SYNOPSIS"
 \fBsnownews [\-huV] [\-\-help|\-\-update|\-\-version]\fR
 .SH "DESCRIPTION"
-Snownews is een kleine RSS/RDF nieuwslezer voor de console. Het can RSS 1.0 feeds lezen die voldoen aan de W3C RDF specificaties, maar het ondersteunt ook userlands 0.91 en 2.0 versies.
+Snownews is een kleine RSS/RDF nieuwslezer voor de console. Het can
+RSS 1.0 feeds lezen die voldoen aan de W3C RDF specificaties, maar het
+ondersteunt ook userlands 0.91 en 2.0 versies.
 
-In het hoofdscherm wat u ziet nadat u het programma gestart hebt kunt u feeds toevoegen/verwijderen en handmatig updaten. Rechts in het scherm staan nummers die het ongelezen/totale aantal berichten voor elke nieuwsfeed aangeven. Om een feed toe te voegen druk op de 'a' en geef de URL in. Dit moet een volledig geldige http URL zijn \fIinclusief http://\fR aan het begin. Om een feed uit de lijst te verwijderen selecteer het met de cursor toetsen en druk op de 'D'. Een venster vraagt dan om bevestiging.
+In het hoofdscherm wat u ziet nadat u het programma gestart hebt
+kunt u feeds toevoegen/verwijderen en handmatig updaten. Rechts in
+het scherm staan nummers die het ongelezen/totale aantal berichten
+voor elke nieuwsfeed aangeven. Om een feed toe te voegen druk op de
+'a' en geef de URL in. Dit moet een volledig geldige http URL zijn
+\fIinclusief http://\fR aan het begin. Om een feed uit de lijst te
+verwijderen selecteer het met de cursor toetsen en druk op de 'D'. Een
+venster vraagt dan om bevestiging.
 
-U kunt door dit menu navigeren met de pijltjestoetsen en met 'n' en 'p' om omhoog en omlaag te gaan. Door op de 'r' toets te drukken wordt de geselecteerde feed opnieuw geladen, 'R' zorgt er voor dat alle feeds in de lijst opnieuw geladen worden.
+U kunt door dit menu navigeren met de pijltjestoetsen en met 'n' en 'p'
+om omhoog en omlaag te gaan. Door op de 'r' toets te drukken wordt de
+geselecteerde feed opnieuw geladen, 'R' zorgt er voor dat alle feeds in
+de lijst opnieuw geladen worden.
 
-Het programma sorteert de lijst niet alfabetisch. U kunt items omhoog en omlaag verplaatsen met de toetsen 'P' en 'N'.
+Het programma sorteert de lijst niet alfabetisch. U kunt items omhoog
+en omlaag verplaatsen met de toetsen 'P' en 'N'.
 
-Als u een feed selecteert en op Enter drukt zal het programma elk item van deze feed tonen. U kunt dan de pijltjestoetsen en de toetsen 'n' en 'p' gebruiken om door de lijst te navigeren. Als u op de toets 'r' drukt wordt de huidige feed opnieuw geladen. Items kunnen van de lijst verdwijnen en nieuwe nieuwsitems verschijnen in vet.
+Als u een feed selecteert en op Enter drukt zal het programma elk item
+van deze feed tonen. U kunt dan de pijltjestoetsen en de toetsen 'n'
+en 'p' gebruiken om door de lijst te navigeren. Als u op de toets 'r'
+drukt wordt de huidige feed opnieuw geladen. Items kunnen van de lijst
+verdwijnen en nieuwe nieuwsitems verschijnen in vet.
 
-Selecteer een item en druk op Enter om de beschrijving te lezen. Als er geen beschrijving aan toegevoegd is zal de tekst 'Geen beschrijving beschikbaar.' verschijnen. U kunt met de pijltjestoetsen links en rechts, respectievelijk 'p' en 'n' het vorige of volgende nieuwsitem uit de lijst selecteren. Door op 'o' te drukken wordt de link (meestal de complete nieuwstekst) geopend in de browser.
+Selecteer een item en druk op Enter om de beschrijving te lezen. Als
+er geen beschrijving aan toegevoegd is zal de tekst 'Geen beschrijving
+beschikbaar.' verschijnen. U kunt met de pijltjestoetsen links en rechts,
+respectievelijk 'p' en 'n' het vorige of volgende nieuwsitem uit de lijst
+selecteren. Door op 'o' te drukken wordt de link (meestal de complete
+nieuwstekst) geopend in de browser.
 
-De standaardbrowser is lynx, maar u kunt dit veranderen door op 'B' te drukken in het hoofdmenu en een nieuwe standaardbrowser in te voeren. Of u kunt het bestand ~/.config/snownews/browser bewerken. Het programma vervangt %s door de URL bij het uitbreiden van de string.
+De standaardbrowser is lynx, maar u kunt dit veranderen door op 'B' te
+drukken in het hoofdmenu en een nieuwe standaardbrowser in te voeren. Of
+u kunt het bestand ~/.config/snownews/browser bewerken. Het programma
+vervangt %s door de URL bij het uitbreiden van de string.
 
 Netwerk verbindingen kunnen onderbroken worden door op 
 .B 'z' 
-te drukken tijden het downloaden of verbinden als het programma hangt terwijl het wacht op data van een webserver.
+te drukken tijden het downloaden of verbinden als het programma hangt
+terwijl het wacht op data van een webserver.
 .P
 U kunt de naam van een feed wijzigen door op de toets
 .B 'c'
-te drukken en de nieuwe naam in te voeren. Om de naam weer terug te veranderen naar de originele titel voert u een '-' in in dit tekstveld.
+te drukken en de nieuwe naam in te voeren. Om de naam weer terug te
+veranderen naar de originele titel voert u een '-' in in dit tekstveld.
 .B Type Ahead Find
 .P
-Voor snellere navigatie in uw lijst met feeds kunt u gebruik maken van Snownews' Type Ahead Find functie. Druk op de TAB toets en de statusregel verandert in een text invoer veld. Terwijl u de tekst die u wilt zoeken intypt, worden de gevonden items al geselecteerd. Als u een item geselecteerd hebt druk op enter om de feed te openen. Als er meerdere items zijn die voldoen aan de zoekopdracht kunt u daartussen wisselen door op TAB te drukken. Om Type Ahead af te sluiten verwijdert u de zoektext of drukt u op CTRL+G
+Voor snellere navigatie in uw lijst met feeds kunt u gebruik maken
+van Snownews' Type Ahead Find functie. Druk op de TAB toets en de
+statusregel verandert in een text invoer veld. Terwijl u de tekst die
+u wilt zoeken intypt, worden de gevonden items al geselecteerd. Als u
+een item geselecteerd hebt druk op enter om de feed te openen. Als er
+meerdere items zijn die voldoen aan de zoekopdracht kunt u daartussen
+wisselen door op TAB te drukken. Om Type Ahead af te sluiten verwijdert
+u de zoektext of drukt u op CTRL+G
 .P
-.B Categorieën
+.B CategorieÃ«n
 .P
-Snownews gebruikt categorieën om met lange abbonnementslijsten om te gaan. U kunt zo veel categorieën definieren voor een feed als u wilt. U kunt dan een filter toepassen in het hoofdmenu die alleen de feeds laat zien die in een passende catgorie vallen. Feeds die tot een catgorie behoren hebben de categorie naast hun naam staan in het hoofdmenu.
+Snownews gebruikt categorieÃ«n om met lange abbonnementslijsten om te
+gaan. U kunt zo veel categorieÃ«n definieren voor een feed als u wilt. U
+kunt dan een filter toepassen in het hoofdmenu die alleen de feeds laat
+zien die in een passende catgorie vallen. Feeds die tot een catgorie
+behoren hebben de categorie naast hun naam staan in het hoofdmenu.
 .P
-Om feeds aan een categorie toe te voegen of uit een categorie te verwijderen, druk op
+Om feeds aan een categorie toe te voegen of uit een categorie te
+verwijderen, druk op
 .B 'C'
-terwijl de feed geselecteerd is in het hoofdmenu. Als u al categorieën hebt gedefinieerd voor andere feeds krijgt u een lijst van bestaande categorieën te zien. Druk op het nummer van de catgorie om de huidige catgorie er aan toe te voegen. Om de feed toe te voegen aan een nieuwe catgorie, druk op
+terwijl de feed geselecteerd is in het hoofdmenu. Als u al categorieÃ«n
+hebt gedefinieerd voor andere feeds krijgt u een lijst van bestaande
+categorieÃ«n te zien. Druk op het nummer van de catgorie om de huidige
+catgorie er aan toe te voegen. Om de feed toe te voegen aan een nieuwe
+catgorie, druk op
 .B 'A'
-en voer de naam in voor de nieuwe categorie. Als een feed wilt verwijderen uit een catgorie, drukt op het nummer in de feed categorisatie GUI.
+en voer de naam in voor de nieuwe categorie. Als een feed wilt verwijderen
+uit een catgorie, drukt op het nummer in de feed categorisatie GUI.
 .P
-U kunt alle al gedefinieerde catgorieën voor een feed zien in de feed info.
+U kunt alle al gedefinieerde catgorieÃ«n voor een feed zien in de feed info.
 
 .P
 .B Toetsenbord instellen
 .P
-U kunt de toetsen veranderen door het bestand ~/.config/snownews/keybindings te bewerken. Het formaat is "functiebeschrijving:toets". Verander de "functiebeschrijving" niet. Het teken achter de dubbele punt is de toets die het programma aan die functie toewijst. Als u een definitie verwijdert of het programma kan het bestand, om de een of andere reden, niet lezen worden de standaard instellingen gebruikt.
+U kunt de toetsen veranderen door het bestand
+~/.config/snownews/keybindings te bewerken. Het formaat is
+"functiebeschrijving:toets". Verander de "functiebeschrijving" niet. Het
+teken achter de dubbele punt is de toets die het programma aan die
+functie toewijst. Als u een definitie verwijdert of het programma kan
+het bestand, om de een of andere reden, niet lezen worden de standaard
+instellingen gebruikt.
 
 .B Een paar dingen die het waard zijn uit te leggen:
 
-Als u de beschrijving van een item aan het bekijken bent kunt u naar het vorige scherm terugkeren met 'q' of door op Enter te drukken. De selectie wordt automatisch op het volgende ongelezen item geplaatst. U kunt elk item van een feed lezen door steeds op Enter te drukken. Het programma zal de beschrijving tonen, terugkeren naar het overzicht, automatisch het volgende ongelezen item selecteren en opnieuw de beschrijving tonen. Wassen, spoelen, herhalen. U hoeft alleen maar op Enter te drukken.
+Als u de beschrijving van een item aan het bekijken bent kunt u naar het
+vorige scherm terugkeren met 'q' of door op Enter te drukken. De selectie
+wordt automatisch op het volgende ongelezen item geplaatst. U kunt elk
+item van een feed lezen door steeds op Enter te drukken. Het programma
+zal de beschrijving tonen, terugkeren naar het overzicht, automatisch
+het volgende ongelezen item selecteren en opnieuw de beschrijving
+tonen. Wassen, spoelen, herhalen. U hoeft alleen maar op Enter te drukken.
 
-De HTTP client van snownews volgt HTTP redirects. Als de URL die u heeft ingevoerd verwijst naar een permanente redirect zal het de interne URL updaten naar de nieuwe locatie. De aanvraag wordt vanaf dan automatisch naar de nieuwe locatie gestuurd.
+De HTTP client van snownews volgt HTTP redirects. Als de URL die u heeft
+ingevoerd verwijst naar een permanente redirect zal het de interne URL
+updaten naar de nieuwe locatie. De aanvraag wordt vanaf dan automatisch
+naar de nieuwe locatie gestuurd.
 
 Een help venster is altijd beschikbaar door op 'h' te drukken.
 
-Als u gebruik maakt van een proxy server om verbinding te maken met internet, moet u de omgevingsvariabele "http_proxy" gebruiken. Snownews verwacht deze variabele in het formaat http://uw_proxy.org:POORT/ (http://proxy.uw_provider.com:8080/).
+Als u gebruik maakt van een proxy server om verbinding te maken met
+internet, moet u de omgevingsvariabele "http_proxy" gebruiken. Snownews
+verwacht deze variabele in het formaat http://uw_proxy.org:POORT/
+(http://proxy.uw_provider.com:8080/).
 
 Snownews is vrijgegeven onder de GNU General Public License versie 3.
 .SH "OPTIONS"
@@ -74,7 +136,13 @@ Het formaat wat verwacht wordt is http://uw_proxy.org:PORT/
 .P
 .B Bugs rapporteren
 .P
-Als u denkt dat u een bug hebt gevonden in Snownews, rapporteer het alstublieft. Alles wat het programma laat crashen, onafhankelijk van wat u doet is een bug en moet gerepareerd worden. XML parsing fouten kunnen waarschijnlijk niet gerepareerd worden in Snownews, omdat libxml verantwoordelijk is voor het parsen van de XML van een document. U kunt problematische feeds echter wel rapporteren, omdat het een bug kan zijn in Snownews.
+Als u denkt dat u een bug hebt gevonden in Snownews, rapporteer het
+alstublieft. Alles wat het programma laat crashen, onafhankelijk van
+wat u doet is een bug en moet gerepareerd worden. XML parsing fouten
+kunnen waarschijnlijk niet gerepareerd worden in Snownews, omdat libxml
+verantwoordelijk is voor het parsen van de XML van een document. U kunt
+problematische feeds echter wel rapporteren, omdat het een bug kan zijn
+in Snownews.
 
 .SH "AUTHOR"
 Oliver Feiler <kiza@kcore.de>

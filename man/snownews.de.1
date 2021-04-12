@@ -3,198 +3,194 @@
 .\" This manpage is copyrighted by Oliver Feiler 2003
 .\"                                <kiza@kcore.de>
 .\"
-.TH SNOWNEWS 1 "1. März 2004" Programs "Snownews"
+.TH SNOWNEWS 1 "1. MÃ¤rz 2004" Programs "Snownews"
 .SH NAME
 .B snownews
 \- Konsolen RSS Newsreader
 .SH SYNTAX
 .B snownews [-huV] [--help|--update|--version]
 .SH BESCHREIBUNG
-Snownews ist ein schlanker RSS/RDF Newsreader. Das Program verarbeitet
-RSS 1.0 feeds, die dem W3C RDF Standard gehorchen. Es unterstützt
-überdies die Radio Userland 0.91 und 2.0 RDF Versionen.
+Snownews ist ein schlanker RSS/RDF Newsreader. Das Program verarbeitet RSS
+1.0 feeds, die dem W3C RDF Standard gehorchen. Es unterstÃ¼tzt Ã¼berdies
+die Radio Userland 0.91 und 2.0 RDF Versionen.
 .P
 Die Hauptansicht des Programms wird unmittelbar nach dem Start
-angezeigt. Dort werden Newsfeeds dazugefügt, gelöscht und manuell
-aufgefrischt. Auf der rechten Seite wird die Anzahl der neuen Einträge
-für den jeweiligen Feed angezeigt. Um einen
-zur Liste hinzuzufügen, drücken Sie die Taste
+angezeigt. Dort werden Newsfeeds dazugefÃ¼gt, gelÃ¶scht und manuell
+aufgefrischt. Auf der rechten Seite wird die Anzahl der neuen EintrÃ¤ge
+fÃ¼r den jeweiligen Feed angezeigt. Um einen zur Liste hinzuzufÃ¼gen,
+drÃ¼cken Sie die Taste
 .B 'a'
-und geben Sie die vollständige URL mit vorangestelltem http:// ein. Um
-einen Eintrag aus der Liste zu löschen drücken Sie die Taste
+und geben Sie die vollstÃ¤ndige URL mit vorangestelltem http:// ein. Um
+einen Eintrag aus der Liste zu lÃ¶schen drÃ¼cken Sie die Taste
 .B 'D'
 , nachdem Sie ihn hervorgehoben haben. Ein Dialogfeld zur
-Bestätigung wird eingeblendet.
+BestÃ¤tigung wird eingeblendet.
 .P
-Sie können mit den Cursortasten und mit den
-Tasten
+Sie kÃ¶nnen mit den Cursortasten und mit den Tasten
 .B 'n'
 und
 .B 'p'
 nach oben, bzw. nach unten navigieren. Wenn Sie die Taste
 .B 'r'
-drücken, wird der aktuell hervorgehobene Eintrag neu vom Server
+drÃ¼cken, wird der aktuell hervorgehobene Eintrag neu vom Server
 geladen. Die Taste
 .B 'R'
-lädt alle Ihre Einträge neu.
+lÃ¤dt alle Ihre EintrÃ¤ge neu.
 .B 'T'
-lädt den aktuellen Feed neu und ignoriert dabei sämtliche Caches. Das heißt,
-auch wenn der Feed auf dem Server nicht verändert wurde, wird er trotzdem
-komplett heruntergeladen.
+lÃ¤dt den aktuellen Feed neu und ignoriert dabei sÃ¤mtliche Caches. Das
+heiÃŸt, auch wenn der Feed auf dem Server nicht verÃ¤ndert wurde, wird
+er trotzdem komplett heruntergeladen.
 .P
-Das Program sortiert Ihre Feedliste nicht automatisch. Um Einträge
+Das Program sortiert Ihre Feedliste nicht automatisch. Um EintrÃ¤ge
 nach oben bzw. unten verschieben, indem Sie die Tasten
 .B 'P'
 oder
 .B 'N'
-drücken.
+drÃ¼cken.
 .P
-Drücken Sie die Return Taste auf einem hervorgehobenen Eintrag,
-um ihn anzuzeigen. In dieser Ansicht können Sie wieder mit den
-Cursortasten, bzw.
+DrÃ¼cken Sie die Return Taste auf einem hervorgehobenen Eintrag, um ihn
+anzuzeigen. In dieser Ansicht kÃ¶nnen Sie wieder mit den Cursortasten,
+bzw.
 .B 'n'
 und
 .B 'p'
 navigieren. Wenn Sie
 .B 'r'
-drücken wird der aktuelle Feed neu geladen. Einträge können
-von der Liste komplett verschwinden und neue erscheinen. Neu
-hinzugekommene werden in Fettschrift dargestellt.
+drÃ¼cken wird der aktuelle Feed neu geladen. EintrÃ¤ge kÃ¶nnen von der
+Liste komplett verschwinden und neue erscheinen. Neu hinzugekommene
+werden in Fettschrift dargestellt.
 .P
-Wählen sie einen Eintrag und drücken Sie Return um ihn zu lesen.
-Wenn keine Beschreibung an den Eintrag gehängt ist, zeigt das
-Programm stattdessen den Text "Keine Beschreibung vorhanden." an.
-In dieser Ansicht können Sie die Cursortasten links und rechts,
-respektive
+WÃ¤hlen sie einen Eintrag und drÃ¼cken Sie Return um ihn zu lesen.
+Wenn keine Beschreibung an den Eintrag gehÃ¤ngt ist, zeigt das Programm
+stattdessen den Text "Keine Beschreibung vorhanden." an. In dieser
+Ansicht kÃ¶nnen Sie die Cursortasten links und rechts, respektive
 .B 'p'
 und
 .B 'n'
-verwenden um zum vorigen oder nächsten Eintrag zu gelangen. Die Taste
+verwenden um zum vorigen oder nÃ¤chsten Eintrag zu gelangen. Die Taste
 .B 'o'
-öffnet den mit dem Eintrag verknüpften Link im angegebenen
-Webbrowser.
+Ã¶ffnet den mit dem Eintrag verknÃ¼pften Link im angegebenen Webbrowser.
 .P
-Der Standardbrowser ist Lynx. Sie können dies aber ändern, indem
-Sie im Hauptmenü die Taste
+Der Standardbrowser ist Lynx. Sie kÃ¶nnen dies aber Ã¤ndern, indem
+Sie im HauptmenÃ¼ die Taste
 .B 'B'
-drücken. Alternativ können Sie auch die Datei ~/.config/snownews/browser
-editieren. Das Programm ersetzt %s durch die URL, wenn es den
-Webbrowser aufruft.
+drÃ¼cken. Alternativ kÃ¶nnen Sie auch die Datei ~/.config/snownews/browser
+editieren. Das Programm ersetzt %s durch die URL, wenn es den Webbrowser
+aufruft.
 .P
-Netzwerkverbindungen können mit der Taste
+Netzwerkverbindungen kÃ¶nnen mit der Taste
 .B 'z'
-unterbrochen werden, wenn das Programm hängt und auf Daten von einem
+unterbrochen werden, wenn das Programm hÃ¤ngt und auf Daten von einem
 Server wartet.
 .P
-Sie können einen Feed umbennen, indem Sie die Taste
+Sie kÃ¶nnen einen Feed umbennen, indem Sie die Taste
 .B 'c'
-drücken und den neuen Namen eintippen. Um den Namen wieder auf den
-ursprünglichen zurückzusetzen geben Sie '-' in das Eingabefeld ein.
+drÃ¼cken und den neuen Namen eintippen. Um den Namen wieder auf den
+ursprÃ¼nglichen zurÃ¼ckzusetzen geben Sie '-' in das Eingabefeld ein.
 .P
 .B Type Ahead Find
 .P
 Zur schnelleren Navigation durch die Feedliste eignet sich Type Ahead
-Find. Drücken Sie die Tabulator Taste um die Funktion zu aktivieren.
-Die Statusleiste dient nun als Eingabefeld. Während Sie den Suchbegriff
-eintippen markiert Snownews automatisch passende Einträge. Wenn Sie die
-Return Taste drücken wird dieser ausgewählt. Wenn mehrere Einträge
-zu Ihren Suchkriterien passen können Sie mit der Tab Taste zwischen
-ihnen hin- und herschalten. Sie können Type Ahead beenden, indem Sie
-den Suchbegriff aus dem Textfeld löschen, oder STRG-G drücken.
+Find. DrÃ¼cken Sie die Tabulator Taste um die Funktion zu aktivieren.
+Die Statusleiste dient nun als Eingabefeld. WÃ¤hrend Sie den Suchbegriff
+eintippen markiert Snownews automatisch passende EintrÃ¤ge. Wenn Sie die
+Return Taste drÃ¼cken wird dieser ausgewÃ¤hlt. Wenn mehrere EintrÃ¤ge
+zu Ihren Suchkriterien passen kÃ¶nnen Sie mit der Tab Taste zwischen
+ihnen hin- und herschalten. Sie kÃ¶nnen Type Ahead beenden, indem Sie
+den Suchbegriff aus dem Textfeld lÃ¶schen, oder STRG-G drÃ¼cken.
 .P
 .B Kategorien
 .P
-Snownews verwendet Kategorien, um große Feedlisten zu organisieren. Sie
-können soviele Kategorien für einen Feed definieren, wie Sie wollen. Im
-Hauptmenü können Sie dann einen Filter aktivieren, der nur Feeds anzeigt,
-die der ausgewählten Kategorie angehören. Die Kategorie wird neben dem
-Namen des Feeds im Hauptmenü angezeigt.
+Snownews verwendet Kategorien, um groÃŸe Feedlisten zu organisieren. Sie
+kÃ¶nnen soviele Kategorien fÃ¼r einen Feed definieren, wie Sie wollen. Im
+HauptmenÃ¼ kÃ¶nnen Sie dann einen Filter aktivieren, der nur Feeds anzeigt,
+die der ausgewÃ¤hlten Kategorie angehÃ¶ren. Die Kategorie wird neben dem
+Namen des Feeds im HauptmenÃ¼ angezeigt.
 .P
-Um einen Feed zu einer Kategorie hinzuzufügen oder zu entfernen, drücken
+Um einen Feed zu einer Kategorie hinzuzufÃ¼gen oder zu entfernen, drÃ¼cken
 Sie
 .B 'C'
-wenn er im Hauptmenü hervorgehoben wird. Wenn bereits Kategorien definiert
-sind, werden diese in einem Menü angezeigt. Drücken Sie einfach die
-vorangestellte Nummer um Sie auszuwählen. Um eine neü Kategorie zu
-erstellen, drücken Sie
+wenn er im HauptmenÃ¼ hervorgehoben wird. Wenn bereits Kategorien definiert
+sind, werden diese in einem MenÃ¼ angezeigt. DrÃ¼cken Sie einfach die
+vorangestellte Nummer um Sie auszuwÃ¤hlen. Um eine neÃ¼ Kategorie zu
+erstellen, drÃ¼cken Sie
 .B 'A'
 und geben Sie den Namen der Kategorie ein. Um einen Feed aus einer
-Kategorie zu entfernen, wählen Sie einfach deren Nummer aus der Liste.
+Kategorie zu entfernen, wÃ¤hlen Sie einfach deren Nummer aus der Liste.
 .P
-Sie können alle Kategorien sehen, in denen sich ein Feed befindet, in
+Sie kÃ¶nnen alle Kategorien sehen, in denen sich ein Feed befindet, in
 der Feed Information.
 .P
 .B Tatenbelegung konfigurieren
 .P
-Die Tastenbelegung können Sie ändern, indem Sie die Datei
+Die Tastenbelegung kÃ¶nnen Sie Ã¤ndern, indem Sie die Datei
 ~/.config/snownews/keybindings editieren. Das Format der Datei ist
-"Funktionsbeschreibung:Taste". ändern Sie bitte nicht den Text der
+"Funktionsbeschreibung:Taste". Ã¤ndern Sie bitte nicht den Text der
 Funktionsbeschreibung. Der einzelne Buchstabe hinter dem Doppelpunkt
 stellt die Taste dar, die das Programm mit der entsprechenden Funktion
-verknüpft. Wenn aus irgendeinem Grund eine Definition aus der Datei
-entfernt wird, oder Sie für das Programm unleserlich ist, wird die
+verknÃ¼pft. Wenn aus irgendeinem Grund eine Definition aus der Datei
+entfernt wird, oder Sie fÃ¼r das Programm unleserlich ist, wird die
 standard Tastenbelegung verwendet.
 .P
 .B HTML Konvertierung
 .P
 Snownews versucht HTML Inhalt von Feed in Standard Text umzuwandeln,
 bevor es den Text anzeigt. Alle HTML tags werden hierzu aus dem Feed
-entfernt und gebräuchliche Entities umgewandelt. Standardmäßig werden
+entfernt und gebrÃ¤uchliche Entities umgewandelt. StandardmÃ¤ÃŸig werden
 nur die in XML definierten Entities (&lt; (<), &gt; (>), &amp; (&), &quot;
 (") and &apos; (')) und eine interne Standardvorgabe umgewandelt. Sie
-können diese Liste erweitern, indem Sie die gewünschten Zeichen in die
-Datei ~/.config/snownews/html_conversion eintragen.
+kÃ¶nnen diese Liste erweitern, indem Sie die gewÃ¼nschten Zeichen in
+die Datei ~/.config/snownews/html_conversion eintragen.
 .P
-.B Einige weitere nützliche Dinge:
+.B Einige weitere nÃ¼tzliche Dinge:
 .P
-Wenn Sie einen Artikel lesen können Sie zur übersicht gelangen,
+Wenn Sie einen Artikel lesen kÃ¶nnen Sie zur Ã¼bersicht gelangen,
 indem Sie
 .B 'q'
-oder die Return Taste drücken. Zurück in der Hauptübersicht wird
-automatisch der nächste ungelesene Eintrag ausgewählt, sodass Sie nur Return
-drücken zu brauchen um alle Artikel nacheinander zu lesen.
+oder die Return Taste drÃ¼cken. ZurÃ¼ck in der HauptÃ¼bersicht wird
+automatisch der nÃ¤chste ungelesene Eintrag ausgewÃ¤hlt, sodass Sie nur
+Return drÃ¼cken zu brauchen um alle Artikel nacheinander zu lesen.
 .P
-Snownews' HTTP Client folgt automatisch HTTP Server Redirects. Wenn
-die URL, die Sie eingegeben haben, auf einen Permanenten Redirect
-zeigt wird das Programm die interne URL auf die neue ändern.
-Dieser Feed wird von nun an automatisch von der neuen Adresse
-geladen.
+Snownews' HTTP Client folgt automatisch HTTP Server Redirects. Wenn die
+URL, die Sie eingegeben haben, auf einen Permanenten Redirect zeigt
+wird das Programm die interne URL auf die neue Ã¤ndern. Dieser Feed
+wird von nun an automatisch von der neuen Adresse geladen.
 .P
 Ein Kurzhilfe Fenster ist in jeder Ansicht mit der Taste
 .B 'h'
-erhältlich.
+erhÃ¤ltlich.
 .P
-Wenn Sie einen Proxyserver benötigen um in das Internet zu gelangen, setzen
-Sie die Umgebungsvariable "http_proxy". Snownews erwartet diese Variable in der
-Form
+Wenn Sie einen Proxyserver benÃ¶tigen um in das Internet zu gelangen,
+setzen Sie die Umgebungsvariable "http_proxy". Snownews erwartet diese
+Variable in der Form
 .I http://ihr_proxy.org:PORT/
 (http://proxy.ihr_provider.com:8080/).
 .P
-.B Snownews wurde veröffentlicht under der GNU General Public License Version 3.
+.B Snownews wurde verÃ¶ffentlicht under der GNU General Public License Version 3.
 .SH OPTIONEN
 .B \-\-update or \-u,
 Alle Feeds werden beim Programmstart automatisch neu geladen.
 .P
 .B \-\-help or \-h,
-Zeigt eine übersicht aller Parameter an und beendet sich wieder.
+Zeigt eine Ã¼bersicht aller Parameter an und beendet sich wieder.
 .P
 .B \-\-version or \-V,
 Zeigt die Versionsnummer an und beendet sich wieder.
 .SH ENVIRONMENT
 .TP
 .B http_proxy
-Snownews wird auf das Internet über den Proxyserver zugreifen, der in
-dieser Variable gesetzt ist. Diese Variable wird in der Form
+Snownews wird auf das Internet Ã¼ber den Proxyserver zugreifen,
+der in dieser Variable gesetzt ist. Diese Variable wird in der Form
 http://ihr_proxy.org:PORT/ erwartet.
 .SH BUGS
 .P
 .B Bugs den Entwicklern melden.
 .P
-Wenn Sie meinen einen Bug in Snownews gefunden zu haben, teilen Sie mir dies bitte
-mit. Alles, was das Programm zum Absturz bringt, egal was sie damit tun, ist ein
-Bug, der behoben werden muss. Probleme beim XML Parsen sind wahrscheinlich nicht
-in Snownews zu beheben, da libxml dafür verantwortlich ist. Sie können mir
-problematische Feeds aber trotzdem schicken, vielleicht ist das Problem ja doch
-in Snownews.
+Wenn Sie meinen einen Bug in Snownews gefunden zu haben, teilen Sie
+mir dies bitte mit. Alles, was das Programm zum Absturz bringt, egal
+was sie damit tun, ist ein Bug, der behoben werden muss. Probleme beim
+XML Parsen sind wahrscheinlich nicht in Snownews zu beheben, da libxml
+dafÃ¼r verantwortlich ist. Sie kÃ¶nnen mir problematische Feeds aber
+trotzdem schicken, vielleicht ist das Problem ja doch in Snownews.
 .SH AUTOR
 Oliver Feiler <kiza@kcore.de>
