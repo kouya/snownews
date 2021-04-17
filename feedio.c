@@ -250,6 +250,8 @@ static void WriteFeedUrls (void)
 	fputs ("\t<outline", urlfile);
 	if (f->custom_title)
 	    fprintf (urlfile, " text=\"%s\"", f->custom_title);
+	else if (f->title)
+	    fprintf (urlfile, " text=\"%s\"", f->title);
 	if (f->feedurl)
 	    fprintf (urlfile, " xmlUrl=\"%s\"", f->feedurl);
 	if (f->feedcategories) {
