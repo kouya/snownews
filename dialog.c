@@ -159,7 +159,7 @@ int UIAddFeed (char* newurl)
 	    return 1;
 	}
 
-	CleanupString (url, 0);
+	CleanupString (url, false);
 
 	// Support that stupid feed:// "protocol"
 	if (strncasecmp (url, "feed://", 7) == 0)

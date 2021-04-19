@@ -22,7 +22,7 @@
 char* iconvert (const char* inbuf);
 char* UIDejunk (const char* feed_description);
 char* WrapText (const char* text, unsigned width);
-void CleanupString (char* string, int tidyness);
+void CleanupString (char* string, bool fullclean);
 char* Hashify (const char* url);
 char* genItemHash (const char* const* hashitems, unsigned items);
 time_t ISODateToUnix (const char* ISODate);

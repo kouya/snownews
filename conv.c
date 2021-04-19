@@ -207,7 +207,7 @@ char* UIDejunk (const char* feed_description)
     }
     free (start);
 
-    CleanupString (newtext, 0);
+    CleanupString (newtext, false);
 
     // See if there are any entities in the string at all.
     if (strchr (newtext, '&') != NULL) {
@@ -409,34 +409,34 @@ char* WrapText (const char* text, unsigned width)
 
 // Remove leading whitspaces, newlines, tabs.
 // This function should be safe for working on UTF-8 strings.
-// tidyness: 0 = only suck chars from beginning of string
-//           1 = extreme, vacuum everything along the string.
-void CleanupString (char* string, int tidyness)
+// fullclean:	false = only suck chars from beginning of string
+//		true = remove newlines inside the string
+void CleanupString (char* s, bool fullclean)
 {
     // If we are passed a NULL pointer, leave it alone and return.
-    if (string == NULL)
+    if (!s)
 	return;
 
-    size_t len = strlen (string);
-    while (len && isspace (string[0])) {
-	// len=strlen(string) does not include \0 of string.
-	// But since we copy from *string+1 \0 gets included.
-	// Delicate code. Think twice before it ends in buffer overflows.
-	memmove (string, string + 1, len);
-	--len;
+    // Remove leading spaces
+    size_t len = strlen (s), leadspace = 0;
+    while (leadspace < len && isspace (s[leadspace]))
+	++leadspace;
+    if (leadspace) {
+	memmove (s, s + leadspace, (len + 1) - leadspace);
+	len -= leadspace;
     }
 
-    // Eat newlines and tabs along the whole string.
+    // Eat newlines and tabs along the whole s.
     for (size_t i = 0; i < len; ++i) {
-	if (string[i] == '\t')
-	    string[i] = ' ';
-	if (tidyness == 1 && string[i] == '\n')
-	    string[i] = ' ';
+	if (s[i] == '\t')
+	    s[i] = ' ';
+	if (fullclean && s[i] == '\n')
+	    s[i] = ' ';
     }
 
     // Remove trailing spaces.
-    while (len > 1 && isspace (string[len-1]))
-	string[--len] = 0;
+    while (len > 1 && isspace (s[len-1]))
+	s[--len] = 0;
 }
 
 // http://foo.bar/address.rdf -> http:__foo.bar_address.rdf
