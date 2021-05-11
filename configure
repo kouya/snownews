@@ -89,6 +89,7 @@ fi
 #### Printing helper functions #######################################
 
 print_components() {
+    # shellcheck disable=SC3043
     local cc name desc
     cc=$components
     echo "Options:"
@@ -126,6 +127,7 @@ print_version() {
 }
 
 sub_var() {
+    # shellcheck disable=SC3043
     local esc2
     esc2=$(escpath "$2")
     eval ac_var_"$1"='$esc2';
@@ -133,6 +135,7 @@ sub_var() {
 }
 
 sub_comp() {
+    # shellcheck disable=SC3043
     local cc name seds
     cc=$components
     while [ -n "$cc" ]; do
