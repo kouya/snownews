@@ -146,8 +146,8 @@ for i in $*; do
 	--)		break;;
 	--version |-V)	print_version && die;;
 	--help |-h |-?)	print_help && die;;
-	--*=*)		sub_var `expr -- "$i" : '--\([^=]*\)='` `expr -- "$i" : '[^=]*=\(.*\)'`;;
-	--*)		sub_comp `expr -- "$i" : '--\(.*\)'`;;
+	--*=*)		sub_var `expr "$i" : '--\([^=]*\)='` `expr "$i" : '[^=]*=\(.*\)'`;;
+	--*)		sub_comp `expr "$i" : '--\(.*\)'`;;
 	*)		echo "Error: unrecognized option \"$i\"" && die;;
     esac
 done
