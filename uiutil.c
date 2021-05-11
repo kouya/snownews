@@ -271,17 +271,23 @@ unsigned utf8_length (const char* s)
 
 void addn_utf8 (const char* s, unsigned n)
 {
-    attr_t attr = 0;
-    short cpair = 0;
-    attr_get (&attr, &cpair, NULL);
+    #if NCURSES_WIDECHAR
+	attr_t attr = 0;
+	short cpair = 0;
+	attr_get (&attr, &cpair, NULL);
 
-    wchar_t wchzs[2] = { 0, 0 };
-    cchar_t ch = {};
+	wchar_t wchzs[2] = { 0, 0 };
+	cchar_t ch = {};
 
-    while (n-- && (wchzs[0] = utf8_next (&s))) {
-	setcchar (&ch, wchzs, attr, cpair, NULL);
-	add_wch (&ch);
-    }
+	while (n-- && (wchzs[0] = utf8_next (&s))) {
+	    setcchar (&ch, wchzs, attr, cpair, NULL);
+	    add_wch (&ch);
+	}
+    #else
+	wchar_t wc;
+	while (n-- && (wc = utf8_next (&s)))
+	    addch (wc < CHAR_MAX ? (char) wc : '?');
+    #endif
 }
 
 void add_utf8 (const char* s)
