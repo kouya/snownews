@@ -92,7 +92,7 @@ print_components() {
     local cc name desc
     cc=$components
     echo "Options:"
-    while [ ! -z "$cc" ]; do
+    while [ -n "$cc" ]; do
        name=$(expr "$cc" : '[^}]*name=\[\([^]]*\)\]')
        desc=$(expr "$cc" : '[^}]*desc=\[\([^]]*\)\]')
        echo "  --$name	$desc"
@@ -135,7 +135,7 @@ sub_var() {
 sub_comp() {
     local cc name seds
     cc=$components
-    while [ ! -z "$cc" ]; do
+    while [ -n "$cc" ]; do
        name=$(expr "$cc" : '[^}]*name=\[\([^]]*\)\]')
        seds=$(expr "$cc" : '[^}]*seds=\[\([^]]*\)\]')
        [ "$name" = "$1" ] && sub "$seds"
@@ -175,10 +175,10 @@ for i in $progs; do
     ppath=$(eval echo \$\{"$pname"\})
     ppath=$(escpath "$ppath")
     # First check if an environment variable is set
-    [ ! -z "$ppath" ] && sub "s/@$pname@/$ppath/g"
+    [ -n "$ppath" ] && sub "s/@$pname@/$ppath/g"
     # Check if the program exists
     ppath=$(which "$pcall" 2>/dev/null)
-    [ ! -z "$ppath" -a -x "$ppath" ] && sub "s/@$pname@/$pcall/g"
+    [ -n "$ppath" ] && [ -x "$ppath" ] && sub "s/@$pname@/$pcall/g"
 done
 # If nothing found in first loop, set the first pair anyway
 for i in $progs; do
@@ -189,12 +189,12 @@ done
 
 # Packages found using pkg-config
 pkgconfig=$(which pkg-config 2>/dev/null)
-if [ ! -z "$pkgconfig" -a -x "$pkgconfig" ]; then
+if [ -n "$pkgconfig" ] && [ -x "$pkgconfig" ]; then
     faildeps=""
     for i in $pkgs; do
         $pkgconfig --exists "$i" || faildeps="$i $faildeps"
     done
-    if [ ! -z "$faildeps" ]; then
+    if [ -n "$faildeps" ]; then
 	echo "Error: missing required packages: $faildeps"; die
     fi
     pkg_cflags=$(escpath "$($pkgconfig --cflags "$pkgs")")
