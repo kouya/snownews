@@ -50,6 +50,7 @@ pkg_minor=$(expr "$pkg_verstr" : 'v*[0-9]*\.\([0-9]*\)')
 pkg_string="$pkg_name $pkg_verstr"
 
 # Miscellaneous substitutions
+# shellcheck disable=SC2018,SC2019
 custsubs="s/@pkg_name@/$pkg_name/g
 s/@pkg_version@/0x$pkg_major$pkg_minor/g
 s/@pkg_verstr@/$pkg_verstr/g
@@ -69,6 +70,7 @@ escpath() { echo "$@" | sed 's/\//\\\//g'; }
 
 #### Set host-dependent options ######################################
 
+# shellcheck disable=SC2018,SC2019
 SYSNAME=$(uname|tr A-Z a-z)
 case "$SYSNAME" in
     *solaris*| *sun*)	SYSNAME="sun";;
