@@ -39,6 +39,10 @@
 #ifndef _GNU_SOURCE
     #define _GNU_SOURCE 1
 #endif
+// Bug in ncurses when _GNU_SOURCE doesn't also set _XOPEN_SOURCE
+#ifndef _XOPEN_SOURCE
+    #define _XOPEN_SOURCE 700
+#endif
 // OS X needs this, otherwise socklen_t is not defined.
 #ifdef __APPLE__
     #define _BSD_SOCKLEN_T_
