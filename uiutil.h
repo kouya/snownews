@@ -18,23 +18,16 @@
 #pragma once
 #include "main.h"
 
-typedef enum {
-    NORMAL,
-    INVERSE
-} clear_line;
-
 void InitCurses (void);
 void UIStatus (const char* text, int delay, int warning);
 void SwapPointers (struct feed* one, struct feed* two);
 void SnowSort (void);
-void UISupportDrawBox (int x1, int y1, int x2, int y2);
+void UISupportDrawBox (unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 void UISupportDrawHeader (const char* headerstring);
 void UISupportURLJump (const char* url);
 void SmartFeedsUpdate (void);
-void SmartFeedNewitems (struct feed* smart_feed);
 bool SmartFeedExists (const char* smartfeed);
-void DrawProgressBar (int numobjects, int titlestrlen);
-void clearLine (int line, clear_line how);
+void DrawProgressBar (unsigned numobjects, unsigned titlestrlen);
 unsigned utf8_length (const char* s);
 void add_utf8 (const char* s);
 void addn_utf8 (const char* s, unsigned n);

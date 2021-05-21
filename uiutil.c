@@ -18,6 +18,18 @@
 #include "uiutil.h"
 #include <ncurses.h>
 
+//----------------------------------------------------------------------
+
+enum clear_line { NORMAL, INVERSE };
+
+//----------------------------------------------------------------------
+
+static const char* SnowSortIgnore (const char* title);
+static void SmartFeedNewitems (struct feed* smart_feed);
+static void clearLine (unsigned line, enum clear_line how);
+
+//----------------------------------------------------------------------
+
 // Init the ncurses library.
 void InitCurses (void)
 {
@@ -60,7 +72,7 @@ void SwapPointers (struct feed* one, struct feed* two)
 }
 
 // Ignore "A", "The", etc. prefixes when sorting feeds.
-const char* SnowSortIgnore (const char* title)
+static const char* SnowSortIgnore (const char* title)
 {
     if (strncasecmp (title, "a ", strlen ("a ")) == 0)
 	return title + strlen ("a ");
@@ -92,11 +104,12 @@ void SnowSort (void)
 }
 
 // Draw a filled box with WA_REVERSE at coordinates x1y1/x2y2
-void UISupportDrawBox (int x1, int y1, int x2, int y2)
+void UISupportDrawBox (unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
     attron (WA_REVERSE);
-    for (int y = y1; y <= y2; ++y) {
-	for (int x = x1; x <= x2; ++x) {
+    for (unsigned y = y1; y <= y2; ++y) {
+	move (y, x1);
+	for (unsigned x = x1; x <= x2; ++x) {
 	    int c = ' ';
 	    if (y == y1) {
 		if (x == x1)
@@ -114,7 +127,7 @@ void UISupportDrawBox (int x1, int y1, int x2, int y2)
 		    c = ACS_HLINE;
 	    } else if (x == x1 || x == x2)
 		c = ACS_VLINE;
-	    mvaddch (y, x, c);
+	    addch (c);
 	}
     }
     attroff (WA_REVERSE);
@@ -123,9 +136,11 @@ void UISupportDrawBox (int x1, int y1, int x2, int y2)
 // Draw main program header.
 void UISupportDrawHeader (const char* headerstring)
 {
+    if (!headerstring)
+	headerstring = "* " SNOWNEWS_NAME " " SNOWNEWS_VERSTRING;
     clearLine (0, INVERSE);
     attron (WA_REVERSE);
-    mvprintw (0, 1, "* Snownews %s  %s", SNOWNEWS_VERSTRING, headerstring ? headerstring : "");
+    mvadd_utf8 (0, 1, headerstring);
     attroff (WA_REVERSE);
 }
 
@@ -165,7 +180,7 @@ void SmartFeedsUpdate (void)
 	    SmartFeedNewitems (f);
 }
 
-void SmartFeedNewitems (struct feed* smart_feed)
+static void SmartFeedNewitems (struct feed* smart_feed)
 {
     // Be smart and don't leak the smart feed.
     // The items->data structures must not be freed, since a smart feed is only
@@ -217,16 +232,16 @@ bool SmartFeedExists (const char* smartfeed)
     return false;
 }
 
-void DrawProgressBar (int numobjects, int titlestrlen)
+void DrawProgressBar (unsigned numobjects, unsigned titlestrlen)
 {
     attron (WA_REVERSE);
     mvhline (LINES - 1, titlestrlen + 1, '=', numobjects);
     mvaddch (LINES - 1, COLS - 3, ']');
-    refresh();
     attroff (WA_REVERSE);
+    refresh();
 }
 
-void clearLine (int line, clear_line how)
+static void clearLine (unsigned line, enum clear_line how)
 {
     if (how == INVERSE)
 	attron (WA_REVERSE);

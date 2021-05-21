@@ -52,7 +52,7 @@ void sig_winch (int p __attribute__((unused)))
 
 // View newsitem in scrollable window.
 // Speed of this code has been greatly increased in 1.2.1.
-static void UIDisplayItem (const struct newsitem* current_item, const struct feed* current_feed, const char* categories)
+static void UIDisplayItem (const struct newsitem* current_item, const struct feed* current_feed)
 {
     struct scrolltext* first_line = NULL;	// Linked list of lines
     unsigned linenumber = 0;	// First line on screen (scrolling). Ugly hack.
@@ -61,163 +61,123 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
     while (1) {
 	erase();
-	UISupportDrawHeader (categories);
 
-	// If feed doesn't have a description print title instead.
-	attron (WA_BOLD);
-	if (current_feed->description != NULL) {
-	    char* newtext = UIDejunk (current_feed->description);
-	    char* converted = iconvert (newtext);
-	    if (converted == NULL)
-		converted = strdup (newtext);
-	    free (newtext);
+	const char* feed_title = current_feed->description;
+	if (!feed_title)
+	    feed_title = current_feed->title;
+	if (!feed_title)
+	    feed_title = "* " SNOWNEWS_NAME " " SNOWNEWS_VERSTRING;
 
-	    int columns = COLS - 10;
-	    mvaddn_utf8 (2, 1, converted, columns);
-	    if (xmlStrlen ((xmlChar*) converted) > columns)
-		mvaddstr (2, columns + 1, "...");
+	// Convert feed title to current locale
+	char* dejunked_title = UIDejunk (feed_title);
+	if (!dejunked_title)
+	    dejunked_title = strdup (feed_title);
+	char* converted_title = iconvert (dejunked_title);
+	if (!converted_title)
+	    converted_title = strdup (dejunked_title);
+	free (dejunked_title);
 
-	    free (converted);
-	} else {
-	    // Print original feed's description and not "(New headlines)".
-	    if (current_feed->smartfeed == 1) {
-		char* newtext = UIDejunk (current_item->data->parent->description);
-		char* converted = iconvert (newtext);
-		if (converted == NULL)
-		    converted = strdup (newtext);
-		free (newtext);
-
-		int columns = COLS - 10;
-		mvaddn_utf8 (2, 1, converted, columns);
-		if (xmlStrlen ((xmlChar*) converted) > columns)
-		    mvaddstr (2, columns + 1, "...");
-
-		free (converted);
-	    } else
-		mvadd_utf8 (2, 1, current_feed->title);
-	}
-
-	attroff (WA_BOLD);
+	// Print feed title
+	UISupportDrawHeader (converted_title);
+	free (converted_title);
 
 	// Print publishing date if we have one.
-	move (LINES - 3, 0);
-	clrtoeol();
-	if (current_item->data->date != 0) {
+	if (current_item->data->date) {
 	    char* date_str = unixToPostDateString (current_item->data->date);
 	    if (date_str) {
-		attron (WA_BOLD);
-		mvaddstr (LINES - 3, 2, date_str);
-		attroff (WA_BOLD);
+		move (0, COLS - strlen(date_str) - 2);
+		attron (WA_REVERSE);
+		addch (' ');
+		addstr (date_str);
+		addch (' ');
+		attroff (WA_REVERSE);
 		free (date_str);
 	    }
 	}
-	// Don't print feed titles longer than screenwidth here.
-	// And don't crash if title is empty.
-	if (current_item->data->title != NULL) {
-	    char* newtext = UIDejunk (current_item->data->title);
-	    char* converted = iconvert (newtext);
-	    if (converted == NULL)
-		converted = strdup (newtext);
-	    free (newtext);
 
-	    int columns = COLS - 6;
-	    if (xmlStrlen ((xmlChar*) converted) > columns) {
-		mvaddn_utf8 (4, 1, converted, columns);
-		if (xmlStrlen ((xmlChar*) converted) > columns)
-		    mvaddstr (4, columns + 1, "...");
-	    } else
-		mvadd_utf8 (4, (COLS / 2) - (xmlStrlen ((xmlChar*) converted) / 2), converted);
+	// Print item title
+	unsigned ydesc = 2, xdesc = 1;
+	if (current_item->data->title) {
+	    dejunked_title = UIDejunk (current_item->data->title);
+	    if (!dejunked_title)
+		dejunked_title = strdup (current_item->data->title);
+	    converted_title = iconvert (dejunked_title);
+	    if (!converted_title)
+		converted_title = strdup (dejunked_title);
+	    free (dejunked_title);
+	    unsigned titlelen = xmlStrlen ((xmlChar*) converted_title);
+	    unsigned xtitle = xdesc;
+	    if (titlelen < COLS - xdesc*2)
+		xtitle = (COLS - titlelen) / 2u;
+	    move (ydesc, xtitle);
+	    attr_set (WA_BOLD, 2, NULL);
+	    add_utf8 (converted_title);
+	    attr_set (WA_NORMAL, 0, NULL);
+	    free (converted_title);
+	    ydesc += 2;
+	}
 
-	    free (converted);
-	} else
-	    mvadd_utf8 (4, (COLS / 2) - (strlen (_("No title")) / 2), _("No title"));
-
-	if (current_item->data->description == NULL)
-	    mvadd_utf8 (6, 1, _("No description available."));
+	// Print item text
+	if (!current_item->data->description || !current_item->data->description[0])
+	    mvadd_utf8 (ydesc, xdesc, _("No description available."));
 	else {
-	    if (strlen (current_item->data->description) == 0)
-		mvadd_utf8 (6, 1, _("No description available."));
-	    else {
-		// Only generate a new scroll list if we need to rewrap everything.
-		// Otherwise just typeaheadskip this block.
-		if (rewrap) {
-		    char* converted = iconvert (current_item->data->description);
-		    if (converted == NULL)
-			converted = strdup (current_item->data->description);
-		    char* newtext = UIDejunk (converted);
-		    free (converted);
-		    char* newtextwrapped = WrapText (newtext, COLS - 4);
-		    free (newtext);
-		    char* freeme = newtextwrapped;	// Set ptr to str start so we can free later.
+	    // Only generate a new scroll list if we need to rewrap everything.
+	    // Otherwise just typeaheadskip this block.
+	    if (rewrap) {
+		char* converted = iconvert (current_item->data->description);
+		if (converted == NULL)
+		    converted = strdup (current_item->data->description);
+		char* newtext = UIDejunk (converted);
+		free (converted);
+		char* newtextwrapped = WrapText (newtext, COLS - 4);
+		free (newtext);
+		char* freeme = newtextwrapped;	// Set ptr to str start so we can free later.
 
-		    // Split newtextwrapped at \n and put into double linked list.
-		    while (1) {
-			char* textslice = strsep (&newtextwrapped, "\n");
+		// Split newtextwrapped at \n and put into double linked list.
+		while (1) {
+		    char* textslice = strsep (&newtextwrapped, "\n");
 
-			// Find out max number of lines text has.
-			++maxlines;
+		    // Find out max number of lines text has.
+		    ++maxlines;
 
-			if (textslice != NULL) {
-			    struct scrolltext* textlist = malloc (sizeof (struct scrolltext));
-			    textlist->line = strdup (textslice);
+		    if (textslice != NULL) {
+			struct scrolltext* textlist = malloc (sizeof (struct scrolltext));
+			textlist->line = strdup (textslice);
 
-			    // Gen double list with new items at bottom.
-			    textlist->next = NULL;
-			    if (first_line == NULL) {
-				textlist->prev = NULL;
-				first_line = textlist;
-			    } else {
-				textlist->prev = first_line;
-				while (textlist->prev->next != NULL)
-				    textlist->prev = textlist->prev->next;
-				textlist->prev->next = textlist;
-			    }
-			} else
-			    break;
-		    }
-		    free (freeme);
-		    rewrap = false;
+			// Gen double list with new items at bottom.
+			textlist->next = NULL;
+			if (first_line == NULL) {
+			    textlist->prev = NULL;
+			    first_line = textlist;
+			} else {
+			    textlist->prev = first_line;
+			    while (textlist->prev->next != NULL)
+				textlist->prev = textlist->prev->next;
+			    textlist->prev->next = textlist;
+			}
+		    } else
+			break;
 		}
-		// Skip to the first visible line
-		unsigned ientry = 0;
-		const struct scrolltext* l = first_line;
-		while (ientry < linenumber && l) {
-		    ++ientry;
-		    l = l->next;
-		}
-		// We sould now have the linked list setup'ed... hopefully.
-		unsigned ypos = 6;
-		for (; ypos <= LINES - 4u && l; ++ientry, ++ypos, l = l->next)
-		    mvadd_utf8 (ypos, 2, l->line);
+		free (freeme);
+		rewrap = false;
 	    }
+	    // Skip to the first visible line
+	    unsigned ientry = 0;
+	    const struct scrolltext* l = first_line;
+	    while (ientry < linenumber && l) {
+		++ientry;
+		l = l->next;
+	    }
+	    // We sould now have the linked list setup'ed... hopefully.
+	    for (unsigned y = ydesc; y <= LINES - 3u && l; ++ientry, ++y, l = l->next)
+		mvadd_utf8 (y, xdesc, l->line);
 	}
 
-	// Apply color style.
-	if (!_settings.monochrome) {
-	    attron (COLOR_PAIR (3));
-	    if (_settings.color.urljumpbold)
-		attron (WA_BOLD);
-	} else
-	    attron (WA_BOLD);
-
-	// Print article URL.
-	if (current_item->data->link == NULL)
-	    mvadd_utf8 (LINES - 2, 1, _("-> No link"));
-	else {
-	    mvaddstr (LINES - 2, 1, "-> ");
-	    add_utf8 (current_item->data->link);
-	}
-
-	// Disable color style.
-	if (!_settings.monochrome) {
-	    attroff (COLOR_PAIR (3));
-	    if (_settings.color.urljumpbold)
-		attroff (WA_BOLD);
-	} else
-	    attroff (WA_BOLD);
-
-	char keyinfostr[128];
-	snprintf (keyinfostr, sizeof (keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), _settings.keybindings.prevmenu, _settings.keybindings.help);
+	char keyinfostr [256];
+	if (current_item->data->link)
+	    snprintf (keyinfostr, sizeof (keyinfostr), "-> %s", current_item->data->link);
+	else
+	    snprintf (keyinfostr, sizeof (keyinfostr), _("Press '%c' or Enter to return to previous screen. Hit '%c' for help screen."), _settings.keybindings.prevmenu, _settings.keybindings.help);
 	UIStatus (keyinfostr, 0, 0);
 
 	int uiinput = getch();
@@ -313,7 +273,7 @@ static int UIDisplayFeed (struct feed* current_feed)
     unsigned highlightnum = 1;	// Index of the highlighted item, 1 = first visible
     while (highlighted && highlighted->next && highlighted->data->readstatus) {
 	highlighted = highlighted->next;
-	if (++highlightnum > LINES - 7u) {
+	if (++highlightnum > LINES - 4u) {
 	    --highlightnum;
 	    if (first_scr_ptr->next)
 		first_scr_ptr = first_scr_ptr->next;
@@ -343,7 +303,30 @@ static int UIDisplayFeed (struct feed* current_feed)
     bool reloaded = false;	// We need to signal the main function if we changed feed contents.
     while (1) {
 	erase();
-	UISupportDrawHeader (categories);
+
+	// Get a title or something
+	const char* title = current_feed->description;
+	if (!title)
+	    title = current_feed->title;
+	if (!title)
+	    title = "Untitled";
+
+	// Convert title to current locale
+	char* dejunked_title = UIDejunk (title);
+	if (!dejunked_title)
+	    dejunked_title = strdup (title);
+	char* converted_title = iconvert (dejunked_title);
+	if (!converted_title)
+	    converted_title = strdup (dejunked_title);
+	free (dejunked_title);
+
+	// Print title
+	UISupportDrawHeader (converted_title);
+	free (converted_title);
+
+	// We start the item list at line 3.
+	unsigned ypos = 2, itemnum = 1;
+	const unsigned ymax = LINES - 4;
 
 	if (typeahead) {
 	    // This resets the offset for every typeahead loop.
@@ -352,9 +335,9 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    unsigned count = 0, skipper = 0;	// # of lines already skipped
 	    bool found = false;
 	    for (const struct newsitem * i = current_feed->items; i; ++count, i = i->next) {
-		// count+1 > LINES-7:
+		// count+1 > ymax:
 		// If the _next_ line would go over the boundary.
-		if (count + 1 > LINES - 7u)
+		if (count + 1 > ymax)
 		    if (first_scr_ptr->next)
 			first_scr_ptr = first_scr_ptr->next;
 		if (!searchstrlen)
@@ -377,42 +360,9 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    }
 	}
 
-	if (_settings.color.feedtitle > -1) {
-	    attron (COLOR_PAIR (4));
-	    if (_settings.color.feedtitlebold)
-		attron (WA_BOLD);
-	} else
-	    attron (WA_BOLD);
-	if (current_feed->description != NULL) {
-	    // Print a max of COLS-something chars.
-
-	    char* newtext = UIDejunk (current_feed->description);
-	    char* converted = iconvert (newtext);
-	    if (converted == NULL)
-		converted = strdup (newtext);
-	    free (newtext);
-
-	    int columns = COLS - 10;
-	    mvaddn_utf8 (2, 1, converted, columns);
-	    if (xmlStrlen ((xmlChar*) converted) > columns)
-		mvaddstr (2, columns + 1, "...");
-
-	    free (converted);
-	} else
-	    mvadd_utf8 (2, 1, current_feed->title);
-
-	if (_settings.color.feedtitle > -1) {
-	    attroff (COLOR_PAIR (4));
-	    if (_settings.color.feedtitlebold)
-		attroff (WA_BOLD);
-	} else
-	    attroff (WA_BOLD);
-
-	// We start the item list at line 5.
-	unsigned ypos = 4, itemnum = 1;
-
 	// Print unread entries in bold.
-	for (const struct newsitem * item = first_scr_ptr; item; item = item->next) {
+	const struct newsitem* current_item = NULL;
+	for (const struct newsitem* item = first_scr_ptr; item; item = item->next) {
 	    // Set cursor to start of current line and clear it.
 	    move (ypos, 0);
 	    clrtoeol();
@@ -428,6 +378,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    }
 
 	    if (item == highlighted) {
+		current_item = item;
 		highlightline = ypos;
 		highlightnum = itemnum;
 		attron (WA_REVERSE);
@@ -476,44 +427,19 @@ static int UIDisplayFeed (struct feed* current_feed)
 		    attroff (WA_BOLD);
 	    }
 
-	    if (itemnum >= LINES - 7u)
+	    if (itemnum >= ymax)
 		break;
 	    ++itemnum;
 	}
 
-	// Apply color style.
-	if (!_settings.monochrome) {
-	    attron (COLOR_PAIR (3));
-	    if (_settings.color.urljumpbold)
-		attron (WA_BOLD);
-	} else
-	    attron (WA_BOLD);
-
-	// Print feed URL.
-	if (current_feed->link == NULL)
-	    mvadd_utf8 (LINES - 2, 1, _("-> No link"));
-	else {
-	    mvaddstr (LINES - 2, 1, "-> ");
-	    add_utf8 (current_feed->link);
-	}
-
-	// Disable color style.
-	if (!_settings.monochrome) {
-	    attroff (COLOR_PAIR (3));
-	    if (_settings.color.urljumpbold)
-		attroff (WA_BOLD);
-	} else
-	    attroff (WA_BOLD);
-
-	if (typeahead) {
-	    char tmpstr[128];
+	char tmpstr [256];
+	if (typeahead)
 	    snprintf (tmpstr, sizeof (tmpstr), "-> %s", searchstr);
-	    UIStatus (tmpstr, 0, 0);
-	} else {
-	    char tmpstr[128];
+	else if (current_item && current_item->data->link)
+	    snprintf (tmpstr, sizeof (tmpstr), "-> %s", current_item->data->link);
+	else
 	    snprintf (tmpstr, sizeof (tmpstr), _("Press '%c' to return to main menu, '%c' to show help."), _settings.keybindings.prevmenu, _settings.keybindings.help);
-	    UIStatus (tmpstr, 0, 0);
-	}
+	UIStatus (tmpstr, 0, 0);
 
 	move (highlightline, 0);
 	int uiinput = getch();
@@ -556,21 +482,21 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    } else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next) {
 		highlighted = highlighted->next;
 		// Adjust first visible entry.
-		if (++highlightnum > LINES - 7u && first_scr_ptr->next) {
+		if (++highlightnum > ymax && first_scr_ptr->next) {
 		    --highlightnum;
 		    first_scr_ptr = first_scr_ptr->next;
 		}
 	    } else if ((uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) && highlighted) {
-		// Move highlight one page up/down == LINES-7
-		for (unsigned i = 0; i < LINES - 7u && highlighted->next; ++i) {
+		// Move highlight one page up/down == ymax
+		for (unsigned i = 0; i < ymax && highlighted->next; ++i) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum > LINES - 7u && first_scr_ptr->next) {
+		    if (++highlightnum > ymax && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
 		}
 	    } else if ((uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) && highlighted) {
-		for (unsigned i = 0; i < LINES - 7u && highlighted->prev; ++i) {
+		for (unsigned i = 0; i < ymax && highlighted->prev; ++i) {
 		    highlighted = highlighted->prev;
 		    if (--highlightnum < 1 && first_scr_ptr->prev) {
 			++highlightnum;
@@ -585,7 +511,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 		highlightnum = 0;
 		while (highlighted && highlighted->next) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum >= LINES - 7u && first_scr_ptr->next) {
+		    if (++highlightnum >= ymax && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
@@ -645,7 +571,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    // Check if we have no items at all!
 	    // Don't even try to view a non existant item.
 	    if (highlighted) {
-		UIDisplayItem (highlighted, current_feed, categories);
+		UIDisplayItem (highlighted, current_feed);
 		if (!highlighted->data->readstatus) {
 		    highlighted->data->readstatus = true;
 		    current_feed->mtime = curtime;
@@ -657,7 +583,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 		// Moves highlight to next unread item.
 		while (highlighted->next && highlighted->data->readstatus) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum > LINES - 7u && first_scr_ptr->next) {
+		    if (++highlightnum > ymax && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
@@ -760,22 +686,23 @@ void UIMainInterface (void)
 	}
 	erase();
 
-	if (filters[0] == NULL)
-	    UISupportDrawHeader (NULL);
-	else {
+	char* filterstring = NULL;
+	if (filters[0]) {
 	    numfilters = 0;
 	    size_t len = 0;
-	    char* filterstring = NULL;
-	    for (unsigned i = 0; i < 8 && filters[i]; ++i, ++numfilters) {
+	    for (unsigned i = 0; i < sizeof(filters)/sizeof(filters[0]) && filters[i]; ++i, ++numfilters)
 		len += strlen (filters[i]) + strlen (", ");
-		filterstring = realloc (filterstring, len);
+	    filterstring = calloc (len, 1);
+	    for (unsigned i = 0; i < numfilters; ++i) {
 		if (i)
 		    strcat (filterstring, ", ");
 		strcat (filterstring, filters[i]);
 	    }
-	    UISupportDrawHeader (filterstring);
-	    free (filterstring);
 	}
+	UISupportDrawHeader (filterstring);
+	if (filterstring)
+	    free (filterstring);
+	filterstring = NULL;
 
 	// If a filter is defined we need to make copy of the pointers in
 	// struct feed and work on that.
@@ -1223,13 +1150,13 @@ void UIMainInterface (void)
 		}
 	    } else if (uiinput == _settings.keybindings.filter) {
 		// GUI to set a filter
-		char* filterstring = DialogGetCategoryFilter();
-		if (filterstring) {
+		char* catfilter = DialogGetCategoryFilter();
+		if (catfilter) {
 		    unsigned iunusedfilter = 0;
 		    while (iunusedfilter < 8 && filters[iunusedfilter])
 			++iunusedfilter;
 		    if (iunusedfilter < 8) {
-			filters[iunusedfilter] = strdup (filterstring);
+			filters[iunusedfilter] = strdup (catfilter);
 			filteractivated = true;
 		    }
 		} else {
@@ -1245,7 +1172,7 @@ void UIMainInterface (void)
 			_unfiltered_feed_list = NULL;
 		    }
 		}
-		free (filterstring);
+		free (catfilter);
 		_feed_list_changed = true;
 	    } else if (uiinput == _settings.keybindings.filtercurrent) {
 		// Set filter to primary filter of this feed.
