@@ -1141,7 +1141,7 @@ void UIMainInterface (void)
 		    _feed_list_changed = true;
 		    update_smartfeeds = true;
 		}
-	    } else if (uiinput == _settings.keybindings.categorize && highlighted && highlighted->smartfeed) {
+	    } else if (uiinput == _settings.keybindings.categorize && highlighted && !highlighted->smartfeed) {
 		if (filters[0])	// This needs to be worked on before it works while a filter is applied!
 		    UIStatus (_("Please deactivate the category filter before using this function."), 2, 0);
 		else {

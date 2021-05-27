@@ -439,7 +439,7 @@ void CategorizeFeed (struct feed* current_feed)
 	for (const struct feedcategories * c = current_feed->feedcategories; c; c = c->next)
 	    ++nfeedcat;
 
-	UISupportDrawBox ((COLS / 2) - 37, 2, (COLS / 2) + 37, 2 + 3 + nglobalcat + 1);
+	UISupportDrawBox ((COLS / 2) - 37, 2, (COLS / 2) + 37, 1 + 4 + nfeedcat + 1);
 
 	attron (WA_REVERSE);
 	mvprintw (3, (COLS / 2) - ((strlen (_("Category configuration for %s")) + strlen (current_feed->title)) / 2), _("Category configuration for %s"), current_feed->title);
@@ -496,11 +496,11 @@ void CategorizeFeed (struct feed* current_feed)
 	    }
 	    if (uiinput == 'A') {
 		// Clear screen area we want to "draw" to.
-		UISupportDrawBox ((COLS / 2) - 37, 5, (COLS / 2) + 37, 2 + 3 + nglobalcat + 1);
+		UISupportDrawBox ((COLS / 2) - 37, 5, (COLS / 2) + 37, 1 + 5 + nglobalcat + 1);
 
 		attron (WA_REVERSE);
 		UIStatus (_("Enter new category name."), 0, 0);
-		char* newcategory = UIOneLineEntryField (COLS / 2 - 33, 5);
+		char* newcategory = UIOneLineEntryField (COLS / 2 - 33, 6);
 		if (strlen (newcategory) == 0)
 		    UIStatus (_("Aborted."), 1, 0);
 		else if (!FeedCategoryExists (current_feed, newcategory))
