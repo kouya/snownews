@@ -278,9 +278,13 @@ static void parse_atom_entry (struct feed* feed, xmlDocPtr doc, xmlNodePtr node)
 
 	if (node_name_is (cur, "title"))
 	    copy_node_text_to (doc, cur, &item->data->title, true);
-	else if (node_name_is (cur, "link"))
-	    copy_node_prop_to (cur, "href", &item->data->link, false);
-	else if (node_name_is (cur, "summary") && !item->data->description)
+	else if (node_name_is (cur, "link")) {
+	    char* rel = NULL;
+	    copy_node_prop_to (cur, "rel", &rel, false );
+	    if (!rel || 0 == strcmp (rel, "alternate"))
+		copy_node_prop_to (cur, "href", &item->data->link, false);
+	    free (rel);
+	} else if (node_name_is (cur, "summary") && !item->data->description)
 	    copy_node_text_to (doc, cur, &item->data->description, false);
 	else if (node_name_is (cur, "content"))
 	    copy_node_text_to (doc, cur, &item->data->description, false);
