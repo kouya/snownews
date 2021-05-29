@@ -915,8 +915,10 @@ void UIMainInterface (void)
 			default:
 			    break;
 		    }
-		} else if (!SmartFeedExists ("newitems"))
+		} else if (!SmartFeedExists ("newitems")) {
 		    UIAddFeed ("smartfeed:/newitems");
+		    _feed_list_changed = true;
+		}
 
 		// Scroll to top of screen and redraw everything.
 		highlighted = _feed_list;
@@ -988,7 +990,7 @@ void UIMainInterface (void)
 			highlighted = saved_highlighted;
 
 			// free (removed) pointer
-			if (removed->smartfeed == 0) {
+			if (!removed->smartfeed) {
 			    if (removed->items) {
 				while (removed->items->next) {
 				    removed->items = removed->items->next;
@@ -1013,8 +1015,8 @@ void UIMainInterface (void)
 			    free (removed->custom_title);
 			    free (removed->original);
 			    free (removed);
-			    _feed_list_changed = true;
 			}
+			_feed_list_changed = true;
 			update_smartfeeds = true;
 		    }
 		}
