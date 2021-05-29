@@ -754,11 +754,7 @@ void UIMainInterface (void)
 		    new_feed->feedcategories = cur_ptr->feedcategories;
 
 		    // Add to bottom of pointer chain.
-		    struct feed** prev_feed = &_feed_list;
-		    while (*prev_feed && (*prev_feed)->next)
-			*prev_feed = (*prev_feed)->next;
-		    new_feed->prev = *prev_feed;
-		    (*prev_feed)->next = new_feed;
+		    AddFeedToList (new_feed);
 		}
 	    }
 	    first_scr_ptr = _feed_list;
@@ -774,7 +770,7 @@ void UIMainInterface (void)
 
 	    unsigned count = 0, skipper = 0;
 	    bool found = false;
-	    for (struct feed * cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next) {
+	    for (struct feed* cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next) {
 		// count+1 >= Lines-4: if the _next_ line would go over the boundary.
 		if (count + 1 > LINES - 4u && first_scr_ptr->next)
 		    first_scr_ptr = first_scr_ptr->next;
@@ -958,7 +954,7 @@ void UIMainInterface (void)
 			// Unlink pointer from chain.
 			if (highlighted == _feed_list) {
 			    // first element
-			    if (_feed_list->next != NULL) {
+			    if (_feed_list->next) {
 				_feed_list = _feed_list->next;
 				first_scr_ptr = _feed_list;
 				highlighted->next->prev = NULL;
@@ -1108,8 +1104,8 @@ void UIMainInterface (void)
 		// changes int values. It automatically marks the correct ones read
 		// if a filter is applied since we are using a copy of the main data.
 		time_t curtime = time (NULL);
-		for (struct feed * f = _feed_list; f; f = f->next) {
-		    for (struct newsitem * i = f->items; i; i = i->next) {
+		for (struct feed* f = _feed_list; f; f = f->next) {
+		    for (struct newsitem* i = f->items; i; i = i->next) {
 			if (!i->data->readstatus) {
 			    i->data->readstatus = true;
 			    f->mtime = curtime;
@@ -1246,7 +1242,7 @@ void UIMainInterface (void)
 		    first_scr_ptr = savestart_first;
 		} else {
 		    unsigned found = 0;
-		    for (const struct feed * f = _feed_list; f; f = f->next)
+		    for (const struct feed* f = _feed_list; f; f = f->next)
 			if (s_strcasestr (f->title, search))	// Substring match.
 			    ++found;
 		    if (typeaheadskip == found - 1)	// found-1 to avoid empty tab cycle.

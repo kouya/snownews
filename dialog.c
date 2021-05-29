@@ -179,14 +179,10 @@ int UIAddFeed (char* newurl)
 
     // getnstr does not return newline... says the docs.
     new_ptr->feedurl = malloc (strlen (url) + 1);
+    strncpy (new_ptr->feedurl, url, strlen (url) + 1);
 
     // Attach to feed pointer chain.
-    strncpy (new_ptr->feedurl, url, strlen (url) + 1);
-    new_ptr->next = _feed_list;
-    if (_feed_list != NULL)
-	_feed_list->prev = new_ptr;
-    new_ptr->prev = NULL;
-    _feed_list = new_ptr;
+    AddFeedToList (new_ptr);
 
     // Tag execurl.
     if (strncasecmp (url, "exec:", 5) == 0)

@@ -87,7 +87,7 @@ int UpdateFeed (struct feed* cur_ptr)
 
 int UpdateAllFeeds (void)
 {
-    for (struct feed * f = _feed_list; f; f = f->next)
+    for (struct feed* f = _feed_list; f; f = f->next)
 	if (0 != UpdateFeed (f))
 	    continue;
     return 0;
@@ -163,7 +163,7 @@ int LoadAllFeeds (unsigned numfeeds)
     unsigned titlestrlen = strlen (_("Loading cache ["));
     int oldnumobjects = 0;
     unsigned count = 1;
-    for (struct feed * f = _feed_list; f; f = f->next) {
+    for (struct feed* f = _feed_list; f; f = f->next) {
 	// Progress bar
 	int numobjects = count * (COLS - titlestrlen - 2) / numfeeds - 2;
 	if (numobjects < 1)
@@ -177,6 +177,18 @@ int LoadAllFeeds (unsigned numfeeds)
 	++count;
     }
     return 0;
+}
+
+void AddFeedToList (struct feed* new_feed)
+{
+    if (!_feed_list)
+	_feed_list = new_feed;
+    else {
+	new_feed->prev = _feed_list;
+	while (new_feed->prev->next)
+	    new_feed->prev = new_feed->prev->next;
+	new_feed->prev->next = new_feed;
+    }
 }
 
 void AddFeed (const char* url, const char* cname, const char* categories, const char* filter)
@@ -197,15 +209,7 @@ void AddFeed (const char* url, const char* cname, const char* categories, const 
 	    FeedCategoryAdd (new_ptr, strsep (&catnext, ","));
 	free (catlist);
     }
-    // Add to bottom of pointer chain.
-    if (!_feed_list)
-	_feed_list = new_ptr;
-    else {
-	new_ptr->prev = _feed_list;
-	while (new_ptr->prev->next)
-	    new_ptr->prev = new_ptr->prev->next;
-	new_ptr->prev->next = new_ptr;
-    }
+    AddFeedToList (new_ptr);
 }
 
 static void WriteFeedUrls (void)
@@ -363,14 +367,14 @@ void WriteCache (void)
 
     // Save feed cache
     unsigned numfeeds = 0;
-    for (const struct feed * f = _feed_list; f; f = f->next)
+    for (const struct feed* f = _feed_list; f; f = f->next)
 	++numfeeds;
 
     unsigned count = 1;
     int oldnumobjects = 0;
     unsigned titlestrlen = strlen (_("Saving settings ["));
 
-    for (const struct feed * cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next) {
+    for (const struct feed* cur_ptr = _feed_list; cur_ptr; cur_ptr = cur_ptr->next) {
 	// Progress bar
 	int numobjects = count * (COLS - titlestrlen - 2) / numfeeds - 2;
 	if (numobjects < 1)

@@ -91,10 +91,10 @@ void SnowSort (void)
     UIStatus (_("Sorting, please wait..."), 0, 0);
 
     unsigned elements = 0;
-    for (const struct feed * f = _feed_list; f; f = f->next)
+    for (const struct feed* f = _feed_list; f; f = f->next)
 	++elements;
     for (unsigned i = 0; i <= elements; ++i) {
-	for (struct feed * f = _feed_list; f->next; f = f->next) {
+	for (struct feed* f = _feed_list; f->next; f = f->next) {
 	    const char* one = SnowSortIgnore (f->title);
 	    const char* two = SnowSortIgnore (f->next->title);
 	    if (strcasecmp (one, two) > 0)
@@ -175,7 +175,7 @@ void UISupportURLJump (const char* url)
 
 void SmartFeedsUpdate (void)
 {
-    for (struct feed * f = _feed_list; f; f = f->next)
+    for (struct feed* f = _feed_list; f; f = f->next)
 	if (f->smartfeed)
 	    SmartFeedNewitems (f);
 }
@@ -193,7 +193,7 @@ static void SmartFeedNewitems (struct feed* smart_feed)
 	free (smart_feed->items);
 	smart_feed->items = NULL;
     }
-    for (struct feed * f = _feed_list; f; f = f->next) {
+    for (struct feed* f = _feed_list; f; f = f->next) {
 	// Do not add the smart feed recursively. 8)
 	if (f == smart_feed)
 	    continue;
@@ -226,7 +226,7 @@ bool SmartFeedExists (const char* smartfeed)
 {
     // Find our smart feed.
     if (strcmp (smartfeed, "newitems") == 0)
-	for (const struct feed * f = _feed_list; f; f = f->next)
+	for (const struct feed* f = _feed_list; f; f = f->next)
 	    if (f->smartfeed == 1)
 		return true;
     return false;

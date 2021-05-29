@@ -22,5 +22,6 @@ int UpdateFeed (struct feed* cur_ptr);
 int UpdateAllFeeds (void);
 int LoadFeed (struct feed* cur_ptr);
 int LoadAllFeeds (unsigned numfeeds);
+void AddFeedToList (struct feed* new_feed);
 void AddFeed (const char* url, const char* cname, const char* categories, const char* filter);
 void WriteCache (void);
