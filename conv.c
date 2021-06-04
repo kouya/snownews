@@ -434,6 +434,17 @@ void CleanupString (char* s, bool fullclean)
 	    s[i] = ' ';
     }
 
+    // Remove embedded CDATA tags
+    #define CDATA_START	"<![CDATA["
+    for (char* si = s; (si = strstr (si, CDATA_START));)
+	memmove (si, si + strlen(CDATA_START), (len -= strlen(CDATA_START)) - (si - s) + 1);
+    #define CDATA_END	"]]>"
+    for (char* si = s; (si = strstr (si, CDATA_END));)
+	memmove (si, si + strlen(CDATA_END), (len -= strlen(CDATA_END)) - (si - s) + 1);
+    #define CDATA_BROK	"]]"
+    for (char* si = s; (si = strstr (si, CDATA_BROK));)
+	memmove (si, si + strlen(CDATA_BROK), (len -= strlen(CDATA_BROK)) - (si - s) + 1);
+
     // Remove trailing spaces.
     while (len > 1 && isspace (s[len-1]))
 	s[--len] = 0;
