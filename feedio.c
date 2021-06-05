@@ -252,12 +252,21 @@ static void WriteFeedUrls (void)
     // Write one outline element per feed
     for (const struct feed* f = _feed_list; f; f = f->next) {
 	fputs ("\t<outline", urlfile);
+    char* title = NULL;
 	if (f->custom_title)
-	    fprintf (urlfile, " text=\"%s\"", f->custom_title);
+        title = f->custom_title;
 	else if (f->title)
-	    fprintf (urlfile, " text=\"%s\"", f->title);
-	if (f->feedurl)
-	    fprintf (urlfile, " xmlUrl=\"%s\"", f->feedurl);
+        title = f->title;
+    if (title) {
+        char* encoded_title = (char*) xmlEncodeSpecialChars (NULL, (xmlChar*) title);
+        fprintf (urlfile, " text=\"%s\"", encoded_title);
+        free (encoded_title);
+    }
+	if (f->feedurl) {
+        char* encoded_feedurl = (char*) xmlEncodeSpecialChars (NULL, (xmlChar*) f->feedurl);
+	    fprintf (urlfile, " xmlUrl=\"%s\"", encoded_feedurl);
+        free (encoded_feedurl);
+    }
 	if (f->feedcategories) {
 	    fputs (" category=\"", urlfile);
 	    for (const struct feedcategories* c = f->feedcategories; c; c = c->next) {
