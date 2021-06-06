@@ -57,6 +57,8 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
     struct scrolltext* first_line = NULL;	// Linked list of lines
     unsigned linenumber = 0;	// First line on screen (scrolling). Ugly hack.
     unsigned maxlines = 0;
+    const unsigned pagesz = LINES-4;
+    const unsigned ymax = LINES-1;
     bool rewrap = true;
 
     while (1) {
@@ -96,7 +98,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 	}
 
 	// Print item title
-	unsigned ydesc = 2, xdesc = 1;
+	unsigned ydesc = 1, xdesc = 1;
 	if (current_item->data->title) {
 	    dejunked_title = UIDejunk (current_item->data->title);
 	    if (!dejunked_title)
@@ -114,7 +116,8 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 	    add_utf8 (converted_title);
 	    attr_set (WA_NORMAL, 0, NULL);
 	    free (converted_title);
-	    ydesc += 2;
+	    mvhline (++ydesc, 0, 0, COLS);
+	    ++ydesc;
 	}
 
 	// Print item text
@@ -169,7 +172,7 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 		l = l->next;
 	    }
 	    // We sould now have the linked list setup'ed... hopefully.
-	    for (unsigned y = ydesc; y <= LINES - 3u && l; ++ientry, ++y, l = l->next)
+	    for (unsigned y = ydesc; y < ymax && l; ++ientry, ++y, l = l->next)
 		mvadd_utf8 (y, xdesc, l->line);
 	}
 
@@ -218,16 +221,16 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 	    }
 	} else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) {
 	    // Scroll by one page.
-	    for (int i = 0; i < LINES - 9; ++i)
-		if (linenumber + (LINES - 7) < maxlines)
+	    for (unsigned i = 0; i < pagesz; ++i)
+		if (linenumber + pagesz < maxlines)
 		    ++linenumber;
 	} else if (uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) {
-	    for (int i = 0; i < LINES - 9; ++i)
-		if (linenumber >= 1)
+	    for (unsigned i = 0; i < pagesz; ++i)
+		if (linenumber > 0)
 		    --linenumber;
-	} else if (uiinput == KEY_UP && linenumber >= 1)
+	} else if (uiinput == KEY_UP && linenumber > 0)
 	    --linenumber;
-	else if (uiinput == KEY_DOWN && linenumber + (LINES - 7) < maxlines)
+	else if (uiinput == KEY_DOWN && linenumber + pagesz < maxlines)
 	    ++linenumber;
 	else if (resize_dirty || uiinput == KEY_RESIZE) {
 	    rewrap = true;
@@ -258,6 +261,9 @@ static void UIDisplayItem (const struct newsitem* current_item, const struct fee
 
 static int UIDisplayFeed (struct feed* current_feed)
 {
+    const unsigned ymax = LINES-1;
+    const unsigned pagesz = LINES-3;
+
     // Set highlighted to _feed_list at the beginning.
     // Otherwise bad things (tm) will happen.
     const struct newsitem* first_scr_ptr = current_feed->items;
@@ -267,13 +273,13 @@ static int UIDisplayFeed (struct feed* current_feed)
     // leave first item active if there is no unread.
     const struct newsitem* highlighted = current_feed->items;
     const struct newsitem* tmp_highlighted = highlighted;
-    unsigned highlightline = LINES - 1;
+    unsigned highlightline = ymax+1;
 
     // Moves highlight to next unread item.
     unsigned highlightnum = 1;	// Index of the highlighted item, 1 = first visible
     while (highlighted && highlighted->next && highlighted->data->readstatus) {
 	highlighted = highlighted->next;
-	if (++highlightnum > LINES - 4u) {
+	if (++highlightnum > ymax) {
 	    --highlightnum;
 	    if (first_scr_ptr->next)
 		first_scr_ptr = first_scr_ptr->next;
@@ -324,9 +330,8 @@ static int UIDisplayFeed (struct feed* current_feed)
 	UISupportDrawHeader (converted_title);
 	free (converted_title);
 
-	// We start the item list at line 3.
+	// We start the item list below the header
 	unsigned ypos = 2, itemnum = 1;
-	const unsigned ymax = LINES - 4;
 
 	if (typeahead) {
 	    // This resets the offset for every typeahead loop.
@@ -482,21 +487,21 @@ static int UIDisplayFeed (struct feed* current_feed)
 	    } else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next) {
 		highlighted = highlighted->next;
 		// Adjust first visible entry.
-		if (++highlightnum > ymax && first_scr_ptr->next) {
+		if (++highlightnum > pagesz && first_scr_ptr->next) {
 		    --highlightnum;
 		    first_scr_ptr = first_scr_ptr->next;
 		}
 	    } else if ((uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) && highlighted) {
-		// Move highlight one page up/down == ymax
-		for (unsigned i = 0; i < ymax && highlighted->next; ++i) {
+		// Move highlight one page up/down == pagesz
+		for (unsigned i = 0; i < pagesz && highlighted->next; ++i) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum > ymax && first_scr_ptr->next) {
+		    if (++highlightnum > pagesz && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
 		}
 	    } else if ((uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) && highlighted) {
-		for (unsigned i = 0; i < ymax && highlighted->prev; ++i) {
+		for (unsigned i = 0; i < pagesz && highlighted->prev; ++i) {
 		    highlighted = highlighted->prev;
 		    if (--highlightnum < 1 && first_scr_ptr->prev) {
 			++highlightnum;
@@ -511,7 +516,7 @@ static int UIDisplayFeed (struct feed* current_feed)
 		highlightnum = 0;
 		while (highlighted && highlighted->next) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum >= ymax && first_scr_ptr->next) {
+		    if (++highlightnum >= pagesz && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
@@ -660,7 +665,8 @@ void UIMainInterface (void)
     struct feed* savestart_first = NULL;
     struct feed* highlighted = _feed_list;
     unsigned highlightnum = 1;
-    unsigned highlightline = LINES - 1;	// Line with current selected item cursor
+    unsigned highlightline = LINES-1;	// Line with current selected item cursor
+    const unsigned pagesz = LINES-2;
     // will be moved to this line to have it in
     // the same line as the highlight. Visually
     // impaired users with screen readers seem
@@ -771,8 +777,8 @@ void UIMainInterface (void)
 	    unsigned count = 0, skipper = 0;
 	    bool found = false;
 	    for (struct feed* cur_ptr = _feed_list; cur_ptr; ++count, cur_ptr = cur_ptr->next) {
-		// count+1 >= Lines-4: if the _next_ line would go over the boundary.
-		if (count + 1 > LINES - 4u && first_scr_ptr->next)
+		// count+1 >= pagesz: if the _next_ line would go over the boundary.
+		if (count + 1 > pagesz && first_scr_ptr->next)
 		    first_scr_ptr = first_scr_ptr->next;
 		// Exact match from beginning of line.
 		if (searchlen > 0 && s_strcasestr (cur_ptr->title, search)) {
@@ -838,7 +844,7 @@ void UIMainInterface (void)
 	    if (cur_ptr == highlighted)
 		attroff (WA_REVERSE);
 
-	    if (itemnum >= LINES - 4u)
+	    if (itemnum >= pagesz)
 		break;
 	    ++itemnum;
 	}
@@ -1028,21 +1034,21 @@ void UIMainInterface (void)
 		}
 	    } else if ((uiinput == KEY_DOWN || uiinput == _settings.keybindings.next) && highlighted && highlighted->next) {
 		highlighted = highlighted->next;
-		if (++highlightnum >= LINES - 5u && first_scr_ptr->next) {	// If we fall off the screen, advance first_scr_ptr to next entry.
+		if (++highlightnum > pagesz && first_scr_ptr->next) {	// If we fall off the screen, advance first_scr_ptr to next entry.
 		    --highlightnum;
 		    first_scr_ptr = first_scr_ptr->next;
 		}
 	    } else if (uiinput == KEY_NPAGE || uiinput == ' ' || uiinput == _settings.keybindings.pdown) {
-		// Move highlight one page up/down == LINES-6
-		for (unsigned i = 0; i < LINES - 6u && highlighted->next; ++i) {
+		// Move highlight one page up/down == pagesz
+		for (unsigned i = 0; i < pagesz && highlighted->next; ++i) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum > LINES - 6u && first_scr_ptr->next) {
+		    if (++highlightnum > pagesz && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
 		}
 	    } else if (uiinput == KEY_PPAGE || uiinput == _settings.keybindings.pup) {
-		for (unsigned i = 0; i < LINES - 6u && highlighted->prev; ++i) {
+		for (unsigned i = 0; i < pagesz && highlighted->prev; ++i) {
 		    highlighted = highlighted->prev;
 		    if (--highlightnum < 1 && first_scr_ptr->prev) {
 			++highlightnum;
@@ -1057,7 +1063,7 @@ void UIMainInterface (void)
 		highlightnum = 0;
 		while (highlighted && highlighted->next) {
 		    highlighted = highlighted->next;
-		    if (++highlightnum >= LINES - 6u && first_scr_ptr->next) {
+		    if (++highlightnum >= pagesz && first_scr_ptr->next) {
 			--highlightnum;
 			first_scr_ptr = first_scr_ptr->next;
 		    }
@@ -1090,7 +1096,7 @@ void UIMainInterface (void)
 		    if (highlighted->next) {
 			SwapPointers (highlighted, highlighted->next);
 			highlighted = highlighted->next;
-			if (++highlightnum >= LINES - 6u && first_scr_ptr->next) {
+			if (++highlightnum >= pagesz && first_scr_ptr->next) {
 			    --highlightnum;
 			    first_scr_ptr = first_scr_ptr->next;
 			}
