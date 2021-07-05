@@ -197,19 +197,23 @@ _Noreturn void MainQuit (const char* func, const char* error)
     endwin();		       // Make sure no ncurses function is called after this point!
     modifyPIDFile (pid_file_delete);
 
-    if (last_signal)
-	printf ("Exiting via signal %d.\n", last_signal);
-    if (error) {
-	printf (_("Aborting program execution!\nAn internal error occured. Snownews has quit, no changes has been saved!\n"));
-	printf (_("Please submit a bugreport at https://github.com/msharov/snownews/issues\n"));
-	printf ("----\n");
-	// Please don't localize! I don't want to receive Japanese error messages.
-	// Thanks. :)
-	printf ("While executing: %s\n", func);
-	printf ("Error as reported by the system: %s\n\n", error);
-	exit (EXIT_FAILURE);
+    if (!error)
+	exit (EXIT_SUCCESS);
+    if (last_signal) {
+	#if __linux__
+	    printf ("Exiting via signal %s.\n", strsignal (last_signal));
+	#else
+	    printf ("Exiting via signal %d.\n", last_signal);
+	#endif
     }
-    exit (EXIT_SUCCESS);
+    printf (_("Aborting program execution!\nAn internal error occured. Snownews has quit, no changes has been saved!\n"));
+    printf (_("Please submit a bugreport at https://github.com/msharov/snownews/issues\n"));
+    printf ("----\n");
+    // Please don't localize! I don't want to receive Japanese error messages.
+    // Thanks. :)
+    printf ("While executing: %s\n", func);
+    printf ("Error as reported by the system: %s\n\n", error);
+    exit (EXIT_FAILURE);
 }
 
 // Signal handler function.
@@ -218,10 +222,10 @@ static _Noreturn void MainSignalHandler (int sig)
     last_signal = sig;
 
     // If there is a _unfiltered_feed_list!=NULL a filter is set. Reset _feed_list
-    // so the correct list gets written on the disk when exisiting via SIGINT.
+    // so the correct list gets written on the disk when exiting via SIGINT.
     if (_unfiltered_feed_list)
 	_feed_list = _unfiltered_feed_list;
-    MainQuit (NULL, "Signal");
+    MainQuit ("MainSignalHandler", (sig == SIGINT || sig == SIGQUIT || sig == SIGTERM) ? NULL : "Signal");
 }
 
 // Automatic child reaper.
@@ -235,6 +239,7 @@ static void InstallSignalHandlers (void)
 {
     signal (SIGHUP, MainSignalHandler);
     signal (SIGINT, MainSignalHandler);
+    signal (SIGQUIT, MainSignalHandler);
     signal (SIGTERM, MainSignalHandler);
     signal (SIGABRT, MainSignalHandler);
     signal (SIGSEGV, MainSignalHandler);
